@@ -8,19 +8,23 @@ defmodule UwOsuStat.Data do
   alias UwOsuStat.Models.UserSnapshot
   alias UwOsuStat.Repo
 
-  def collect do
+  def collect(
+    user_ids \\ Application.get_env(:uw_osu_stat, :user_ids),
+    client \\ %Osu.Client{api_key: Application.get_env(:uw_osu_stat, :osu_api_key)}
+  ) do
     Osu.start
 
-    user_ids = Application.get_env(:uw_osu_stat, :user_ids)
-    client = %Osu.Client{api_key: Application.get_env(:uw_osu_stat, :osu_api_key)}
-    Enum.each(user_ids, fn(user_id) ->
-      Repo.transaction(fn ->
-        process_user(user_id, client)
+    Repo.transaction(fn ->
+      generation_id = Repo.insert!(%Generation{}).id
+      Enum.each(user_ids, fn(user_id) ->
+        Repo.transaction(fn ->
+          process_user(user_id, generation_id, client)
+        end)
       end)
     end)
   end
 
-  defp process_user(user_id_or_username, client) do
+  defp process_user(user_id_or_username, generation_id, client) do
     # Get user
     %HTTPoison.Response{body: [user | _]} = Osu.get_user!(user_id_or_username, client)
 
@@ -31,8 +35,6 @@ defmodule UwOsuStat.Data do
         Repo.insert!(%User{id: id})
       _ ->
     end
-
-    generation_id = Repo.insert!(%Generation{}).id
 
     username = user["username"]
     IO.puts "Processing for user #{username} (#{id}) with generation #{generation_id}"
