@@ -38,28 +38,65 @@ defmodule DataTest do
     end
   end
 
+  defp mock_user_dict(overrides \\ %{}) do
+    default = %{
+      "user_id" => "123",
+      "username" => "testuser",
+      "count300" => "8260346",
+      "count100" => "639175",
+      "count50" => "63029",
+      "playcount" => "45432",
+      "ranked_score" => "13352117327",
+      "total_score" => "70088502830",
+      "pp_rank" => "2815",
+      "level" => "100.432",
+      "pp_raw" => "5033.02",
+      "accuracy" => "99.01136779785156",
+      "count_rank_ss" => "81",
+      "count_rank_s" => "632",
+      "count_rank_a" => "650",
+      "country" => "CA",
+      "pp_country_rank" => "103",
+      "events" => [],
+    }
+    Dict.merge(default, overrides)
+  end
+
+  defp mock_event_dict(overrides \\ %{}) do
+    default = %{
+      "display_html" => "<img src='/images/S_small.png'/> <b><a href='/u/1579374'>influxd</a></b> achieved rank #998 on <a href='/b/696783?m=0'>AKINO from bless4 - MIIRO [Hime]</a> (osu!)",
+      "beatmap_id" => "696783",
+      "beatmapset_id" => "312042",
+      "date" => "2015-12-31 14:31:35",
+      "epicfactor" => "1",
+    }
+    Dict.merge(default, overrides)
+  end
+
+  defp mock_score_dict(overrides \\ %{}) do
+    default = %{
+      "beatmap_id" => "759192",
+      "score" => "69954590",
+      "maxcombo" => "1768",
+      "count50" => "0",
+      "count100" => "16",
+      "count300" => "1263",
+      "countmiss" => "1",
+      "countkatu" => "9",
+      "countgeki" => "203",
+      "perfect" => "0",
+      "enabled_mods" => "0",
+      "user_id" => "1579374",
+      "date" => "2015-12-28 04:25:55",
+      "rank" => "A",
+      "pp" => "281.856",
+    }
+    Dict.merge(default, overrides)
+  end
+
   test_with_mock "snapshot", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [%{
-          "user_id" => "123",
-          "username" => "testuser",
-          "count300" => "8260346",
-          "count100" => "639175",
-          "count50" => "63029",
-          "playcount" => "45432",
-          "ranked_score" => "13352117327",
-          "total_score" => "70088502830",
-          "pp_rank" => "2815",
-          "level" => "100.432",
-          "pp_raw" => "5033.02",
-          "accuracy" => "99.01136779785156",
-          "count_rank_ss" => "81",
-          "count_rank_s" => "632",
-          "count_rank_a" => "650",
-          "country" => "CA",
-          "pp_country_rank" => "103",
-          "events" => [],
-        }]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [mock_user_dict]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
@@ -91,34 +128,9 @@ defmodule DataTest do
 
   test_with_mock "events", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [%{
-          "user_id" => "123",
-          "username" => "testuser",
-          "count300" => "8260346",
-          "count100" => "639175",
-          "count50" => "63029",
-          "playcount" => "45432",
-          "ranked_score" => "13352117327",
-          "total_score" => "70088502830",
-          "pp_rank" => "2815",
-          "level" => "100.432",
-          "pp_raw" => "5033.02",
-          "accuracy" => "99.01136779785156",
-          "count_rank_ss" => "81",
-          "count_rank_s" => "632",
-          "count_rank_a" => "650",
-          "country" => "CA",
-          "pp_country_rank" => "103",
-          "events" => [
-            %{
-              "display_html" => "<img src='/images/S_small.png'/> <b><a href='/u/1579374'>influxd</a></b> achieved rank #998 on <a href='/b/696783?m=0'>AKINO from bless4 - MIIRO [Hime]</a> (osu!)",
-              "beatmap_id" => "696783",
-              "beatmapset_id" => "312042",
-              "date" => "2015-12-31 14:31:35",
-              "epicfactor" => "1",
-            },
-          ],
-        }]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_user_dict %{"events" => [mock_event_dict]}
+      ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
@@ -139,41 +151,9 @@ defmodule DataTest do
 
   test_with_mock "should not create duplicate event", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [%{
-          "user_id" => "123",
-          "username" => "testuser",
-          "count300" => "8260346",
-          "count100" => "639175",
-          "count50" => "63029",
-          "playcount" => "45432",
-          "ranked_score" => "13352117327",
-          "total_score" => "70088502830",
-          "pp_rank" => "2815",
-          "level" => "100.432",
-          "pp_raw" => "5033.02",
-          "accuracy" => "99.01136779785156",
-          "count_rank_ss" => "81",
-          "count_rank_s" => "632",
-          "count_rank_a" => "650",
-          "country" => "CA",
-          "pp_country_rank" => "103",
-          "events" => [
-            %{
-              "display_html" => "<img src='/images/S_small.png'/> <b><a href='/u/1579374'>influxd</a></b> achieved rank #998 on <a href='/b/696783?m=0'>AKINO from bless4 - MIIRO [Hime]</a> (osu!)",
-              "beatmap_id" => "696783",
-              "beatmapset_id" => "312042",
-              "date" => "2015-12-31 14:31:35",
-              "epicfactor" => "1",
-            },
-            %{
-              "display_html" => "<img src='/images/S_small.png'/> <b><a href='/u/1579374'>influxd</a></b> achieved rank #998 on <a href='/b/696783?m=0'>AKINO from bless4 - MIIRO [Hime]</a> (osu!)",
-              "beatmap_id" => "696783",
-              "beatmapset_id" => "312042",
-              "date" => "2015-12-31 14:31:35",
-              "epicfactor" => "1",
-            },
-          ],
-        }]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_user_dict %{"events" => [mock_event_dict, mock_event_dict]}
+      ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
@@ -189,44 +169,11 @@ defmodule DataTest do
 
   test_with_mock "scores", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [%{
-          "user_id" => "123",
-          "username" => "testuser",
-          "count300" => "8260346",
-          "count100" => "639175",
-          "count50" => "63029",
-          "playcount" => "45432",
-          "ranked_score" => "13352117327",
-          "total_score" => "70088502830",
-          "pp_rank" => "2815",
-          "level" => "100.432",
-          "pp_raw" => "5033.02",
-          "accuracy" => "99.01136779785156",
-          "count_rank_ss" => "81",
-          "count_rank_s" => "632",
-          "count_rank_a" => "650",
-          "country" => "CA",
-          "pp_country_rank" => "103",
-          "events" => [],
-        }]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_user_dict
+      ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        %{
-          "beatmap_id" => "759192",
-          "score" => "69954590",
-          "maxcombo" => "1768",
-          "count50" => "0",
-          "count100" => "16",
-          "count300" => "1263",
-          "countmiss" => "1",
-          "countkatu" => "9",
-          "countgeki" => "203",
-          "perfect" => "0",
-          "enabled_mods" => "0",
-          "user_id" => "1579374",
-          "date" => "2015-12-28 04:25:55",
-          "rank" => "A",
-          "pp" => "281.856",
-        },
+        mock_score_dict
       ]} end,
   ] do
     next_generation_id = get_next_generation_id
@@ -255,61 +202,12 @@ defmodule DataTest do
 
   test_with_mock "should not create duplicate score", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [%{
-          "user_id" => "123",
-          "username" => "testuser",
-          "count300" => "8260346",
-          "count100" => "639175",
-          "count50" => "63029",
-          "playcount" => "45432",
-          "ranked_score" => "13352117327",
-          "total_score" => "70088502830",
-          "pp_rank" => "2815",
-          "level" => "100.432",
-          "pp_raw" => "5033.02",
-          "accuracy" => "99.01136779785156",
-          "count_rank_ss" => "81",
-          "count_rank_s" => "632",
-          "count_rank_a" => "650",
-          "country" => "CA",
-          "pp_country_rank" => "103",
-          "events" => [],
-        }]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_user_dict
+      ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        %{
-          "beatmap_id" => "759192",
-          "score" => "69954590",
-          "maxcombo" => "1768",
-          "count50" => "0",
-          "count100" => "16",
-          "count300" => "1263",
-          "countmiss" => "1",
-          "countkatu" => "9",
-          "countgeki" => "203",
-          "perfect" => "0",
-          "enabled_mods" => "0",
-          "user_id" => "1579374",
-          "date" => "2015-12-28 04:25:55",
-          "rank" => "A",
-          "pp" => "281.856",
-        },
-        %{
-          "beatmap_id" => "759192",
-          "score" => "69954590",
-          "maxcombo" => "1768",
-          "count50" => "0",
-          "count100" => "16",
-          "count300" => "1263",
-          "countmiss" => "1",
-          "countkatu" => "9",
-          "countgeki" => "203",
-          "perfect" => "0",
-          "enabled_mods" => "0",
-          "user_id" => "1579374",
-          "date" => "2015-12-28 04:25:55",
-          "rank" => "A",
-          "pp" => "281.856",
-        },
+        mock_score_dict,
+        mock_score_dict
       ]} end,
   ] do
     next_generation_id = get_next_generation_id
@@ -324,26 +222,9 @@ defmodule DataTest do
 
   test_with_mock "only one generation is created per run", Osu, [
     start: fn -> end,
-    get_user!: fn(id, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [%{
-          "user_id" => "#{id}",
-          "username" => "testuser",
-          "count300" => "8260346",
-          "count100" => "639175",
-          "count50" => "63029",
-          "playcount" => "45432",
-          "ranked_score" => "13352117327",
-          "total_score" => "70088502830",
-          "pp_rank" => "2815",
-          "level" => "100.432",
-          "pp_raw" => "5033.02",
-          "accuracy" => "99.01136779785156",
-          "count_rank_ss" => "81",
-          "count_rank_s" => "632",
-          "count_rank_a" => "650",
-          "country" => "CA",
-          "pp_country_rank" => "103",
-          "events" => [],
-        }]} end,
+    get_user!: fn(id, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_user_dict %{"user_id" => "#{id}"}
+      ]} end,
     get_user_best!: fn(_id, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
