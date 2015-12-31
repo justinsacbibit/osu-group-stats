@@ -65,8 +65,7 @@ defmodule UwOsuStat.Data do
 
     Enum.each(user["events"], fn(event_dict) ->
       beatmap_id = elem(Integer.parse(event_dict["beatmap_id"]), 0)
-      date = String.replace(event_dict["date"], " ", "T")
-      {:ok, date} = Ecto.DateTime.cast(date <> "Z")
+      {:ok, date} = Ecto.DateTime.cast(event_dict["date"])
 
       query = from e in Event,
         where: e.user_id == ^id
