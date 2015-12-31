@@ -20,6 +20,8 @@ use Mix.Config
 #
 #     config :logger, level: :info
 #
+config :logger, level: :info
+
 config :uw_osu_stat, UwOsuStat.Repo,
   adapter: Ecto.Adapters.Postgres,
   database: "uw_osu_stat",
