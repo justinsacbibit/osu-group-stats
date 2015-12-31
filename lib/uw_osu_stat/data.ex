@@ -2,6 +2,7 @@ defmodule UwOsuStat.Data do
   import Ecto.Query, only: [from: 2]
   alias UwOsuStat.Osu
   alias UwOsuStat.Models.Event
+  alias UwOsuStat.Models.Generation
   alias UwOsuStat.Models.Score
   alias UwOsuStat.Models.User
   alias UwOsuStat.Models.UserSnapshot
@@ -10,7 +11,8 @@ defmodule UwOsuStat.Data do
   def collect do
     Osu.start
 
-    Enum.each(Application.get_env(:uw_osu_stat, :user_ids), fn(user_id) ->
+    user_ids = Application.get_env(:uw_osu_stat, :user_ids)
+    Enum.each(user_ids, fn(user_id) ->
       Repo.transaction(fn ->
         process_user(user_id)
       end)
@@ -23,30 +25,21 @@ defmodule UwOsuStat.Data do
 
     # Insert into user table if the user is not already there
     {id, _} = Integer.parse(user["user_id"])
-    generation = case Repo.get(User, id) do
+    case Repo.get(User, id) do
       nil ->
         Repo.insert!(%User{id: id})
-        1
       _ ->
-        generation_query = from s in UserSnapshot,
-          where: s.user_id == ^id,
-          select: max(s.generation)
-
-        case Repo.one!(generation_query) do
-          nil ->
-            1
-          generation ->
-            generation + 1
-        end
     end
 
+    generation_id = Repo.insert!(%Generation{}).id
+
     username = user["username"]
-    IO.puts "Processing for user #{username} (#{id}) with generation #{generation}"
+    IO.puts "Processing for user #{username} (#{id}) with generation #{generation_id}"
 
     # Create snapshot
     snapshot = %UserSnapshot{
       user_id: id,
-      generation: generation,
+      generation_id: generation_id,
       username: user["username"],
       count300: elem(Integer.parse(user["count300"]), 0),
       count100: elem(Integer.parse(user["count100"]), 0),

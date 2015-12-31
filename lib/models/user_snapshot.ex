@@ -1,10 +1,11 @@
 defmodule UwOsuStat.Models.UserSnapshot do
   use Ecto.Schema
   alias UwOsuStat.Models.User
+  alias UwOsuStat.Models.Generation
 
   schema "user_snapshot" do
     belongs_to :user, User
-    field :generation, :integer
+    belongs_to :generation, Generation
     field :username, :string
     field :count300, :integer
     field :count100, :integer
