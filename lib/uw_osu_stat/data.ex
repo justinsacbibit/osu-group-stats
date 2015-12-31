@@ -12,16 +12,17 @@ defmodule UwOsuStat.Data do
     Osu.start
 
     user_ids = Application.get_env(:uw_osu_stat, :user_ids)
+    client = %Osu.Client{api_key: Application.get_env(:uw_osu_stat, :osu_api_key)}
     Enum.each(user_ids, fn(user_id) ->
       Repo.transaction(fn ->
-        process_user(user_id)
+        process_user(user_id, client)
       end)
     end)
   end
 
-  defp process_user(user_id_or_username) do
+  defp process_user(user_id_or_username, client) do
     # Get user
-    %HTTPoison.Response{body: [user | _]} = Osu.get!("/get_user?k=#{Application.get_env(:uw_osu_stat, :osu_api_key)}&u=#{user_id_or_username}")
+    %HTTPoison.Response{body: [user | _]} = Osu.get_user!(user_id_or_username, client)
 
     # Insert into user table if the user is not already there
     {id, _} = Integer.parse(user["user_id"])
@@ -86,7 +87,7 @@ defmodule UwOsuStat.Data do
     end)
 
     # Get user scores
-    %HTTPoison.Response{body: scores} = Osu.get!("/get_user_best?k=#{Application.get_env(:uw_osu_stat, :osu_api_key)}&u=#{user_id_or_username}")
+    %HTTPoison.Response{body: scores} = Osu.get_user_best!(user_id_or_username, client)
 
     Enum.each(scores, fn(score_dict) ->
       beatmap_id = elem(Integer.parse(score_dict["beatmap_id"]), 0)
