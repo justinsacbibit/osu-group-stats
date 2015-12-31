@@ -17,6 +17,7 @@ defmodule UwOsuStat.Data do
 
     Repo.transaction fn ->
       generation_id = Repo.insert!(%Generation{}).id
+
       Enum.each user_ids, fn(user_id) ->
         Repo.transaction fn ->
           process_user(user_id, generation_id, client)
@@ -41,31 +42,16 @@ defmodule UwOsuStat.Data do
     Logger.info "Processing for user #{username} (#{id}) with generation #{generation_id}"
 
     # Create snapshot
-    snapshot = %UserSnapshot{
-      user_id: id,
-      generation_id: generation_id,
-      username: user["username"],
-      count300: elem(Integer.parse(user["count300"]), 0),
-      count100: elem(Integer.parse(user["count100"]), 0),
-      count50: elem(Integer.parse(user["count50"]), 0),
-      playcount: elem(Integer.parse(user["playcount"]), 0),
-      ranked_score: elem(Integer.parse(user["ranked_score"]), 0),
-      total_score: elem(Integer.parse(user["total_score"]), 0),
-      pp_rank: elem(Integer.parse(user["pp_rank"]), 0),
-      level: elem(Float.parse(user["level"]), 0),
-      pp_raw: elem(Float.parse(user["pp_raw"]), 0),
-      accuracy: elem(Float.parse(user["accuracy"]), 0),
-      count_rank_ss: elem(Integer.parse(user["count_rank_ss"]), 0),
-      count_rank_s: elem(Integer.parse(user["count_rank_s"]), 0),
-      count_rank_a: elem(Integer.parse(user["count_rank_a"]), 0),
-      country: user["country"],
-      pp_country_rank: elem(Integer.parse(user["pp_country_rank"]), 0),
+    snapshot_dict = Dict.merge user, %{
+      "user_id" => id,
+      "generation_id" => generation_id,
     }
+    snapshot = UserSnapshot.changeset(%UserSnapshot{}, snapshot_dict)
     Repo.insert!(snapshot)
 
     Enum.each(user["events"], fn(event_dict) ->
-      beatmap_id = elem(Integer.parse(event_dict["beatmap_id"]), 0)
-      {:ok, date} = Ecto.DateTime.cast(event_dict["date"])
+      beatmap_id = event_dict["beatmap_id"]
+      date = event_dict["date"]
 
       query = from e in Event,
         where: e.user_id == ^id
@@ -78,9 +64,9 @@ defmodule UwOsuStat.Data do
             user_id: id,
             display_html: event_dict["display_html"],
             beatmap_id: beatmap_id,
-            beatmapset_id: elem(Integer.parse(event_dict["beatmapset_id"]), 0),
+            beatmapset_id: event_dict["beatmapset_id"],
             date: date,
-            epicfactor: elem(Integer.parse(event_dict["epicfactor"]), 0),
+            epicfactor: event_dict["epicfactor"],
           })
           Repo.insert(event)
         _ ->
@@ -92,9 +78,8 @@ defmodule UwOsuStat.Data do
     %HTTPoison.Response{body: scores} = Osu.get_user_best!(user_id_or_username, client)
 
     Enum.each(scores, fn(score_dict) ->
-      beatmap_id = elem(Integer.parse(score_dict["beatmap_id"]), 0)
-      date = String.replace(score_dict["date"], " ", "T")
-      {:ok, date} = Ecto.DateTime.cast(date <> "Z")
+      beatmap_id = score_dict["beatmap_id"]
+      {:ok, date} = Ecto.DateTime.cast(score_dict["date"])
 
       query = from s in Score,
         where: s.user_id == ^id
@@ -102,38 +87,17 @@ defmodule UwOsuStat.Data do
 
       case Repo.one(query) do
         nil ->
-          score = %Score{
-            user_id: id,
-            beatmap_id: beatmap_id,
-            score: parse_int(score_dict["score"]),
-            date: date,
-            maxcombo: parse_int(score_dict["maxcombo"]),
-            count50: parse_int(score_dict["count50"]),
-            count100: parse_int(score_dict["count100"]),
-            count300: parse_int(score_dict["count300"]),
-            countmiss: parse_int(score_dict["countmiss"]),
-            countkatu: parse_int(score_dict["countkatu"]),
-            countgeki: parse_int(score_dict["countgeki"]),
-            perfect: parse_int(score_dict["perfect"]),
-            enabled_mods: parse_int(score_dict["enabled_mods"]),
-            rank: score_dict["rank"],
-            pp: parse_float(score_dict["pp"]),
+          score_dict = Dict.merge score_dict, %{
+            "user_id" => id,
+            "beatmap_id" => beatmap_id,
+            "date" => date,
           }
+          score = Score.changeset(%Score{}, score_dict)
           Repo.insert(score)
         _ ->
           :ok
       end
     end)
-  end
-
-  defp parse_int(val) do
-    {int, _} = Integer.parse(val)
-    int
-  end
-
-  defp parse_float(val) do
-    {float, _} = Float.parse(val)
-    float
   end
 end
 

@@ -1,5 +1,6 @@
 defmodule UwOsuStat.Models.UserSnapshot do
   use Ecto.Schema
+  import Ecto.Changeset
   alias UwOsuStat.Models.User
   alias UwOsuStat.Models.Generation
 
@@ -24,6 +25,15 @@ defmodule UwOsuStat.Models.UserSnapshot do
     field :pp_country_rank, :integer
 
     timestamps
+  end
+
+  @required_fields ~w(user_id generation_id username count300 count100 count50 playcount ranked_score total_score pp_rank level pp_raw accuracy count_rank_ss count_rank_s count_rank_a country pp_country_rank)
+  @optional_fields ~w()
+
+  def changeset(event, params \\ :empty) do
+    event
+    |> cast(params, @required_fields, @optional_fields)
+    |> unique_constraint(:user_id, name: :user_snapshot_user_id_generation_id_index)
   end
 end
 
