@@ -36,8 +36,8 @@ config :uw_osu_stat, user_ids: [
 ]
 
 config :quantum, cron: [
-  "@daily": {UwOsuStat.Data, :collect},
-  #"* * * * *": {UwOsuStat.Data, :collect},
+  # Daily at midnight EST
+  "0 5 * * *": {UwOsuStat.Data, :collect},
 ]
 
 # It is also possible to import configuration files, relative to this
