@@ -1,4 +1,5 @@
 defmodule UwOsuStat.Data do
+  require Logger
   import Ecto.Query, only: [from: 2]
   alias UwOsuStat.Osu
   alias UwOsuStat.Models.Event
@@ -14,14 +15,14 @@ defmodule UwOsuStat.Data do
   ) do
     Osu.start
 
-    Repo.transaction(fn ->
+    Repo.transaction fn ->
       generation_id = Repo.insert!(%Generation{}).id
-      Enum.each(user_ids, fn(user_id) ->
-        Repo.transaction(fn ->
+      Enum.each user_ids, fn(user_id) ->
+        Repo.transaction fn ->
           process_user(user_id, generation_id, client)
-        end)
-      end)
-    end)
+        end
+      end
+    end
   end
 
   defp process_user(user_id_or_username, generation_id, client) do
@@ -37,7 +38,7 @@ defmodule UwOsuStat.Data do
     end
 
     username = user["username"]
-    IO.puts "Processing for user #{username} (#{id}) with generation #{generation_id}"
+    Logger.info "Processing for user #{username} (#{id}) with generation #{generation_id}"
 
     # Create snapshot
     snapshot = %UserSnapshot{

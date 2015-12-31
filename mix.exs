@@ -38,6 +38,7 @@ defmodule UwOsuStat.Mixfile do
      {:ecto, "~> 1.1.1"},
      {:quantum, "~> 1.6.1"},
      {:httpoison, "~> 0.8.0"},
-     {:poison, "~> 1.5"}]
+     {:poison, "~> 1.5"},
+     {:mock, "~> 0.1.1", only: :test}]
   end
 end
