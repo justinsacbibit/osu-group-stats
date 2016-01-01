@@ -76,5 +76,6 @@ config :uw_osu_stat, user_ids: [
   2446880,
   2130039,
   5063503,
+  "Arneshie-",
 ]
 
