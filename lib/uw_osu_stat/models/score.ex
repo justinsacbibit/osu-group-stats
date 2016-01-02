@@ -1,21 +1,20 @@
 defmodule UwOsuStat.Models.Score do
   use Ecto.Schema
   import Ecto.Changeset
-  alias UwOsuStat.Models.Types.IntString
 
   schema "score" do
     belongs_to :user, User
-    field :beatmap_id, IntString
-    field :score, IntString
-    field :maxcombo, IntString
-    field :count50, IntString
-    field :count100, IntString
-    field :count300, IntString
-    field :countmiss, IntString
-    field :countkatu, IntString
-    field :countgeki, IntString
-    field :perfect, IntString
-    field :enabled_mods, IntString
+    field :beatmap_id, :integer
+    field :score, :integer
+    field :maxcombo, :integer
+    field :count50, :integer
+    field :count100, :integer
+    field :count300, :integer
+    field :countmiss, :integer
+    field :countkatu, :integer
+    field :countgeki, :integer
+    field :perfect, :integer
+    field :enabled_mods, :integer
     field :date, Ecto.DateTime
     field :rank, :string
     field :pp, :float

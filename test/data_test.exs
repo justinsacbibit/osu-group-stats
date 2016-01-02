@@ -4,6 +4,7 @@ defmodule DataTest do
   alias UwOsuStat.Repo
   alias UwOsuStat.Data
   alias UwOsuStat.Osu
+  alias UwOsuStat.Models.Beatmap
   alias UwOsuStat.Models.Generation
   alias UwOsuStat.Models.Event
   alias UwOsuStat.Models.User
@@ -236,5 +237,151 @@ defmodule DataTest do
 
     query = from g in Generation, select: count(g.id)
     assert Repo.one!(query) == 1
+  end
+
+  defp mock_beatmap_dict(overrides \\ %{}) do
+    default = %{
+      "approved" => "1",
+      "approved_date" => "2013-07-02 01:01:12",
+      "last_update" => "2013-07-06 16:51:22",
+      "artist" => "Luxion",
+      "beatmap_id" => "252002",
+      "beatmapset_id" => "93398",
+      "bpm" => "196.5",
+      "creator" => "RikiH",
+      "difficultyrating" => "5.59516",
+      "diff_size" => "3.8",
+      "diff_overall" => "6.01",
+      "diff_approach" => "9.2",
+      "diff_drain" => "6.7",
+      "hit_length" => "113",
+      "source" => "BMS",
+      "genre_id" => "1",
+      "language_id" => "5",
+      "title" => "High-Priestess",
+      "total_length" => "145",
+      "version" => "Overkill",
+      "file_md5" => "c8f08438204abfcdd1a748ebfae67421",
+      "mode" => "0",
+      "tags" => "melodious long",
+      "favourite_count" => "121",
+      "playcount" => "9001",
+      "passcount" => "1337",
+      "max_combo" => "2101",
+    }
+    Dict.merge default, overrides
+  end
+
+  test_with_mock "collect beatmaps", Osu, [
+    start: fn -> end,
+    get_beatmaps!: fn(%{b: 234}, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_beatmap_dict(%{
+          "beatmap_id" => "234",
+          "beatmapset_id" => "123456",
+          "version" => "Overkill",
+        }),
+      ]}
+    end
+  ] do
+    count_query = from b in Beatmap, select: count(b.id), where: b.id == 234
+    assert Repo.one!(count_query) == 0
+
+    # insert a score that points to the 234 beatmap
+    Repo.insert!(%User{id: 1})
+    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+      "beatmap_id" => "234",
+      "user_id" => 1,
+    }))
+    Repo.insert!(changeset)
+
+    Data.collect_beatmaps %Osu.Client{api_key: "abc"}
+
+    assert Repo.one!(count_query) == 1
+
+    beatmap = Repo.get!(Beatmap, 234)
+    assert beatmap.approved == 1
+    assert beatmap.approved_date == Ecto.DateTime.cast("2013-07-02 01:01:12") |> elem(1)
+    assert beatmap.last_update == Ecto.DateTime.cast("2013-07-06 16:51:22") |> elem(1)
+    assert beatmap.artist == "Luxion"
+    assert beatmap.beatmapset_id == 123456
+    assert beatmap.bpm == 196.5
+    assert beatmap.creator == "RikiH"
+    assert beatmap.difficultyrating == 5.59516
+    assert beatmap.diff_size == 3.8
+    assert beatmap.diff_overall == 6.01
+    assert beatmap.diff_approach == 9.2
+    assert beatmap.diff_drain == 6.7
+    assert beatmap.hit_length == 113
+    assert beatmap.source == "BMS"
+    assert beatmap.genre_id == 1
+    assert beatmap.language_id == 5
+    assert beatmap.title == "High-Priestess"
+    assert beatmap.total_length == 145
+    assert beatmap.version == "Overkill"
+    assert beatmap.file_md5 == "c8f08438204abfcdd1a748ebfae67421"
+    assert beatmap.mode == 0
+    assert beatmap.tags == "melodious long"
+    assert beatmap.favourite_count == 121
+    assert beatmap.playcount == 9001
+    assert beatmap.passcount == 1337
+    assert beatmap.max_combo == 2101
+  end
+
+  test_with_mock "collect beatmaps only collects for distinct beatmap ids", Osu, [
+    start: fn -> end,
+    get_beatmaps!: fn(%{b: 234}, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+        mock_beatmap_dict(%{
+          "beatmap_id" => "234",
+          "beatmapset_id" => "123456",
+          "version" => "Overkill",
+        }),
+      ]}
+    end
+  ] do
+    count_query = from b in Beatmap, select: count(b.id), where: b.id == 234
+    assert Repo.one!(count_query) == 0
+
+    # insert two scores that point to the 234 beatmap
+    Repo.insert!(%User{id: 1})
+    Repo.insert!(%User{id: 2})
+    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+      "beatmap_id" => "234",
+      "user_id" => 1,
+    }))
+    Repo.insert!(changeset)
+    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+      "beatmap_id" => "234",
+      "user_id" => 2,
+    }))
+    Repo.insert!(changeset)
+
+    Data.collect_beatmaps %Osu.Client{api_key: "abc"}
+
+    assert Repo.one!(count_query) == 1
+  end
+
+  test_with_mock "collect beatmaps does not collect a beatmap that already is in db", Osu, [
+    start: fn -> end,
+  ] do
+    count_query = from b in Beatmap, select: count(b.id), where: b.id == 234
+    assert Repo.one!(count_query) == 0
+
+    Repo.insert! Beatmap.changeset(%Beatmap{}, mock_beatmap_dict(%{
+      "id" => "234",
+      "beatmapset_id" => "123456",
+      "version" => "Overkill",
+    }))
+
+    assert Repo.one!(count_query) == 1
+
+    # insert a score that points to the 234 beatmap
+    Repo.insert!(%User{id: 1})
+    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+      "beatmap_id" => "234",
+      "user_id" => 1,
+    }))
+    Repo.insert!(changeset)
+
+    Data.collect_beatmaps %Osu.Client{api_key: "abc"}
   end
 end

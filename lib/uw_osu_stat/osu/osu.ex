@@ -23,6 +23,10 @@ defmodule UwOsuStat.Osu do
     _get!("/get_user_best", client, %{u: user})
   end
 
+  def get_beatmaps!(params, client) do
+    _get!("/get_beatmaps", client, params)
+  end
+
   defp _get!(path, client, params \\ %{}) do
     params = Dict.merge(params, %{k: client.api_key})
     get!(path, [], params: params)

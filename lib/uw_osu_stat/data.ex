@@ -2,12 +2,40 @@ defmodule UwOsuStat.Data do
   require Logger
   import Ecto.Query, only: [from: 2]
   alias UwOsuStat.Osu
+  alias UwOsuStat.Models.Beatmap
   alias UwOsuStat.Models.Event
   alias UwOsuStat.Models.Generation
   alias UwOsuStat.Models.Score
   alias UwOsuStat.Models.User
   alias UwOsuStat.Models.UserSnapshot
   alias UwOsuStat.Repo
+
+  def collect_beatmaps(
+    client \\ %Osu.Client{api_key: Application.get_env(:uw_osu_stat, :osu_api_key)}
+  ) do
+    Osu.start
+    Logger.debug "Using API key #{client.api_key}"
+
+    query = from s in Score,
+      distinct: s.beatmap_id,
+      left_join: b in Beatmap, on: s.beatmap_id == b.id,
+      where: is_nil(b.id),
+      select: s.beatmap_id
+
+    beatmap_ids = Repo.all(query)
+
+    Logger.info "Fetching #{length beatmap_ids} beatmaps"
+
+    Enum.each beatmap_ids, fn(beatmap_id) ->
+      Logger.info "Fetching #{beatmap_id}"
+      %HTTPoison.Response{body: [beatmap | _]} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
+      beatmap = Dict.merge beatmap, %{
+        "id" => beatmap["beatmap_id"]
+      }
+      beatmap = Dict.delete beatmap, "beatmap_id"
+      Repo.insert!(Beatmap.changeset(%Beatmap{}, beatmap))
+    end
+  end
 
   def collect(
     user_ids \\ Application.get_env(:uw_osu_stat, :user_ids),
@@ -89,8 +117,6 @@ defmodule UwOsuStat.Data do
         nil ->
           score_dict = Dict.merge score_dict, %{
             "user_id" => id,
-            "beatmap_id" => beatmap_id,
-            "date" => date,
           }
           score = Score.changeset(%Score{}, score_dict)
           Repo.insert(score)

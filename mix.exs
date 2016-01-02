@@ -17,9 +17,6 @@ defmodule UwOsuStat.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [mod: {UwOsuStat.App, []},
-     env: [
-       osu_api_key: System.get_env("OSU_API_KEY"),
-     ],
      applications: [
        :logger,
        :postgrex,

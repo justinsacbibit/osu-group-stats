@@ -2,15 +2,14 @@ defmodule UwOsuStat.Models.Event do
   use Ecto.Schema
   import Ecto.Changeset
   alias UwOsuStat.Models.User
-  alias UwOsuStat.Models.Types.IntString
 
   schema "event" do
     belongs_to :user, User
     field :display_html, :string
-    field :beatmap_id, IntString
-    field :beatmapset_id, IntString
+    field :beatmap_id, :integer
+    field :beatmapset_id, :integer
     field :date, Ecto.DateTime
-    field :epicfactor, IntString
+    field :epicfactor, :integer
 
     timestamps
   end
