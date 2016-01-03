@@ -95,6 +95,23 @@ defmodule DataTest do
     Dict.merge(default, overrides)
   end
 
+  test_with_mock "user username", Osu, [
+    start: fn -> end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [mock_user_dict]} end,
+    get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
+      ]} end,
+  ] do
+    next_generation_id = get_next_generation_id
+
+    Data.collect [123], %Osu.Client{api_key: "abc"}
+
+    invariant_check next_generation_id, [123]
+
+    # should create user_snapshot
+    user = Repo.get!(User, 123)
+    assert user.username == "testuser"
+  end
+
   test_with_mock "snapshot", Osu, [
     start: fn -> end,
     get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [mock_user_dict]} end,

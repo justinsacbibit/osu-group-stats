@@ -56,28 +56,33 @@ defmodule UwOsuStat.Data do
 
   defp process_user(user_id_or_username, generation_id, client) do
     # Get user
-    %HTTPoison.Response{body: [user | _]} = Osu.get_user!(user_id_or_username, client)
+    %HTTPoison.Response{body: [user_dict | _]} = Osu.get_user!(user_id_or_username, client)
 
     # Insert into user table if the user is not already there
-    {id, _} = Integer.parse(user["user_id"])
-    case Repo.get(User, id) do
+    id = user_dict["user_id"]
+    user = case Repo.get(User, id) do
       nil ->
-        Repo.insert!(%User{id: id})
-      _ ->
+        changeset = User.changeset %User{}, %{id: id}
+        Repo.insert! changeset
+      user ->
+        user
     end
 
-    username = user["username"]
+    username = user_dict["username"]
     Logger.info "Processing for user #{username} (#{id}) with generation #{generation_id}"
 
+    # Update username
+    Repo.update! Ecto.Changeset.change(user, username: username)
+
     # Create snapshot
-    snapshot_dict = Dict.merge user, %{
+    snapshot_dict = Dict.merge user_dict, %{
       "user_id" => id,
       "generation_id" => generation_id,
     }
     snapshot = UserSnapshot.changeset(%UserSnapshot{}, snapshot_dict)
     Repo.insert!(snapshot)
 
-    Enum.each(user["events"], fn(event_dict) ->
+    Enum.each(user_dict["events"], fn(event_dict) ->
       beatmap_id = event_dict["beatmap_id"]
       date = event_dict["date"]
 
