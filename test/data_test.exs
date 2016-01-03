@@ -256,7 +256,7 @@ defmodule DataTest do
     assert Repo.one!(query) == 1
   end
 
-  defp mock_beatmap_dict(overrides \\ %{}) do
+  defp mock_beatmap_dict(overrides) do
     default = %{
       "approved" => "1",
       "approved_date" => "2013-07-02 01:01:12",
@@ -285,6 +285,30 @@ defmodule DataTest do
       "playcount" => "9001",
       "passcount" => "1337",
       "max_combo" => "2101",
+    }
+    Dict.merge default, overrides
+  end
+
+  defp mock_snapshot_dict(overrides) do
+    default = %{
+      "user_id" => 1,
+      "generation_id" => 1,
+      "username" => "a",
+      "count300" => 1,
+      "count100" => 1,
+      "count50" => 1,
+      "playcount" => 1,
+      "ranked_score" => 1,
+      "total_score" => 1,
+      "pp_rank" => 1,
+      "level" => 1,
+      "pp_raw" => 1,
+      "accuracy" => 1,
+      "count_rank_ss" => 1,
+      "count_rank_s" => 1,
+      "count_rank_a" => 1,
+      "country" => "CA",
+      "pp_country_rank" => 1,
     }
     Dict.merge default, overrides
   end
@@ -430,5 +454,49 @@ defmodule DataTest do
 
     gen2 = Enum.at(generations, 1)
     assert gen2.id == 3
+  end
+
+  test "get users" do
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 1,
+      "inserted_at" => "2015-01-01 05:00:00",
+      "updated_at" => "2015-01-01 05:00:00",
+    }
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 2,
+      "inserted_at" => "2015-01-01 06:00:00",
+      "updated_at" => "2015-01-01 06:00:00",
+    }
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 3,
+      "inserted_at" => "2015-01-02 05:00:00",
+      "updated_at" => "2015-01-02 05:00:00",
+    }
+
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 1,
+    }
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 1,
+      "generation_id" => 1,
+    })
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 1,
+      "generation_id" => 2,
+    })
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 1,
+      "generation_id" => 3,
+    })
+
+    user = Repo.one! Data.get_users
+
+    assert length(user.snapshots) == 2
+    # should order by generation.inserted_at
+    assert Enum.at(user.snapshots, 0).generation_id == 1
+    assert Enum.at(user.snapshots, 1).generation_id == 3
   end
 end

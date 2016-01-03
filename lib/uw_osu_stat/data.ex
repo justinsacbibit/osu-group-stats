@@ -17,6 +17,17 @@ defmodule UwOsuStat.Data do
       select: g
   end
 
+  def get_users do
+    from u in User,
+      join: s in assoc(u, :snapshots),
+      join: g in assoc(s, :generation),
+      order_by: g.inserted_at,
+      where: s.generation_id in fragment("(SELECT g.id FROM generation g INNER JOIN
+  (SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date) i
+  ON g.inserted_at = i.min)"),
+      preload: [snapshots: s]
+  end
+
   def collect_beatmaps(
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu_stat, :osu_api_key)}
   ) do
