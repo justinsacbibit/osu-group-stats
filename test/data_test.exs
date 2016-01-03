@@ -401,4 +401,34 @@ defmodule DataTest do
 
     Data.collect_beatmaps %Osu.Client{api_key: "abc"}
   end
+
+  # queries
+
+  test "get daily generations" do
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 1,
+      "inserted_at" => "2015-01-01 05:00:00",
+      "updated_at" => "2015-01-01 05:00:00",
+    }
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 2,
+      "inserted_at" => "2015-01-01 06:00:00",
+      "updated_at" => "2015-01-01 06:00:00",
+    }
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 3,
+      "inserted_at" => "2015-01-02 05:00:00",
+      "updated_at" => "2015-01-02 05:00:00",
+    }
+
+    generations = Repo.all Data.get_daily_generations
+
+    assert length(generations) == 2
+
+    gen1 = Enum.at(generations, 0)
+    assert gen1.id == 1
+
+    gen2 = Enum.at(generations, 1)
+    assert gen2.id == 3
+  end
 end

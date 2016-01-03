@@ -10,6 +10,13 @@ defmodule UwOsuStat.Data do
   alias UwOsuStat.Models.UserSnapshot
   alias UwOsuStat.Repo
 
+  def get_daily_generations do
+    from g in Generation,
+      join: i in fragment("SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date"),
+      on: g.inserted_at == i.min,
+      select: g
+  end
+
   def collect_beatmaps(
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu_stat, :osu_api_key)}
   ) do
@@ -111,7 +118,6 @@ defmodule UwOsuStat.Data do
     %HTTPoison.Response{body: scores} = Osu.get_user_best!(user_id_or_username, client)
 
     Enum.each(scores, fn(score_dict) ->
-      beatmap_id = score_dict["beatmap_id"]
       {:ok, date} = Ecto.DateTime.cast(score_dict["date"])
 
       query = from s in Score,
