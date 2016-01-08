@@ -20,7 +20,9 @@ defmodule UwOsu.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", UwOsu do
-  #   pipe_through :api
-  # end
+  scope "/api", UwOsu do
+    pipe_through :api
+
+    get "/weekly-snapshots", DataController, :weekly_snapshots
+  end
 end
