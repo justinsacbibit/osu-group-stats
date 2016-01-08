@@ -20,7 +20,7 @@ defmodule UwOsuStat.Osu do
   end
 
   def get_user_best!(user, client) do
-    _get!("/get_user_best", client, %{u: user})
+    _get!("/get_user_best", client, %{u: user, limit: 100})
   end
 
   def get_beatmaps!(params, client) do
