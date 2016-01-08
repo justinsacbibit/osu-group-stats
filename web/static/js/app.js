@@ -10,7 +10,16 @@ import TableRowColumn from 'material-ui/lib/table/table-row-column';
 
 
 export default class App extends Component {
-  render () {
+  componentDidMount() {
+    const root = location.protocol + '//' + location.host;
+    $.get(`${root}/api/weekly-snapshots`, snapshots => {
+      this.setState({
+        snapshots,
+      });
+    });
+  }
+
+  render() {
     return (
       <div>
         <h1>This app is hot!</h1>
