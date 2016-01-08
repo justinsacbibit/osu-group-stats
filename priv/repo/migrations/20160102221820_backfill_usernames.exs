@@ -1,4 +1,4 @@
-defmodule UwOsuStat.Repo.Migrations.BackfillUsernames do
+defmodule UwOsu.Repo.Migrations.BackfillUsernames do
   use Ecto.Migration
 
   def change do

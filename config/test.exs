@@ -1,16 +1,20 @@
 use Mix.Config
 
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :uw_osu, UwOsu.Endpoint,
+  http: [port: 4001],
+  server: false
+
+# Print only warnings and errors during test
 config :logger, level: :warn
 
-config :uw_osu_stat, UwOsuStat.Repo,
+# Configure your database
+config :uw_osu, UwOsu.Repo,
   adapter: Ecto.Adapters.Postgres,
-  pool: Ecto.Adapters.SQL.Sandbox,
-  database: "uw_osu_stat_test",
   username: "postgres",
   password: "postgres",
-  hostname: "localhost"
-
-config :uw_osu_stat, user_ids: [
-  "testuser",
-]
+  database: "uw_osu_test",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
 

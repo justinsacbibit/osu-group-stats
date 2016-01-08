@@ -1,4 +1,4 @@
-defmodule UwOsuStat.Repo.Migrations.AlterUserAddUsername do
+defmodule UwOsu.Repo.Migrations.AlterUserAddUsername do
   use Ecto.Migration
 
   def change do

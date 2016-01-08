@@ -1,4 +1,4 @@
-defmodule UwOsuStat.Repo.Migrations.AlterBeatmapDiffsToFloats do
+defmodule UwOsu.Repo.Migrations.AlterBeatmapDiffsToFloats do
   use Ecto.Migration
 
   def change do

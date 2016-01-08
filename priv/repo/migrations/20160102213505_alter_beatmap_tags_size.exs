@@ -1,4 +1,4 @@
-defmodule UwOsuStat.Repo.Migrations.AlterBeatmapTagsSize do
+defmodule UwOsu.Repo.Migrations.AlterBeatmapTagsSize do
   use Ecto.Migration
 
   def change do

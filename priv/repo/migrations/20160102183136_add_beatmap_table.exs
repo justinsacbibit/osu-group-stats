@@ -1,4 +1,4 @@
-defmodule UwOsuStat.Repo.Migrations.AddBeatmapTable do
+defmodule UwOsu.Repo.Migrations.AddBeatmapTable do
   use Ecto.Migration
 
   def change do

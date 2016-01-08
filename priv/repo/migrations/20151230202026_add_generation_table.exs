@@ -1,4 +1,4 @@
-defmodule UwOsuStat.Repo.Migrations.AddGenerationTable do
+defmodule UwOsu.Repo.Migrations.AddGenerationTable do
   use Ecto.Migration
 
   def change do
