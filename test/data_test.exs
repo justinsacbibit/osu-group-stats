@@ -499,4 +499,76 @@ defmodule DataTest do
     assert Enum.at(user.snapshots, 0).generation_id == 1
     assert Enum.at(user.snapshots, 1).generation_id == 3
   end
+
+  test "get weekly snapshots" do
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 1,
+      "inserted_at" => "2015-12-30 05:00:00",
+      "updated_at" => "2015-12-30 05:00:00",
+    }
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 2,
+      "inserted_at" => "2015-12-31 06:00:00",
+      "updated_at" => "2015-12-31 06:00:00",
+    }
+    Repo.insert! Generation.changeset %Generation{}, %{
+      "id" => 3,
+      "inserted_at" => "2016-01-06 05:00:00",
+      "updated_at" => "2016-01-06 05:00:00",
+    }
+
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 1,
+    }
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 1,
+      "generation_id" => 1,
+      "playcount" => 5,
+      "pp_rank" => 1380,
+      "level" => 100,
+      "pp_raw" => 3000,
+      "accuracy" => 98.98,
+      "pp_country_rank" => 50,
+    })
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 1,
+      "generation_id" => 2,
+    })
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 1,
+      "generation_id" => 3,
+      "playcount" => 11,
+      "pp_rank" => 1360,
+      "level" => 101,
+      "pp_raw" => 3050,
+      "accuracy" => 98.99,
+      "pp_country_rank" => 49,
+    })
+
+    snapshot_tuples = Repo.all Data.get_weekly_snapshots
+
+    assert length(snapshot_tuples) == 1
+
+    [snapshot_tuple | _] = snapshot_tuples
+    {s1, s2, %{
+        "playcount" => playcount,
+        "pp_rank" => pp_rank,
+        "level" => level,
+        "pp_raw" => pp_raw,
+        "accuracy" => accuracy,
+        "pp_country_rank" => pp_country_rank,
+      }
+    } = snapshot_tuple
+    assert s1.generation_id == 3
+    assert s2.generation_id == 1
+    assert playcount == 6
+    assert pp_rank == -20
+    assert level == 1
+    assert pp_raw == 50
+    assert Float.round(accuracy, 2) == 0.01
+    assert pp_country_rank == -1
+  end
 end
