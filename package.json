@@ -1,8 +1,8 @@
 {
-  "repository": {
-  },
+  "repository": {},
   "dependencies": {
     "babel-brunch": "^6.0.0",
+    "babel-preset-es2015": "^6.3.13",
     "brunch": "^2.0.0",
     "clean-css-brunch": ">= 1.0 < 1.8",
     "css-brunch": ">= 1.0 < 1.8",
