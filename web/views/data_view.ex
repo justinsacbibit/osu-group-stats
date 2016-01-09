@@ -32,13 +32,27 @@ defmodule UwOsu.DataView do
 
   def render("farmed_beatmaps.json", %{beatmaps: beatmaps}) do
     render_many(beatmaps, UwOsu.DataView, "beatmap.json", as: :beatmap)
+    |> Enum.sort_by(fn(%{scores: scores}) -> length scores end, &>/2)
   end
 
-  def render("beatmap.json", %{beatmap: {beatmap, count}}) do
+  def render("beatmap.json", %{beatmap: beatmap}) do
     beatmap
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :scores])
-    |> Map.put(:score_count, count)
+    |> Map.drop([:__struct__, :__meta__])
+    |> Map.update(:scores, [], fn(scores) ->
+      scores
+      |> Enum.map(fn(score) ->
+        score
+        |> Map.from_struct
+        |> Map.drop([:__struct__, :__meta__])
+        |> Map.update(:user, nil, fn(user) ->
+          user
+          |> Map.from_struct
+          |> Map.drop([:__struct__, :__meta__, :events, :snapshots])
+        end)
+      end)
+      |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
+    end)
   end
 end
 

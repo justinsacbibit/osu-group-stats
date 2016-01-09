@@ -604,12 +604,10 @@ defmodule DataTest do
 
     [b1, b2] = Repo.all Data.get_farmed_beatmaps
 
-    {b1, b1_count} = b1
     assert b1.id == 1
-    assert b1_count == 2
+    assert length(b1.scores) == 2
 
-    {b2, b2_count} = b2
     assert b2.id == 2
-    assert b2_count == 1
+    assert length(b2.scores) == 1
   end
 end

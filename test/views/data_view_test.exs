@@ -226,23 +226,33 @@ defmodule UwOsu.DataViewTest do
       "beatmap_id" => 3,
       "user_id" => 1,
       "date" => "2015-01-01 01:00:00",
+      "pp" => "100",
     }
     Repo.insert! Score.changeset %Score{}, mock_score_dict %{
       "beatmap_id" => 3,
       "user_id" => 2,
       "date" => "2015-01-01 02:00:00",
+      "pp" => "300",
     }
     Repo.insert! Score.changeset %Score{}, mock_score_dict %{
       "beatmap_id" => 3,
       "user_id" => 3,
       "date" => "2015-01-01 03:00:00",
+      "pp" => "200",
     }
 
     conn = get conn, "/api/farmed-beatmaps"
     [
-      %{"id" => 3, "score_count" => 3},
-      %{"id" => 1, "score_count" => 2},
-      %{"id" => 2, "score_count" => 1},
+      %{
+        "id" => 3,
+        "scores" => [
+          %{"pp" => 300.0, "user" => %{"id" => 2}},
+          %{"pp" => 200.0},
+          %{"pp" => 100.0},
+        ],
+      },
+      %{"id" => 1},
+      %{"id" => 2},
     ] = json_response(conn, 200)
   end
 end

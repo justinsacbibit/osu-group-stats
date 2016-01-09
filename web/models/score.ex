@@ -1,6 +1,7 @@
 defmodule UwOsu.Models.Score do
   use Ecto.Schema
   import Ecto.Changeset
+  alias UwOsu.Models.User
 
   schema "score" do
     belongs_to :user, User
