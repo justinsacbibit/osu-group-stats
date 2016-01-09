@@ -145,3 +145,8 @@ config :uw_osu, user_ids: [
   "Arneshie-",
 ]
 
+config :uw_osu, excluded_user_ids: [
+  "ChronoTrig",
+  "Flandre-",
+]
+

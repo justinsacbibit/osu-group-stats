@@ -59,7 +59,6 @@ defmodule UwOsu.DataView do
   end
 
   def render("player.json", %{player: player}) do
-    IO.inspect player.snapshots
     player
     |> Map.from_struct
     |> Map.drop([:__struct__, :__meta__, :snapshots, :events])

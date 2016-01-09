@@ -185,15 +185,19 @@ defmodule UwOsu.DataViewTest do
   test "get farmed beatmaps" do
     Repo.insert! User.changeset %User{}, %{
       "id" => 1,
+      "username" => "a",
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 2,
+      "username" => "a",
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 3,
+      "username" => "a",
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 4,
+      "username" => "a",
     }
     Repo.insert! Beatmap.changeset %Beatmap{}, mock_beatmap_dict %{
       "id" => 1,

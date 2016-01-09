@@ -466,6 +466,7 @@ defmodule DataTest do
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 1,
+      "username" => "a",
     }
     Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
       "user_id" => 1,
@@ -481,6 +482,7 @@ defmodule DataTest do
     })
     Repo.insert! User.changeset %User{}, %{
       "id" => 2,
+      "username" => "a",
     }
     Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
       "user_id" => 2,
@@ -579,15 +581,19 @@ defmodule DataTest do
   test "get farmed beatmaps" do
     Repo.insert! User.changeset %User{}, %{
       "id" => 1,
+      "username" => "a",
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 2,
+      "username" => "a",
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 3,
+      "username" => "a",
     }
     Repo.insert! User.changeset %User{}, %{
       "id" => 4,
+      "username" => "a",
     }
     Repo.insert! Beatmap.changeset %Beatmap{}, mock_beatmap_dict %{
       "id" => 1,

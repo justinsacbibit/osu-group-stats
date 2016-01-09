@@ -26,6 +26,7 @@ defmodule UwOsu.Data do
         ORDER BY inserted_at DESC
         LIMIT 1
       )"),
+      where: u.username != "ChronoTrig" and u.username != "Flandre-", # TODO: Not hardcode
       order_by: [desc: s.pp_raw],
       preload: [snapshots: s]
   end
@@ -43,6 +44,7 @@ defmodule UwOsu.Data do
         ON s.user_id = (?) AND s.generation_id = g.id
         WHERE g.inserted_at::date >= '2015-12-30')
           ", s1.user_id),
+      where: s1.username != "ChronoTrig" and s1.username != "Flandre-", # TODO: Not hardcode
       select: {
         s1,
         s2,
@@ -76,6 +78,7 @@ defmodule UwOsu.Data do
         ORDER BY inserted_at DESC
         LIMIT 1
       )", b.id, sc.user_id),
+      where: u.username != "ChronoTrig" and u.username != "Flandre-", # TODO: Not hardcode
       order_by: [desc: sc_.score_count],
       preload: [scores: {sc, user: u}],
       select: b
