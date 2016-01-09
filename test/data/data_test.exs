@@ -563,4 +563,53 @@ defmodule DataTest do
     assert Float.round(accuracy, 2) == 0.01
     assert pp_country_rank == -1
   end
+
+  test "get farmed beatmaps" do
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 1,
+    }
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 2,
+    }
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 3,
+    }
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 4,
+    }
+    Repo.insert! Beatmap.changeset %Beatmap{}, mock_beatmap_dict %{
+      "id" => 1,
+    }
+    Repo.insert! Beatmap.changeset %Beatmap{}, mock_beatmap_dict %{
+      "id" => 2,
+    }
+    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+      "beatmap_id" => 1,
+      "user_id" => 1,
+    }
+    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+      "beatmap_id" => 1,
+      "user_id" => 2,
+    }
+    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2015-01-01 05:00:00",
+    }
+    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2015-01-01 06:00:00",
+    }
+
+    [b1, b2] = Repo.all Data.get_farmed_beatmaps
+
+    {b1, b1_count} = b1
+    assert b1.id == 1
+    assert b1_count == 2
+
+    {b2, b2_count} = b2
+    assert b2.id == 2
+    assert b2_count == 1
+  end
 end

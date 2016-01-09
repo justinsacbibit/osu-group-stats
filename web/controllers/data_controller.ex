@@ -7,4 +7,9 @@ defmodule UwOsu.DataController do
     snapshots = Repo.all Data.get_weekly_snapshots
     render conn, "weekly_snapshots.json", snapshots: snapshots
   end
+
+  def farmed_beatmaps(conn, _params) do
+    beatmaps = Repo.all Data.get_farmed_beatmaps
+    render conn, "farmed_beatmaps.json", beatmaps: beatmaps
+  end
 end

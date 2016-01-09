@@ -24,5 +24,6 @@ defmodule UwOsu.Router do
     pipe_through :api
 
     get "/weekly-snapshots", DataController, :weekly_snapshots
+    get "/farmed-beatmaps", DataController, :farmed_beatmaps
   end
 end

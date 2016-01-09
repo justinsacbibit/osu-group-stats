@@ -1,8 +1,10 @@
 defmodule UwOsu.Models.Beatmap do
   use Ecto.Schema
   import Ecto.Changeset
+  alias UwOsu.Models.Score
 
   schema "beatmap" do
+    has_many :scores, Score
     field :approved, :integer
     field :approved_date, Ecto.DateTime
     field :last_update, Ecto.DateTime

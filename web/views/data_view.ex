@@ -29,5 +29,16 @@ defmodule UwOsu.DataView do
       diffs: diffs,
     }
   end
+
+  def render("farmed_beatmaps.json", %{beatmaps: beatmaps}) do
+    render_many(beatmaps, UwOsu.DataView, "beatmap.json", as: :beatmap)
+  end
+
+  def render("beatmap.json", %{beatmap: {beatmap, count}}) do
+    beatmap
+    |> Map.from_struct
+    |> Map.drop([:__struct__, :__meta__, :scores])
+    |> Map.put :score_count, count
+  end
 end
 
