@@ -96,7 +96,7 @@ export default class App extends Component {
             const selectedBeatmap = this.state.beatmaps[this.state.selectedBeatmapIndex];
 
             return (
-              <Paper style={{ marginLeft: '50px', width: '500px', display: 'inline-block' }}>
+              <Paper style={{ marginLeft: '50px', width: '520px', display: 'inline-block' }}>
                 <Table height='500px'>
                   <TableHeader
                     adjustForCheckbox={false}
@@ -105,7 +105,7 @@ export default class App extends Component {
                       <TableHeaderColumn style={{ width: '20px' }}>
                         Rank
                       </TableHeaderColumn>
-                      <TableHeaderColumn style={{ width: '70px' }}>
+                      <TableHeaderColumn style={{ width: '100px' }}>
                         Username
                       </TableHeaderColumn>
                       <TableHeaderColumn style={{ width: '50px' }}>
@@ -127,7 +127,7 @@ export default class App extends Component {
                           <TableRowColumn style={{ width: '20px' }}>
                             {index + 1}
                           </TableRowColumn>
-                          <TableRowColumn style={{ width: '70px' }}>
+                          <TableRowColumn style={{ width: '100px' }}>
                             {score.user.username}
                           </TableRowColumn>
                           <TableRowColumn style={{ width: '50px' }}>
