@@ -60,6 +60,7 @@ defmodule UwOsu.Data do
       where: sc.id == fragment("(SELECT id FROM score sc WHERE sc.beatmap_id = (?) AND sc.user_id = (?) ORDER BY inserted_at DESC LIMIT 1)", b.id, sc.user_id),
       group_by: b.id,
       order_by: [desc: count(sc.beatmap_id)],
+      limit: 50,
       select: {b, count(sc.beatmap_id)}
   end
 
