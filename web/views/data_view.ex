@@ -32,7 +32,6 @@ defmodule UwOsu.DataView do
 
   def render("farmed_beatmaps.json", %{beatmaps: beatmaps}) do
     render_many(beatmaps, UwOsu.DataView, "beatmap.json", as: :beatmap)
-    |> Enum.sort_by(fn(%{scores: scores}) -> length scores end, &>/2)
   end
 
   def render("beatmap.json", %{beatmap: beatmap}) do

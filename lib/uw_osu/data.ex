@@ -59,9 +59,9 @@ defmodule UwOsu.Data do
       join: sc in assoc(b, :scores),
       join: u in assoc(sc, :user),
       where: sc.id == fragment("(SELECT id FROM score sc WHERE sc.beatmap_id = (?) AND sc.user_id = (?) ORDER BY inserted_at DESC LIMIT 1)", b.id, sc.user_id),
-      limit: 50,
       preload: [scores: {sc, user: u}],
-      #order_by: fragment("(SELECT count(*) FROM score sc WHERE sc.id = (?))", sc.id),
+      order_by: [desc: fragment("(SELECT count(*) FROM score sc WHERE sc.beatmap_id = (?))", b.id)],
+      limit: 50,
       select: b
   end
 
