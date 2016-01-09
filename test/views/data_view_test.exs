@@ -242,6 +242,11 @@ defmodule UwOsu.DataViewTest do
     }
 
     conn = get conn, "/api/farmed-beatmaps"
+    resp = json_response(conn, 200)
+    [
+      3, 1, 2
+    ] = Enum.map resp, fn(%{"id" => id}) -> id end
+
     [
       %{
         "id" => 3,
@@ -253,6 +258,6 @@ defmodule UwOsu.DataViewTest do
       },
       %{"id" => 1},
       %{"id" => 2},
-    ] = json_response(conn, 200)
+    ] = resp
   end
 end
