@@ -64,7 +64,8 @@ export default class App extends Component {
         <Paper style={{ display: 'inline-block', marginLeft: '130px', width: '800px' }}>
           <Table
             height='500px'
-            onRowSelection={this.handleOnRowSelection.bind(this)}>
+            onRowSelection={this.handleOnRowSelection.bind(this)}
+            selectable>
             <TableHeader
               displaySelectAll={false}>
               <TableRow>
@@ -89,7 +90,8 @@ export default class App extends Component {
               {this.state.beatmaps.map((beatmap, index) => {
                 return (
                   <TableRow
-                    key={index}>
+                    key={index}
+                    selected={index === this.state.selectedBeatmapIndex}>
                     <TableRowColumn style={{ width: '20px' }}>
                       {index + 1}
                     </TableRowColumn>
