@@ -2,7 +2,17 @@ defmodule UwOsu.DataView do
   use UwOsu.Web, :view
 
   def render("weekly_snapshots.json", %{snapshots: snapshots}) do
-    render_many snapshots, UwOsu.DataView, "weekly_snapshot.json", as: :snapshot
+    %{
+      rankings: %{
+        playcount: snapshots
+        |> Enum.sort_by(fn({_, _, %{"playcount" => playcount}}) -> playcount end, &>/2)
+        |> Enum.map(fn({s1, _, _}) -> s1.user_id end),
+        pp_raw: snapshots
+        |> Enum.sort_by(fn({_, _, %{"pp_raw" => pp_raw}}) -> pp_raw end, &>/2)
+        |> Enum.map fn({s1, _, _}) -> s1.user_id end
+      },
+      snapshots: render_many(snapshots, UwOsu.DataView, "weekly_snapshot.json", as: :snapshot)
+    }
   end
 
   def render("weekly_snapshot.json", %{snapshot: {s1, s2, diffs}}) do

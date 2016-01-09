@@ -77,15 +77,52 @@ defmodule UwOsu.DataViewTest do
       "pp_country_rank" => 49,
     })
 
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 2,
+    }
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 2,
+      "generation_id" => 1,
+      "playcount" => 1000,
+      "pp_rank" => 1380,
+      "level" => 100,
+      "pp_raw" => 3000,
+      "accuracy" => 98.98,
+      "pp_country_rank" => 50,
+    })
+
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 2,
+      "generation_id" => 3,
+      "playcount" => 1001,
+      "pp_rank" => 1360,
+      "level" => 101,
+      "pp_raw" => 3100,
+      "accuracy" => 98.99,
+      "pp_country_rank" => 49,
+    })
+
     conn = get conn, "/api/weekly-snapshots"
-    [%{"current" => current, "past" => past, "diffs" => diffs}|_] = json_response(conn, 200)
-
-    assert current["generation_id"] == 3
-    assert past["generation_id"] == 1
-
     %{
-      "playcount" => playcount,
-    } = diffs
-    assert playcount == 6
+      "rankings" => %{
+        "playcount" => [1, 2],
+        "pp_raw" => [2, 1],
+      },
+      "snapshots" => [
+        %{
+          "current" => %{
+            "generation_id" => 3,
+          },
+          "past" => %{
+            "generation_id" => 1,
+          },
+          "diffs" => %{
+            "playcount" => 6,
+          },
+        }
+        |_
+      ]
+    } = json_response(conn, 200)
   end
 end

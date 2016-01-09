@@ -40,14 +40,18 @@ defmodule UwOsu.Data do
         ON s.user_id = (?) AND s.generation_id = g.id
         WHERE g.inserted_at::date >= '2015-12-30')
           ", s1.user_id),
-      select: {s1, s2, %{
+      select: {
+        s1,
+        s2,
+        %{
           "playcount" => fragment("(?) - (?)", s1.playcount, s2.playcount),
           "pp_rank" => fragment("(?) - (?)", s1.pp_rank, s2.pp_rank),
           "level" => fragment("(?) - (?)", s1.level, s2.level),
           "pp_raw" => fragment("(?) - (?)", s1.pp_raw, s2.pp_raw),
           "accuracy" => fragment("(?) - (?)", s1.accuracy, s2.accuracy),
           "pp_country_rank" => fragment("(?) - (?)", s1.pp_country_rank, s2.pp_country_rank),
-        }}
+        },
+      }
   end
 
   def collect_beatmaps(
