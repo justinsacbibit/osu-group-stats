@@ -53,5 +53,21 @@ defmodule UwOsu.DataView do
       |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
     end)
   end
+
+  def render("players.json", %{players: players}) do
+    render_many players, UwOsu.DataView, "player.json", as: :player
+  end
+
+  def render("player.json", %{player: player}) do
+    IO.inspect player.snapshots
+    player
+    |> Map.from_struct
+    |> Map.drop([:__struct__, :__meta__, :snapshots, :events])
+    |> Map.merge(
+      Enum.at(player.snapshots, 0)
+      |> Map.from_struct
+      |> Map.drop([:__struct__, :__meta__, :generation, :user])
+    )
+  end
 end
 

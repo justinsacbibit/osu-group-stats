@@ -12,4 +12,9 @@ defmodule UwOsu.DataController do
     beatmaps = Repo.all Data.get_farmed_beatmaps
     render conn, "farmed_beatmaps.json", beatmaps: beatmaps
   end
+
+  def players(conn, _params) do
+    players = Repo.all Data.get_users
+    render conn, "players.json", players: players
+  end
 end

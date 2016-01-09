@@ -464,32 +464,44 @@ defmodule DataTest do
       "inserted_at" => "2015-01-02 05:00:00",
       "updated_at" => "2015-01-02 05:00:00",
     }
-
     Repo.insert! User.changeset %User{}, %{
       "id" => 1,
     }
-
     Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
       "user_id" => 1,
       "generation_id" => 1,
     })
-
     Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
       "user_id" => 1,
       "generation_id" => 2,
     })
-
     Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
       "user_id" => 1,
       "generation_id" => 3,
     })
+    Repo.insert! User.changeset %User{}, %{
+      "id" => 2,
+    }
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 2,
+      "generation_id" => 1,
+    })
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 2,
+      "generation_id" => 2,
+    })
+    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+      "user_id" => 2,
+      "generation_id" => 3,
+    })
 
-    user = Repo.one! Data.get_users
+    [u1, u2] = Repo.all Data.get_users
 
-    assert length(user.snapshots) == 2
-    # should order by generation.inserted_at
-    assert Enum.at(user.snapshots, 0).generation_id == 1
-    assert Enum.at(user.snapshots, 1).generation_id == 3
+    [u1_snapshot] = u1.snapshots
+    assert u1_snapshot.generation_id == 3
+
+    [u2_snapshot] = u2.snapshots
+    assert u2_snapshot.generation_id == 3
   end
 
   test "get weekly snapshots" do

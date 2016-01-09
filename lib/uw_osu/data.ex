@@ -20,10 +20,13 @@ defmodule UwOsu.Data do
     from u in User,
       join: s in assoc(u, :snapshots),
       join: g in assoc(s, :generation),
-      order_by: g.inserted_at,
-      where: s.generation_id in fragment("(SELECT g.id FROM generation g INNER JOIN
-  (SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date) i
-  ON g.inserted_at = i.min)"),
+      where: s.generation_id in fragment("(
+        SELECT g.id
+        FROM generation g
+        ORDER BY inserted_at DESC
+        LIMIT 1
+      )"),
+      order_by: [desc: s.pp_raw],
       preload: [snapshots: s]
   end
 
