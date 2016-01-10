@@ -120,12 +120,10 @@ config :uw_osu, user_ids: [
   1844801,
   3392917,
   1579374,
-  2624025,
   2200307,
   3905113,
   3327052,
   3465394,
-  3687489,
   3993851,
   4383481,
   2593681,
@@ -143,10 +141,5 @@ config :uw_osu, user_ids: [
   2130039,
   5063503,
   "Arneshie-",
-]
-
-config :uw_osu, excluded_user_ids: [
-  "ChronoTrig",
-  "Flandre-",
 ]
 

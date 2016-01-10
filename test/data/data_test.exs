@@ -619,6 +619,12 @@ defmodule DataTest do
       "user_id" => 1,
       "date" => "2015-01-01 06:00:00",
     }
+    # Duplicate (beatmap_id, user_id) may affect the beatmap ordering
+    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2012-01-01 06:00:00",
+    }
 
     [b1, b2] = Repo.all Data.get_farmed_beatmaps
 
