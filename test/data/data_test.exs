@@ -519,4 +519,57 @@ defmodule DataTest do
     assert b2.id == 2
     assert length(b2.scores) == 1
   end
+
+  test "get users with snapshots" do
+    insert_generation! %{
+      "id" => 1,
+      "inserted_at" => "2015-12-30 05:00:00",
+      "updated_at" => "2015-12-30 05:00:00",
+    }
+    insert_generation! %{
+      "id" => 2,
+      "inserted_at" => "2015-12-30 06:00:00",
+      "updated_at" => "2015-12-30 06:00:00",
+    }
+    insert_generation! %{
+      "id" => 3,
+      "inserted_at" => "2015-12-31 05:00:00",
+      "updated_at" => "2015-12-31 05:00:00",
+    }
+    insert_user! %{
+      "id" => 1,
+      "username" => "a",
+    }
+    insert_user! %{
+      "id" => 2,
+      "username" => "a",
+    }
+    insert_user_snapshot! %{
+      "user_id" => 1,
+      "generation_id" => 1,
+    }
+    insert_user_snapshot! %{
+      "user_id" => 1,
+      "generation_id" => 2,
+    }
+    insert_user_snapshot! %{
+      "user_id" => 1,
+      "generation_id" => 3,
+    }
+    insert_user_snapshot! %{
+      "user_id" => 2,
+      "generation_id" => 3,
+    }
+
+    [u1, u2] = Repo.all Data.get_users_with_snapshots
+
+    assert u1.id == 1
+    %User{snapshots: [u1_s1, u1_s2]} = u1
+    assert u1_s1.generation_id == 3
+    assert u1_s2.generation_id == 1
+
+    assert u2.id == 2
+    %User{snapshots: [u2_s1]} = u2
+    assert u2_s1.generation_id == 3
+  end
 end

@@ -17,4 +17,9 @@ defmodule UwOsu.DataController do
     players = Repo.all Data.get_users
     render conn, "players.json", players: players
   end
+
+  def daily_snapshots(conn, params) do
+    users = Repo.all Data.get_users_with_snapshots
+    render conn, "daily_snapshots.json", users: users
+  end
 end

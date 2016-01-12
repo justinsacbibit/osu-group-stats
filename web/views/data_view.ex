@@ -30,6 +30,25 @@ defmodule UwOsu.DataView do
     }
   end
 
+  def render("daily_snapshots.json", %{users: users}) do
+    render_many users, UwOsu.DataView, "daily_snapshot.json", as: :user
+  end
+
+  def render("daily_snapshot.json", %{user: user}) do
+    user
+    |> Map.from_struct
+    |> Map.drop([:__struct__, :__meta__, :events])
+    |> Map.update(:snapshots, [], fn(snapshots) ->
+      snapshots
+      |> Enum.map(fn(snapshot) ->
+        snapshot
+        |> Map.from_struct
+        |> Map.drop([:__struct__, :__meta__, :generation, :user])
+      end)
+      |> Enum.sort_by(fn(%{generation_id: gid}) -> gid end, &<=/2)
+    end)
+  end
+
   def render("farmed_beatmaps.json", %{beatmaps: beatmaps}) do
     render_many(beatmaps, UwOsu.DataView, "beatmap.json", as: :beatmap)
   end

@@ -13,6 +13,10 @@ defmodule UwOsu.RepoHelper do
     Repo.insert! changeset
   end
 
+  def insert_scores!(scores \\ []) do
+    Enum.each scores, &insert_score!/1
+  end
+
   def insert_beatmap!(overrides \\ %{}) do
     changeset = Beatmap.changeset %Beatmap{}, ApiData.beatmap overrides
     Repo.insert! changeset

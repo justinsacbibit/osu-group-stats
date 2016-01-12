@@ -28,5 +28,6 @@ defmodule UwOsu.Router do
     get "/weekly-snapshots", DataController, :weekly_snapshots
     get "/farmed-beatmaps", DataController, :farmed_beatmaps
     get "/players", DataController, :players
+    get "/daily-snapshots", DataController, :daily_snapshots
   end
 end
