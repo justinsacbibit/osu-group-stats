@@ -141,5 +141,6 @@ config :uw_osu, user_ids: [
   2130039,
   5063503,
   "Arneshie-",
+  "blunt master",
 ]
 
