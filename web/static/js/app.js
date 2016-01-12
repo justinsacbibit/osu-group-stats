@@ -19,123 +19,107 @@ class Beatmaps extends Component {
     || nextProps.beatmaps !== this.props.beatmaps;
   }
 
-  handleOnRowSelection(selectedRows) {
-    if (selectedRows.length === 1) {
-      const [ selectedRow ] = selectedRows;
-      this.props.onRowSelection(selectedRow);
-    }
+  handleOnRowSelection(selectedRow) {
+    this.props.onRowSelection(selectedRow);
   }
 
   render() {
     return (
       <div>
-        <Paper style={{ display: 'inline-block', marginLeft: '130px', width: '800px' }}>
-          <Table
-            height='500px'
-            onRowSelection={this.handleOnRowSelection.bind(this)}
-            selectable>
-            <TableHeader
-              displaySelectAll={false}>
-              <TableRow>
-                <TableHeaderColumn style={{ width: '20px' }}>
+        <h3>
+          Click a beatmap to see the top scores for it
+        </h3>
+      <div className='ui grid'>
+        <div className='nine wide column'>
+          <table className='ui selectable celled table'>
+            <thead>
+              <tr>
+                <th>
                   Rank
-                </TableHeaderColumn>
-                <TableHeaderColumn style={{ width: '20px' }}>
+                </th>
+                <th>
                   # Scores
-                </TableHeaderColumn>
-                <TableHeaderColumn>
-                  Artist
-                </TableHeaderColumn>
-                <TableHeaderColumn>
-                  Title
-                </TableHeaderColumn>
-                <TableHeaderColumn>
-                  Version
-                </TableHeaderColumn>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+                </th>
+                <th>
+                  Beatmap
+                </th>
+              </tr>
+            </thead>
+            <tbody>
               {this.props.beatmaps.map((beatmap, index) => {
                 return (
-                  <TableRow
+                  <tr
+                    className={classNames({ 'active': index === this.props.selectedBeatmapIndex })}
                     key={index}
-                    selected={index === this.props.selectedBeatmapIndex}>
-                    <TableRowColumn style={{ width: '20px' }}>
+                    onClick={this.handleOnRowSelection.bind(this, index)}
+                    style={{ cursor: 'pointer' }}>
+                    <td>
                       {index + 1}
-                    </TableRowColumn>
-                    <TableRowColumn style={{ width: '20px' }}>
+                    </td>
+                    <td>
                       {beatmap.scores.length}
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      {beatmap.artist}
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      {beatmap.title}
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      {beatmap.version}
-                    </TableRowColumn>
-                  </TableRow>
+                    </td>
+                    <td>
+                      {`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] \\\\ ${beatmap.creator}`}
+                    </td>
+                  </tr>
                   );
               })}
-            </TableBody>
-          </Table>
-        </Paper>
+            </tbody>
+          </table>
 
-        {this.props.selectedBeatmapIndex !== null ?
-          (() => {
-            const selectedBeatmap = this.props.beatmaps[this.props.selectedBeatmapIndex];
+        </div>
+        <div className='seven wide column'>
+          {this.props.selectedBeatmapIndex !== null ?
+            (() => {
+              const selectedBeatmap = this.props.beatmaps[this.props.selectedBeatmapIndex];
 
-            return (
-              <Paper style={{ marginLeft: '50px', width: '430px', display: 'inline-block' }}>
-                <Table height='500px'>
-                  <TableHeader
-                    adjustForCheckbox={false}
-                    displaySelectAll={false}>
-                    <TableRow>
-                      <TableHeaderColumn style={{ width: '10px' }}>
+              return (
+                <table className='ui celled table'>
+                  <thead>
+                    <tr>
+                      <th>
                         Rank
-                      </TableHeaderColumn>
-                      <TableHeaderColumn style={{ width: '100px' }}>
+                      </th>
+                      <th>
                         Username
-                      </TableHeaderColumn>
-                      <TableHeaderColumn style={{ width: '50px' }}>
+                      </th>
+                      <th>
                         PP
-                      </TableHeaderColumn>
-                      <TableHeaderColumn>
+                      </th>
+                      <th>
                         Date
-                      </TableHeaderColumn>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody
-                    adjustForCheckbox={false}
-                    displayRowCheckbox={false}>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {selectedBeatmap.scores.map((score, index) => {
                       const scoreDate = new Date(score.date);
                       return (
-                        <TableRow
+                        <tr
                           key={index}>
-                          <TableRowColumn style={{ width: '10px' }}>
+                          <td>
                             {index + 1}
-                          </TableRowColumn>
-                          <TableRowColumn style={{ width: '100px' }}>
+                          </td>
+                          <td>
                             {score.user.username}
-                          </TableRowColumn>
-                          <TableRowColumn style={{ width: '50px' }}>
+                          </td>
+                          <td>
                             {score.pp}
-                          </TableRowColumn>
-                          <TableRowColumn>
+                          </td>
+                          <td>
                             {scoreDate.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' })}
-                          </TableRowColumn>
-                        </TableRow>
+                          </td>
+                        </tr>
                         );
                     })}
-                  </TableBody>
-                </Table>
-              </Paper>
-            );
-          })()
-        : null}
+                  </tbody>
+                </table>
+                );
+            })()
+              : null}
+            </div>
+          </div>
       </div>
     );
   }
@@ -206,62 +190,67 @@ class Players extends Component {
     const players = this.props.players.slice();
     players.sort(this._sortPlayers.bind(this));
     return (
-      <table className='ui sortable celled table'>
-        <thead>
-          <tr>
-            <th>
-              Rank
-            </th>
-            <th>
-              Username
-            </th>
-            {sortableColumns.map((header, index) => {
-              const sorted = index === this.state.sortIndex;
+      <div>
+        <h3>
+          Click a column header to change the sort order
+        </h3>
+        <table className='ui sortable celled table'>
+          <thead>
+            <tr>
+              <th>
+                Rank
+              </th>
+              <th>
+                Username
+              </th>
+              {sortableColumns.map((header, index) => {
+                const sorted = index === this.state.sortIndex;
+                return (
+                  <th
+                    className={classNames(sorted, {
+                      'sorted': sorted,
+                      [this.state.sortDirection]: sorted,
+                    })}
+                    key={index}
+                    onClick={this.handleOnClickSortableColumn.bind(this, index)}>
+                    {header}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {players.map((player, index) => {
               return (
-                <th
-                  className={classNames(sorted, {
-                    'sorted': sorted,
-                    [this.state.sortDirection]: sorted,
-                  })}
-                  key={index}
-                  onClick={this.handleOnClickSortableColumn.bind(this, index)}>
-                  {header}
-                </th>
-              );
+                <tr
+                  key={index}>
+                  <td>
+                    {index + 1}
+                  </td>
+                  <td>
+                    {player.username}
+                  </td>
+                  <td>
+                    {player.pp_raw}
+                  </td>
+                  <td>
+                    {player.pp_rank}
+                  </td>
+                  <td>
+                    {player.pp_country_rank}
+                  </td>
+                  <td>
+                    {player.playcount}
+                  </td>
+                  <td>
+                    {player.accuracy.toFixed(2)}
+                  </td>
+                </tr>
+                );
             })}
-          </tr>
-        </thead>
-        <tbody>
-          {players.map((player, index) => {
-            return (
-              <tr
-                key={index}>
-                <td>
-                  {index + 1}
-                </td>
-                <td>
-                  {player.username}
-                </td>
-                <td>
-                  {player.pp_raw}
-                </td>
-                <td>
-                  {player.pp_rank}
-                </td>
-                <td>
-                  {player.pp_country_rank}
-                </td>
-                <td>
-                  {player.playcount}
-                </td>
-                <td>
-                  {player.accuracy.toFixed(2)}
-                </td>
-              </tr>
-              );
-          })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     );
   }
 }
@@ -274,6 +263,7 @@ export default class App extends Component {
       beatmaps: [],
       players: [],
       selectedBeatmapIndex: null,
+      selectedTabIndex: 0,
     };
   }
 
@@ -298,23 +288,50 @@ export default class App extends Component {
   }
 
   handleOnTouchTapBeatmaps() {
-
+    this.setState({
+      selectedTabIndex: 0,
+    });
   }
 
   handleOnTouchTapPlayers() {
-
+    this.setState({
+      selectedTabIndex: 1,
+    });
   }
 
   render() {
+    const { selectedTabIndex } = this.state;
     return (
       <div>
-        <Beatmaps
-          beatmaps={this.state.beatmaps}
-          onRowSelection={this.handleOnRowSelection.bind(this)}
-          selectedBeatmapIndex={this.state.selectedBeatmapIndex} />
-
-        <Players
-          players={this.state.players} />
+        <div className='ui fixed inverted menu'>
+          <div className='ui container'>
+            <a className='header item'>
+              UW/Laurier osu! Stats
+            </a>
+          </div>
+        </div>
+        <div
+          className='ui main container'
+          style={{ marginTop: '7em' }}>
+          <div className='ui tabular menu'>
+            <a
+              className={classNames('item', { active: selectedTabIndex === 0 })}
+              onClick={this.handleOnTouchTapBeatmaps.bind(this)}>Beatmaps</a>
+            <a
+              className={classNames('item', { active: selectedTabIndex === 1 })}
+              onClick={this.handleOnTouchTapPlayers.bind(this)}>Players</a>
+          </div>
+          {selectedTabIndex === 0 ?
+            <Beatmaps
+              beatmaps={this.state.beatmaps}
+              onRowSelection={this.handleOnRowSelection.bind(this)}
+              selectedBeatmapIndex={this.state.selectedBeatmapIndex} />
+          : null}
+          {selectedTabIndex === 1 ?
+            <Players
+              players={this.state.players} />
+          : null}
+        </div>
       </div>
     )
   }
