@@ -1,6 +1,8 @@
 defmodule DataTest do
   use UwOsu.ModelCase
   import Ecto.Query, only: [from: 2]
+  import UwOsu.RepoHelper
+  alias UwOsu.ApiData
   alias UwOsu.Repo
   alias UwOsu.Data
   alias UwOsu.Osu
@@ -31,65 +33,9 @@ defmodule DataTest do
     end
   end
 
-  defp mock_user_dict(overrides \\ %{}) do
-    default = %{
-      "user_id" => "123",
-      "username" => "testuser",
-      "count300" => "8260346",
-      "count100" => "639175",
-      "count50" => "63029",
-      "playcount" => "45432",
-      "ranked_score" => "13352117327",
-      "total_score" => "70088502830",
-      "pp_rank" => "2815",
-      "level" => "100.432",
-      "pp_raw" => "5033.02",
-      "accuracy" => "99.01136779785156",
-      "count_rank_ss" => "81",
-      "count_rank_s" => "632",
-      "count_rank_a" => "650",
-      "country" => "CA",
-      "pp_country_rank" => "103",
-      "events" => [],
-    }
-    Dict.merge(default, overrides)
-  end
-
-  defp mock_event_dict(overrides \\ %{}) do
-    default = %{
-      "display_html" => "<img src='/images/S_small.png'/> <b><a href='/u/1579374'>influxd</a></b> achieved rank #998 on <a href='/b/696783?m=0'>AKINO from bless4 - MIIRO [Hime]</a> (osu!)",
-      "beatmap_id" => "696783",
-      "beatmapset_id" => "312042",
-      "date" => "2015-12-31 14:31:35",
-      "epicfactor" => "1",
-    }
-    Dict.merge(default, overrides)
-  end
-
-  defp mock_score_dict(overrides \\ %{}) do
-    default = %{
-      "beatmap_id" => "759192",
-      "score" => "69954590",
-      "maxcombo" => "1768",
-      "count50" => "0",
-      "count100" => "16",
-      "count300" => "1263",
-      "countmiss" => "1",
-      "countkatu" => "9",
-      "countgeki" => "203",
-      "perfect" => "0",
-      "enabled_mods" => "0",
-      "user_id" => "1579374",
-      "date" => "2015-12-28 04:25:55",
-      "rank" => "A",
-      "pp" => "281.856",
-    }
-    Dict.merge(default, overrides)
-  end
-
   test_with_mock "user username", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [mock_user_dict]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [ApiData.user]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
@@ -106,7 +52,7 @@ defmodule DataTest do
 
   test_with_mock "snapshot", Osu, [
     start: fn -> end,
-    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [mock_user_dict]} end,
+    get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [ApiData.user]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
@@ -139,7 +85,7 @@ defmodule DataTest do
   test_with_mock "events", Osu, [
     start: fn -> end,
     get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_user_dict %{"events" => [mock_event_dict]}
+        ApiData.user %{"events" => [ApiData.event]}
       ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
@@ -162,7 +108,7 @@ defmodule DataTest do
   test_with_mock "should not create duplicate event", Osu, [
     start: fn -> end,
     get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_user_dict %{"events" => [mock_event_dict, mock_event_dict]}
+        ApiData.user %{"events" => [ApiData.event, ApiData.event]}
       ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
@@ -180,10 +126,10 @@ defmodule DataTest do
   test_with_mock "scores", Osu, [
     start: fn -> end,
     get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_user_dict
+        ApiData.user
       ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_score_dict
+        ApiData.score
       ]} end,
   ] do
     next_generation_id = get_next_generation_id
@@ -213,11 +159,11 @@ defmodule DataTest do
   test_with_mock "should not create duplicate score", Osu, [
     start: fn -> end,
     get_user!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_user_dict
+        ApiData.user
       ]} end,
     get_user_best!: fn(123, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_score_dict,
-        mock_score_dict
+        ApiData.score,
+        ApiData.score
       ]} end,
   ] do
     next_generation_id = get_next_generation_id
@@ -233,7 +179,7 @@ defmodule DataTest do
   test_with_mock "only one generation is created per run", Osu, [
     start: fn -> end,
     get_user!: fn(id, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_user_dict %{"user_id" => "#{id}"}
+        ApiData.user %{"user_id" => "#{id}"}
       ]} end,
     get_user_best!: fn(_id, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
       ]} end,
@@ -248,67 +194,10 @@ defmodule DataTest do
     assert Repo.one!(query) == 1
   end
 
-  defp mock_beatmap_dict(overrides) do
-    default = %{
-      "approved" => "1",
-      "approved_date" => "2013-07-02 01:01:12",
-      "last_update" => "2013-07-06 16:51:22",
-      "artist" => "Luxion",
-      "beatmap_id" => "252002",
-      "beatmapset_id" => "93398",
-      "bpm" => "196.5",
-      "creator" => "RikiH",
-      "difficultyrating" => "5.59516",
-      "diff_size" => "3.8",
-      "diff_overall" => "6.01",
-      "diff_approach" => "9.2",
-      "diff_drain" => "6.7",
-      "hit_length" => "113",
-      "source" => "BMS",
-      "genre_id" => "1",
-      "language_id" => "5",
-      "title" => "High-Priestess",
-      "total_length" => "145",
-      "version" => "Overkill",
-      "file_md5" => "c8f08438204abfcdd1a748ebfae67421",
-      "mode" => "0",
-      "tags" => "melodious long",
-      "favourite_count" => "121",
-      "playcount" => "9001",
-      "passcount" => "1337",
-      "max_combo" => "2101",
-    }
-    Dict.merge default, overrides
-  end
-
-  defp mock_snapshot_dict(overrides) do
-    default = %{
-      "user_id" => 1,
-      "generation_id" => 1,
-      "username" => "a",
-      "count300" => 1,
-      "count100" => 1,
-      "count50" => 1,
-      "playcount" => 1,
-      "ranked_score" => 1,
-      "total_score" => 1,
-      "pp_rank" => 1,
-      "level" => 1,
-      "pp_raw" => 1,
-      "accuracy" => 1,
-      "count_rank_ss" => 1,
-      "count_rank_s" => 1,
-      "count_rank_a" => 1,
-      "country" => "CA",
-      "pp_country_rank" => 1,
-    }
-    Dict.merge default, overrides
-  end
-
   test_with_mock "collect beatmaps", Osu, [
     start: fn -> end,
     get_beatmaps!: fn(%{b: 234}, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_beatmap_dict(%{
+        ApiData.beatmap(%{
           "beatmap_id" => "234",
           "beatmapset_id" => "123456",
           "version" => "Overkill",
@@ -320,12 +209,11 @@ defmodule DataTest do
     assert Repo.one!(count_query) == 0
 
     # insert a score that points to the 234 beatmap
-    Repo.insert!(%User{id: 1})
-    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+    insert_user! %{id: 1}
+    insert_score! %{
       "beatmap_id" => "234",
       "user_id" => 1,
-    }))
-    Repo.insert!(changeset)
+    }
 
     Data.collect_beatmaps %Osu.Client{api_key: "abc"}
 
@@ -363,7 +251,7 @@ defmodule DataTest do
   test_with_mock "collect beatmaps only collects for distinct beatmap ids", Osu, [
     start: fn -> end,
     get_beatmaps!: fn(%{b: 234}, %Osu.Client{api_key: "abc"}) -> %HTTPoison.Response{body: [
-        mock_beatmap_dict(%{
+        ApiData.beatmap(%{
           "beatmap_id" => "234",
           "beatmapset_id" => "123456",
           "version" => "Overkill",
@@ -375,18 +263,16 @@ defmodule DataTest do
     assert Repo.one!(count_query) == 0
 
     # insert two scores that point to the 234 beatmap
-    Repo.insert!(%User{id: 1})
-    Repo.insert!(%User{id: 2})
-    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+    insert_user! %{id: 1}
+    insert_user! %{id: 2}
+    insert_score! %{
       "beatmap_id" => "234",
       "user_id" => 1,
-    }))
-    Repo.insert!(changeset)
-    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+    }
+    insert_score! %{
       "beatmap_id" => "234",
       "user_id" => 2,
-    }))
-    Repo.insert!(changeset)
+    }
 
     Data.collect_beatmaps %Osu.Client{api_key: "abc"}
 
@@ -399,21 +285,20 @@ defmodule DataTest do
     count_query = from b in Beatmap, select: count(b.id), where: b.id == 234
     assert Repo.one!(count_query) == 0
 
-    Repo.insert! Beatmap.changeset(%Beatmap{}, mock_beatmap_dict(%{
+    insert_beatmap! %{
       "id" => "234",
       "beatmapset_id" => "123456",
       "version" => "Overkill",
-    }))
+    }
 
     assert Repo.one!(count_query) == 1
 
     # insert a score that points to the 234 beatmap
-    Repo.insert!(%User{id: 1})
-    changeset = Score.changeset(%Score{}, mock_score_dict(%{
+    insert_user! %{id: 1}
+    insert_score! %{
       "beatmap_id" => "234",
       "user_id" => 1,
-    }))
-    Repo.insert!(changeset)
+    }
 
     Data.collect_beatmaps %Osu.Client{api_key: "abc"}
   end
@@ -421,17 +306,17 @@ defmodule DataTest do
   # queries
 
   test "get daily generations" do
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 1,
       "inserted_at" => "2015-01-01 05:00:00",
       "updated_at" => "2015-01-01 05:00:00",
     }
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 2,
       "inserted_at" => "2015-01-01 06:00:00",
       "updated_at" => "2015-01-01 06:00:00",
     }
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 3,
       "inserted_at" => "2015-01-02 05:00:00",
       "updated_at" => "2015-01-02 05:00:00",
@@ -449,53 +334,53 @@ defmodule DataTest do
   end
 
   test "get users" do
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 1,
       "inserted_at" => "2015-01-01 05:00:00",
       "updated_at" => "2015-01-01 05:00:00",
     }
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 2,
       "inserted_at" => "2015-01-01 06:00:00",
       "updated_at" => "2015-01-01 06:00:00",
     }
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 3,
       "inserted_at" => "2015-01-02 05:00:00",
       "updated_at" => "2015-01-02 05:00:00",
     }
-    Repo.insert! User.changeset %User{}, %{
+    insert_user! %{
       "id" => 1,
       "username" => "a",
     }
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 1,
-    })
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    }
+    insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 2,
-    })
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    }
+    insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 3,
-    })
-    Repo.insert! User.changeset %User{}, %{
+    }
+    insert_user! %{
       "id" => 2,
       "username" => "a",
     }
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 1,
-    })
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    }
+    insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 2,
-    })
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    }
+      insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 3,
-    })
+    }
 
     [u1, u2] = Repo.all Data.get_users
 
@@ -507,27 +392,27 @@ defmodule DataTest do
   end
 
   test "get weekly snapshots" do
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 1,
       "inserted_at" => "2015-12-30 05:00:00",
       "updated_at" => "2015-12-30 05:00:00",
     }
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 2,
       "inserted_at" => "2015-12-31 06:00:00",
       "updated_at" => "2015-12-31 06:00:00",
     }
-    Repo.insert! Generation.changeset %Generation{}, %{
+    insert_generation! %{
       "id" => 3,
       "inserted_at" => "2016-01-06 05:00:00",
       "updated_at" => "2016-01-06 05:00:00",
     }
 
-    Repo.insert! User.changeset %User{}, %{
+    insert_user! %{
       "id" => 1,
     }
 
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 1,
       "playcount" => 5,
@@ -536,14 +421,14 @@ defmodule DataTest do
       "pp_raw" => 3000,
       "accuracy" => 98.98,
       "pp_country_rank" => 50,
-    })
+    }
 
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 2,
-    })
+    }
 
-    Repo.insert! UserSnapshot.changeset %UserSnapshot{}, mock_snapshot_dict(%{
+    insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 3,
       "playcount" => 11,
@@ -552,7 +437,7 @@ defmodule DataTest do
       "pp_raw" => 3050,
       "accuracy" => 98.99,
       "pp_country_rank" => 49,
-    })
+    }
 
     snapshot_tuples = Repo.all Data.get_weekly_snapshots
 
@@ -579,48 +464,48 @@ defmodule DataTest do
   end
 
   test "get farmed beatmaps" do
-    Repo.insert! User.changeset %User{}, %{
+    insert_user! %{
       "id" => 1,
       "username" => "a",
     }
-    Repo.insert! User.changeset %User{}, %{
+    insert_user! %{
       "id" => 2,
       "username" => "a",
     }
-    Repo.insert! User.changeset %User{}, %{
+    insert_user! %{
       "id" => 3,
       "username" => "a",
     }
-    Repo.insert! User.changeset %User{}, %{
+    insert_user! %{
       "id" => 4,
       "username" => "a",
     }
-    Repo.insert! Beatmap.changeset %Beatmap{}, mock_beatmap_dict %{
+    insert_beatmap! %{
       "id" => 1,
     }
-    Repo.insert! Beatmap.changeset %Beatmap{}, mock_beatmap_dict %{
+    insert_beatmap! %{
       "id" => 2,
     }
-    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+    insert_score! %{
       "beatmap_id" => 1,
       "user_id" => 1,
     }
-    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+    insert_score! %{
       "beatmap_id" => 1,
       "user_id" => 2,
     }
-    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+    insert_score! %{
       "beatmap_id" => 2,
       "user_id" => 1,
       "date" => "2015-01-01 05:00:00",
     }
-    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+    insert_score! %{
       "beatmap_id" => 2,
       "user_id" => 1,
       "date" => "2015-01-01 06:00:00",
     }
     # Duplicate (beatmap_id, user_id) may affect the beatmap ordering
-    Repo.insert! Score.changeset %Score{}, mock_score_dict %{
+    insert_score! %{
       "beatmap_id" => 2,
       "user_id" => 1,
       "date" => "2012-01-01 06:00:00",
