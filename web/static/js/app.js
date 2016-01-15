@@ -317,8 +317,9 @@ class PlayerCharts extends Component {
   }
 
   render() {
+    const style = this.props.visible ? {} : { display: 'none' };
     return (
-      <div>
+      <div style={style}>
         <div className='ui input'>
           <input
             type='text'
@@ -425,10 +426,9 @@ export default class App extends Component {
             <Players
               players={this.state.players} />
           : null}
-          {selectedTabIndex === 2 ?
-            <PlayerCharts
-              snapshots={this.state.snapshots} />
-          : null}
+          <PlayerCharts
+            snapshots={this.state.snapshots}
+            visible={selectedTabIndex === 2} />
         </div>
       </div>
     )
