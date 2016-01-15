@@ -1,14 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import classNames from 'classnames';
 
 
 class Beatmaps extends Component {
-  shouldComponentUpdate(nextProps) {
-    return nextProps.selectedBeatmapIndex !== this.props.selectedBeatmapIndex
-    || nextProps.beatmaps !== this.props.beatmaps;
-  }
-
-  handleOnRowSelection(selectedRow) {
+    handleOnRowSelection(selectedRow) {
     this.props.onRowSelection(selectedRow);
   }
 
@@ -18,97 +13,97 @@ class Beatmaps extends Component {
         <h3>
           Click a beatmap to see the top scores for it
         </h3>
-      <div className='ui grid'>
-        <div className='nine wide column'>
-          <table className='ui selectable celled table'>
-            <thead>
-              <tr>
-                <th>
-                  Rank
-                </th>
-                <th>
-                  # Scores
-                </th>
-                <th>
-                  Beatmap
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.props.beatmaps.map((beatmap, index) => {
-                return (
-                  <tr
-                    className={classNames({ 'active': index === this.props.selectedBeatmapIndex })}
-                    key={index}
-                    onClick={this.handleOnRowSelection.bind(this, index)}
-                    style={{ cursor: 'pointer' }}>
-                    <td>
-                      {index + 1}
-                    </td>
-                    <td>
-                      {beatmap.scores.length}
-                    </td>
-                    <td>
-                      {`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] \\\\ ${beatmap.creator}`}
-                    </td>
-                  </tr>
-                  );
-              })}
-            </tbody>
-          </table>
+        <div className='ui grid'>
+          <div className='nine wide column'>
+            <table className='ui selectable celled table'>
+              <thead>
+                <tr>
+                  <th>
+                    Rank
+                  </th>
+                  <th>
+                    # Scores
+                  </th>
+                  <th>
+                    Beatmap
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.props.beatmaps.map((beatmap, index) => {
+                   return (
+                     <tr
+                       className={classNames({ 'active': index === this.props.selectedBeatmapIndex })}
+                       key={index}
+                       onClick={this.handleOnRowSelection.bind(this, index)}
+                       style={{ cursor: 'pointer' }}>
+                       <td>
+                         {index + 1}
+                       </td>
+                       <td>
+                         {beatmap.scores.length}
+                       </td>
+                       <td>
+                         {`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] \\\\ ${beatmap.creator}`}
+                       </td>
+                     </tr>
+                   );
+                 })}
+              </tbody>
+            </table>
 
-        </div>
-        <div className='seven wide column'>
-          {this.props.selectedBeatmapIndex !== null ?
-            (() => {
-              const selectedBeatmap = this.props.beatmaps[this.props.selectedBeatmapIndex];
-
-              return (
-                <table className='ui celled table'>
-                  <thead>
-                    <tr>
-                      <th>
-                        Rank
-                      </th>
-                      <th>
-                        Username
-                      </th>
-                      <th>
-                        PP
-                      </th>
-                      <th>
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedBeatmap.scores.map((score, index) => {
-                      const scoreDate = new Date(score.date);
-                      return (
-                        <tr
-                          key={index}>
-                          <td>
-                            {index + 1}
-                          </td>
-                          <td>
-                            {score.user.username}
-                          </td>
-                          <td>
-                            {score.pp}
-                          </td>
-                          <td>
-                            {scoreDate.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' })}
-                          </td>
-                        </tr>
-                        );
-                    })}
-                  </tbody>
-                </table>
-                );
-            })()
-              : null}
-            </div>
           </div>
+          <div className='seven wide column'>
+            {this.props.selectedBeatmapIndex !== null ?
+             (() => {
+               const selectedBeatmap = this.props.beatmaps[this.props.selectedBeatmapIndex];
+
+               return (
+                 <table className='ui celled table'>
+                   <thead>
+                     <tr>
+                       <th>
+                         Rank
+                       </th>
+                       <th>
+                         Username
+                       </th>
+                       <th>
+                         PP
+                       </th>
+                       <th>
+                         Date
+                       </th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     {selectedBeatmap.scores.map((score, index) => {
+                        const scoreDate = new Date(score.date);
+                        return (
+                          <tr
+                            key={index}>
+                            <td>
+                              {index + 1}
+                            </td>
+                            <td>
+                              {score.user.username}
+                            </td>
+                            <td>
+                              {score.pp}
+                            </td>
+                            <td>
+                              {scoreDate.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' })}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                   </tbody>
+                 </table>
+               );
+             })()
+               : null}
+          </div>
+        </div>
       </div>
     );
   }
@@ -245,6 +240,59 @@ class Players extends Component {
 }
 
 
+class PlayerCharts extends Component {
+  componentDidMount() {
+    const root = location.protocol + '//' + location.host;
+    $.get(`${root}/api/daily-snapshots`, this._initHighChart);
+  }
+
+  _initHighChart(data) {
+    $(() => {
+      const usernames = ['Arneshie-', 'influxd'];
+      data = data.filter(data => usernames.indexOf(data.username) >= 0);
+      console.log(data)
+      $('#container').highcharts({
+        chart: {
+          type: 'line'
+        },
+        title: {
+          text: 'UW/Laurier osu! Performance Points'
+        },
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: {
+          title: {
+            text: 'Performance Points'
+          }
+        },
+        series: data.map((user) => {
+          return {
+            name: user.username,
+            data: user.generations.map((generation, index) => {
+              const { snapshots: [snapshot] } = generation;
+              let date = new Date(generation.inserted_at.split('T')[0]);
+              date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+              const data = snapshot ? snapshot.pp_raw : null;
+              return [
+                date,
+                data,
+              ];
+            })
+          };
+        })
+      });
+    });
+  }
+
+  render() {
+    return (
+      <div id='container'></div>
+    );
+  }
+}
+
+
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -253,6 +301,7 @@ export default class App extends Component {
       players: [],
       selectedBeatmapIndex: null,
       selectedTabIndex: 0,
+      snapshots: [],
     };
   }
 
@@ -276,20 +325,21 @@ export default class App extends Component {
     });
   }
 
-  handleOnTouchTapBeatmaps() {
+  handleMenuItemSelection(index) {
     this.setState({
-      selectedTabIndex: 0,
-    });
-  }
-
-  handleOnTouchTapPlayers() {
-    this.setState({
-      selectedTabIndex: 1,
+      selectedTabIndex: index,
     });
   }
 
   render() {
     const { selectedTabIndex } = this.state;
+
+    const menuItems = [
+      'Beatmaps',
+      'Players',
+      'Player Charts',
+    ];
+
     return (
       <div>
         <div className='ui fixed inverted menu'>
@@ -303,12 +353,14 @@ export default class App extends Component {
           className='ui main container'
           style={{ marginTop: '7em' }}>
           <div className='ui tabular menu'>
-            <a
-              className={classNames('item', { active: selectedTabIndex === 0 })}
-              onClick={this.handleOnTouchTapBeatmaps.bind(this)}>Beatmaps</a>
-            <a
-              className={classNames('item', { active: selectedTabIndex === 1 })}
-              onClick={this.handleOnTouchTapPlayers.bind(this)}>Players</a>
+            {menuItems.map((item, index) => {
+               return (
+                 <a
+                   className={classNames('item', { active: selectedTabIndex === index })}
+                   key={index}
+                   onClick={this.handleMenuItemSelection.bind(this, index)}>{item}</a>
+               );
+             })}
           </div>
           {selectedTabIndex === 0 ?
             <Beatmaps
@@ -319,6 +371,10 @@ export default class App extends Component {
           {selectedTabIndex === 1 ?
             <Players
               players={this.state.players} />
+          : null}
+          {selectedTabIndex === 2 ?
+            <PlayerCharts
+              snapshots={this.state.snapshots} />
           : null}
         </div>
       </div>

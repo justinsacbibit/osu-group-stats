@@ -275,10 +275,33 @@ defmodule UwOsu.DataViewTest do
     [u1, u2] = resp
 
     assert u1["id"] == 1
-    assert Enum.at(u1["snapshots"], 0)["generation_id"] == 1
-    assert Enum.at(u1["snapshots"], 1)["generation_id"] == 3
+    [u1_g1, u1_g2] = u1["generations"]
+    %{
+      "id" => 1,
+      "snapshots" => [%{
+        "user_id" => 1,
+        "generation_id" => 1,
+      }]
+    } = u1_g1
+    %{
+      "id" => 3,
+      "snapshots" => [%{
+        "user_id" => 1,
+        "generation_id" => 3,
+      }]
+    } = u1_g2
 
-    assert u2["id"] == 2
-    assert Enum.at(u2["snapshots"], 0)["generation_id"] == 3
+    [u2_g1, u2_g2] = u2["generations"]
+    %{
+      "id" => 1,
+      "snapshots" => [nil],
+    } = u2_g1
+    %{
+      "id" => 3,
+      "snapshots" => [%{
+        "user_id" => 2,
+        "generation_id" => 3,
+      }]
+    } = u2_g2
   end
 end

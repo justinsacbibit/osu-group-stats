@@ -1,5 +1,7 @@
 defmodule UwOsu.DataView do
   use UwOsu.Web, :view
+  alias UwOsu.Models.User
+  alias UwOsu.Models.Generation
 
   def render("weekly_snapshots.json", %{snapshots: snapshots}) do
     %{
@@ -31,21 +33,40 @@ defmodule UwOsu.DataView do
   end
 
   def render("daily_snapshots.json", %{users: users}) do
-    render_many users, UwOsu.DataView, "daily_snapshot.json", as: :user
+    users = users
+    |> Enum.group_by(fn({%User{id: id}, _, _}) -> id end)
+    |> Enum.map(fn({_, tuples}) ->
+      [{u, _, _} | _] = tuples
+      %{ u | generations:
+         Enum.map(tuples, fn({_, g, s}) -> %{ g | snapshots: [s] } end)
+       }
+    end)
+    render_many(users, UwOsu.DataView, "daily_snapshot.json", as: :user)
   end
 
   def render("daily_snapshot.json", %{user: user}) do
     user
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :events])
-    |> Map.update(:snapshots, [], fn(snapshots) ->
-      snapshots
-      |> Enum.map(fn(snapshot) ->
-        snapshot
+    |> Map.drop([:__struct__, :__meta__, :events, :snapshots])
+    |> Map.update(:generations, [], fn(generations) ->
+      generations
+      |> Enum.map(fn(generation) ->
+        generation
         |> Map.from_struct
-        |> Map.drop([:__struct__, :__meta__, :generation, :user])
+        |> Map.update(:snapshots, [], fn(snapshots) ->
+          case snapshots do
+            [nil] ->
+              [nil]
+            [snapshot] ->
+              snapshot = snapshot
+              |> Map.from_struct
+              |> Map.drop([:__struct__, :__meta__, :generation, :user])
+
+              [snapshot]
+          end
+        end)
+        |> Map.drop([:__struct__, :__meta__])
       end)
-      |> Enum.sort_by(fn(%{generation_id: gid}) -> gid end, &<=/2)
     end)
   end
 
@@ -66,7 +87,7 @@ defmodule UwOsu.DataView do
         |> Map.update(:user, nil, fn(user) ->
           user
           |> Map.from_struct
-          |> Map.drop([:__struct__, :__meta__, :events, :snapshots])
+          |> Map.drop([:__struct__, :__meta__, :events, :snapshots, :generations])
         end)
       end)
       |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
@@ -80,7 +101,7 @@ defmodule UwOsu.DataView do
   def render("player.json", %{player: player}) do
     player
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :snapshots, :events])
+    |> Map.drop([:__struct__, :__meta__, :snapshots, :events, :generations])
     |> Map.merge(
       Enum.at(player.snapshots, 0)
       |> Map.from_struct

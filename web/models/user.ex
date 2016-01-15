@@ -3,9 +3,11 @@ defmodule UwOsu.Models.User do
   import Ecto.Changeset
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Models.Event
+  alias UwOsu.Models.Generation
 
   schema "user" do
     has_many :snapshots, UserSnapshot
+    has_many :generations, through: [:snapshots, :generation]
     has_many :events, Event
     field :username, :string
 
