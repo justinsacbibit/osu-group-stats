@@ -14,7 +14,7 @@ class Beatmaps extends Component {
           Click a beatmap to see the top scores for it
         </h3>
         <div className='ui grid'>
-          <div className='nine wide column'>
+          <div className='eight wide column'>
             <table className='ui selectable celled table'>
               <thead>
                 <tr>
@@ -53,7 +53,7 @@ class Beatmaps extends Component {
             </table>
 
           </div>
-          <div className='seven wide column'>
+          <div className='eight wide column'>
             {this.props.selectedBeatmapIndex !== null ?
              (() => {
                const selectedBeatmap = this.props.beatmaps[this.props.selectedBeatmapIndex];
@@ -72,6 +72,9 @@ class Beatmaps extends Component {
                          PP
                        </th>
                        <th>
+                         Mods
+                       </th>
+                       <th>
                          Date
                        </th>
                      </tr>
@@ -79,6 +82,35 @@ class Beatmaps extends Component {
                    <tbody>
                      {selectedBeatmap.scores.map((score, index) => {
                         const scoreDate = new Date(score.date);
+
+                        const modMap = [
+                          ['NF', 1],
+                          ['EZ', 2],
+                          ['HD', 8],
+                          ['HR', 16],
+                          ['SD', 32],
+                          ['DT', 64],
+                          ['RX', 128],
+                          ['HT', 256],
+                          ['NC', 512], // Only set along with DoubleTime. i.e: NC only gives 576
+                          ['FL', 1024],
+                          ['AP', 2048],
+                          ['SO', 4096],
+                          ['PF', 16384],
+                          // Where is SD?
+                        ];
+                        let curMods = score.enabled_mods;
+
+                        const mods = [];
+                        for (let i = modMap.length - 1; i >= 0; i--) {
+                          const arr = modMap[i];
+                          const [mod, val] = arr;
+                          if (val > curMods) continue;
+                          curMods -= val;
+                          if (val == 512) curMods -= 64;
+                          mods.push(mod);
+                        }
+
                         return (
                           <tr
                             key={index}>
@@ -90,6 +122,9 @@ class Beatmaps extends Component {
                             </td>
                             <td>
                               {score.pp}
+                            </td>
+                            <td>
+                              {mods.join(', ')}
                             </td>
                             <td>
                               {scoreDate.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' })}
