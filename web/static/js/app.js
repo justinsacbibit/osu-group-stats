@@ -241,16 +241,31 @@ class Players extends Component {
 
 
 class PlayerCharts extends Component {
-  componentDidMount() {
-    const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/daily-snapshots`, this._initHighChart);
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
+      player1: 'influxd',
+      player2: 'Arneshie-',
+    };
   }
 
-  _initHighChart(data) {
+  componentDidMount() {
+    const root = location.protocol + '//' + location.host;
+    $.get(`${root}/api/daily-snapshots`, (data) => {
+      this.setState({
+        data,
+      });
+      this._initHighChart();
+    });
+  }
+
+  _initHighChart() {
+    let { data } = this.state;
     $(() => {
-      const usernames = ['Arneshie-', 'influxd'];
+      const { player1, player2 } = this.state;
+      const usernames = [player1, player2];
       data = data.filter(data => usernames.indexOf(data.username) >= 0);
-      console.log(data)
       $('#container').highcharts({
         chart: {
           type: 'line'
@@ -285,9 +300,47 @@ class PlayerCharts extends Component {
     });
   }
 
+  handleOnChangePlayer1Value({ target: { value } }) {
+    this.setState({
+      player1: value,
+    });
+  }
+
+  handleOnChangePlayer2Value({ target: { value } }) {
+    this.setState({
+      player2: value,
+    });
+  }
+
+  handleOnClickUpdate() {
+    this._initHighChart();
+  }
+
   render() {
     return (
-      <div id='container'></div>
+      <div>
+        <div className='ui input'>
+          <input
+            type='text'
+            placeholder='Player 1'
+            onChange={this.handleOnChangePlayer1Value.bind(this)}
+            value={this.state.player1} />
+        </div>
+        <div className='ui input'>
+          <input
+            type='text'
+            placeholder='Player 2'
+            onChange={this.handleOnChangePlayer2Value.bind(this)}
+            value={this.state.player2} />
+        </div>
+        <div
+          className='ui button'
+          onClick={this.handleOnClickUpdate.bind(this)}>
+          Update
+        </div>
+        <div id='container'>
+        </div>
+      </div>
     );
   }
 }
