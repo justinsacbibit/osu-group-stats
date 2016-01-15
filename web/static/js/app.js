@@ -389,9 +389,9 @@ export default class App extends Component {
     const { selectedTabIndex } = this.state;
 
     const menuItems = [
-      'Beatmaps',
       'Players',
       'Player Charts',
+      'Beatmaps',
     ];
 
     return (
@@ -417,18 +417,18 @@ export default class App extends Component {
              })}
           </div>
           {selectedTabIndex === 0 ?
-            <Beatmaps
-              beatmaps={this.state.beatmaps}
-              onRowSelection={this.handleOnRowSelection.bind(this)}
-              selectedBeatmapIndex={this.state.selectedBeatmapIndex} />
-          : null}
-          {selectedTabIndex === 1 ?
             <Players
               players={this.state.players} />
           : null}
           <PlayerCharts
             snapshots={this.state.snapshots}
-            visible={selectedTabIndex === 2} />
+            visible={selectedTabIndex === 1} />
+          {selectedTabIndex === 2 ?
+            <Beatmaps
+              beatmaps={this.state.beatmaps}
+              onRowSelection={this.handleOnRowSelection.bind(this)}
+              selectedBeatmapIndex={this.state.selectedBeatmapIndex} />
+          : null}
         </div>
       </div>
     )
