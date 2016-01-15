@@ -280,6 +280,7 @@ class PlayerCharts extends Component {
     super(props);
     this.state = {
       data: [],
+      initted: false,
       player1: 'influxd',
       player2: 'Arneshie-',
     };
@@ -291,8 +292,16 @@ class PlayerCharts extends Component {
       this.setState({
         data,
       });
-      this._initHighChart();
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!this.state.initted && !prevProps.visible && this.props.visible) {
+      this._initHighChart();
+      this.setState({
+        initted: true,
+      });
+    }
   }
 
   _initHighChart() {
@@ -355,24 +364,26 @@ class PlayerCharts extends Component {
     const style = this.props.visible ? {} : { display: 'none' };
     return (
       <div style={style}>
-        <div className='ui input'>
-          <input
-            type='text'
-            placeholder='Player 1'
-            onChange={this.handleOnChangePlayer1Value.bind(this)}
-            value={this.state.player1} />
-        </div>
-        <div className='ui input'>
-          <input
-            type='text'
-            placeholder='Player 2'
-            onChange={this.handleOnChangePlayer2Value.bind(this)}
-            value={this.state.player2} />
-        </div>
-        <div
-          className='ui button'
-          onClick={this.handleOnClickUpdate.bind(this)}>
-          Update
+        <div>
+          <div className='ui input'>
+            <input
+              type='text'
+              placeholder='Player 1'
+              onChange={this.handleOnChangePlayer1Value.bind(this)}
+              value={this.state.player1} />
+          </div>
+          <div className='ui input'>
+            <input
+              type='text'
+              placeholder='Player 2'
+              onChange={this.handleOnChangePlayer2Value.bind(this)}
+              value={this.state.player2} />
+          </div>
+          <div
+            className='ui button'
+            onClick={this.handleOnClickUpdate.bind(this)}>
+            Update
+          </div>
         </div>
         <div id='container'>
         </div>
