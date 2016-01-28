@@ -129,6 +129,7 @@ defmodule UwOsu.DataView do
         end)
       end)
       |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
+      |> Enum.take(10)
     end)
   end
 end
