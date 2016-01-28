@@ -106,7 +106,7 @@ defmodule UwOsu.Data do
       join: s in assoc(u, :scores),
       join: b in assoc(s, :beatmap),
       where: fragment("(?) >= '2016-01-01'", s.date) and fragment("(?) < '2016-02-01'", s.date),
-      #order_by: [desc: s.date],
+      order_by: [desc: s.date],
       distinct: [u.id, s.beatmap_id],
       preload: [scores: {s, beatmap: b}]
   end
