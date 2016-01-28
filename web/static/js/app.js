@@ -2,6 +2,38 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 
 
+function getModsArray(curMods) {
+  const modMap = [
+    ['NF', 1],
+    ['EZ', 2],
+    ['HD', 8],
+    ['HR', 16],
+    ['SD', 32],
+    ['DT', 64],
+    ['RX', 128],
+    ['HT', 256],
+    ['NC', 512], // Only set along with DoubleTime. i.e: NC only gives 576
+    ['FL', 1024],
+    ['AP', 2048],
+    ['SO', 4096],
+    ['PF', 16384],
+    // Where is SD?
+  ];
+
+  const mods = [];
+  for (let i = modMap.length - 1; i >= 0; i--) {
+    const arr = modMap[i];
+    const [mod, val] = arr;
+    if (val > curMods) continue;
+    curMods -= val;
+    if (val == 512) curMods -= 64;
+    mods.push(mod);
+  }
+
+  return mods;
+}
+
+
 class Beatmaps extends Component {
     handleOnRowSelection(selectedRow) {
     this.props.onRowSelection(selectedRow);
@@ -83,33 +115,7 @@ class Beatmaps extends Component {
                      {selectedBeatmap.scores.map((score, index) => {
                         const scoreDate = new Date(score.date);
 
-                        const modMap = [
-                          ['NF', 1],
-                          ['EZ', 2],
-                          ['HD', 8],
-                          ['HR', 16],
-                          ['SD', 32],
-                          ['DT', 64],
-                          ['RX', 128],
-                          ['HT', 256],
-                          ['NC', 512], // Only set along with DoubleTime. i.e: NC only gives 576
-                          ['FL', 1024],
-                          ['AP', 2048],
-                          ['SO', 4096],
-                          ['PF', 16384],
-                          // Where is SD?
-                        ];
-                        let curMods = score.enabled_mods;
-
-                        const mods = [];
-                        for (let i = modMap.length - 1; i >= 0; i--) {
-                          const arr = modMap[i];
-                          const [mod, val] = arr;
-                          if (val > curMods) continue;
-                          curMods -= val;
-                          if (val == 512) curMods -= 64;
-                          mods.push(mod);
-                        }
+                        const mods = getModsArray(score.enabled_mods);
 
                         return (
                           <tr
@@ -199,6 +205,8 @@ class Players extends Component {
   }
 
   render() {
+    if (!this.props.visible) return null;
+
     const sortableColumns = [
       'PP',
       'PP Rank',
@@ -283,6 +291,7 @@ class PlayerCharts extends Component {
       initted: false,
       player1: 'influxd',
       player2: 'Arneshie-',
+      stat: 0,
     };
   }
 
@@ -304,25 +313,26 @@ class PlayerCharts extends Component {
     }
   }
 
-  _initHighChart() {
+  _initHighChart(stat = 0) {
     let { data } = this.state;
     $(() => {
       const { player1, player2 } = this.state;
       const usernames = [player1, player2];
       data = data.filter(data => usernames.indexOf(data.username) >= 0);
+      const text = stat === 0 ? 'Performance Points' : 'Play Count';
       $('#container').highcharts({
         chart: {
           type: 'line'
         },
         title: {
-          text: 'UW/Laurier osu! Performance Points'
+          text: `UW/Laurier osu! ${text}`
         },
         xAxis: {
           type: 'datetime'
         },
         yAxis: {
           title: {
-            text: 'Performance Points'
+            text,
           }
         },
         series: data.map((user) => {
@@ -332,7 +342,14 @@ class PlayerCharts extends Component {
               const { snapshots: [snapshot] } = generation;
               let date = new Date(generation.inserted_at.split('T')[0]);
               date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-              const data = snapshot ? snapshot.pp_raw : null;
+              let data = null;
+              if (snapshot) {
+                if (stat === 0) {
+                  data = snapshot.pp_raw;
+                } else {
+                  data = snapshot.playcount;
+                }
+              }
               return [
                 date,
                 data,
@@ -360,10 +377,40 @@ class PlayerCharts extends Component {
     this._initHighChart();
   }
 
+  handleOnClickPP(stat) {
+    this.setState({
+      stat: 0,
+    });
+    this._initHighChart(0);
+  }
+
+  handleOnClickPlaycount() {
+    this.setState({
+      stat: 1,
+    });
+    this._initHighChart(1);
+  }
+
   render() {
     const style = this.props.visible ? {} : { display: 'none' };
     return (
       <div style={style}>
+        <div className="ui form">
+          <div className="inline fields">
+            <div className="field">
+              <div className="ui radio checkbox">
+                <input onChange={this.handleOnClickPP.bind(this)} type="radio" name="frequency" checked={this.state.stat === 0} />
+                <label>PP</label>
+              </div>
+            </div>
+            <div className="field">
+              <div className="ui radio checkbox">
+                <input onChange={this.handleOnClickPlaycount.bind(this)} type="radio" name="frequency" checked={this.state.stat === 1} />
+                <label>Playcount</label>
+              </div>
+            </div>
+          </div>
+        </div>
         <div>
           <div className='ui input'>
             <input
@@ -386,6 +433,57 @@ class PlayerCharts extends Component {
           </div>
         </div>
         <div id='container'>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class Scores extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: []
+    };
+  }
+
+  componentDidMount() {
+    const root = location.protocol + '//' + location.host;
+    $.get(`${root}/api/latest-scores`, (data) => {
+      this.setState({
+        data,
+      });
+    });
+  }
+
+  render() {
+    if (!this.props.visible) {
+      return null;
+    }
+
+    return (
+      <div>
+        <h2 className='ui header'>
+          January 2016 Scores
+        </h2>
+        <div className="ui list">
+          {this.state.data.map((user, index) => {
+            return (
+              <div className="item" key={index}>
+                {user.username}
+                <div className='list'>
+                  {user.scores.map((score, scoreIndex) => {
+                    return (
+                      <div className='item' key={scoreIndex}>
+                        [<strong>{score.pp}pp</strong>] <strong>{getModsArray(score.enabled_mods).join('')}</strong> {score.beatmap.artist} - {score.beatmap.title} [{score.beatmap.version}] \\ {score.beatmap.creator}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -436,6 +534,7 @@ export default class App extends Component {
 
     const menuItems = [
       'Players',
+      'Scores',
       'Player Charts',
       'Beatmaps',
     ];
@@ -462,14 +561,15 @@ export default class App extends Component {
                );
              })}
           </div>
-          {selectedTabIndex === 0 ?
-            <Players
-              players={this.state.players} />
-          : null}
+          <Players
+            players={this.state.players}
+            visible={selectedTabIndex === 0} />
+          <Scores
+            visible={selectedTabIndex === 1} />
           <PlayerCharts
             snapshots={this.state.snapshots}
-            visible={selectedTabIndex === 1} />
-          {selectedTabIndex === 2 ?
+            visible={selectedTabIndex === 2} />
+          {selectedTabIndex === 3 ?
             <Beatmaps
               beatmaps={this.state.beatmaps}
               onRowSelection={this.handleOnRowSelection.bind(this)}

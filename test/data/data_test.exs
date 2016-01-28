@@ -519,4 +519,49 @@ defmodule DataTest do
     assert b2.id == 2
     assert length(b2.scores) == 1
   end
+
+  test "get latest scores" do
+    insert_user! %{
+      "id" => 1,
+      "username" => "a",
+    }
+    insert_user! %{
+      "id" => 2,
+      "username" => "b",
+    }
+    insert_beatmap! %{
+      "id" => 1,
+    }
+    insert_beatmap! %{
+      "id" => 2,
+    }
+    insert_score! %{
+      "beatmap_id" => 1,
+      "user_id" => 1,
+      "date" => "2016-01-14 05:00:00",
+    }
+    insert_score! %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2016-01-14 06:00:00",
+    }
+    insert_score! %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2016-01-13 05:00:00",
+    }
+    insert_score! %{
+      "beatmap_id" => 1,
+      "user_id" => 2,
+      "date" => "2016-01-13 05:00:00",
+    }
+
+    [u1, u2] = Repo.all Data.get_latest_scores
+
+    assert u1.id == 1
+    assert length(u1.scores) == 2
+
+    assert u2.id == 2
+    assert length(u2.scores) == 1
+  end
 end

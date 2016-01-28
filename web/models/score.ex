@@ -2,10 +2,11 @@ defmodule UwOsu.Models.Score do
   use Ecto.Schema
   import Ecto.Changeset
   alias UwOsu.Models.User
+  alias UwOsu.Models.Beatmap
 
   schema "score" do
     belongs_to :user, User
-    field :beatmap_id, :integer
+    belongs_to :beatmap, Beatmap
     field :score, :integer
     field :maxcombo, :integer
     field :count50, :integer

@@ -22,4 +22,9 @@ defmodule UwOsu.DataController do
     users = Repo.all Data.get_users_with_snapshots
     render conn, "daily_snapshots.json", users: users
   end
+
+  def latest_scores(conn, _params) do
+    users = Repo.all Data.get_latest_scores
+    render conn, "latest_scores.json", users: users
+  end
 end

@@ -101,6 +101,16 @@ defmodule UwOsu.Data do
       select: b
   end
 
+  def get_latest_scores do
+    from u in User,
+      join: s in assoc(u, :scores),
+      join: b in assoc(s, :beatmap),
+      where: fragment("(?) >= '2016-01-01'", s.date) and fragment("(?) < '2016-02-01'", s.date),
+      #order_by: [desc: s.date],
+      distinct: [u.id, s.beatmap_id],
+      preload: [scores: {s, beatmap: b}]
+  end
+
   def collect_beatmaps(
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
   ) do
@@ -118,7 +128,7 @@ defmodule UwOsu.Data do
     Logger.info "Fetching #{length beatmap_ids} beatmaps"
 
     Enum.each beatmap_ids, fn(beatmap_id) ->
-      Logger.info "Fetching #{beatmap_id}"
+      Logger.debug "Fetching #{beatmap_id}"
       %HTTPoison.Response{body: [beatmap | _]} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
       beatmap = Dict.merge beatmap, %{
         "id" => beatmap["beatmap_id"]
@@ -130,18 +140,29 @@ defmodule UwOsu.Data do
 
   def collect(
     user_ids \\ Application.get_env(:uw_osu, :user_ids),
-    client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
+    client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)},
+    attempts_remaining \\ 5
   ) do
-    Osu.start
+    if attempts_remaining > 0 do
+      Osu.start
 
-    Repo.transaction fn ->
-      generation_id = Repo.insert!(%Generation{}).id
-
-      Enum.each user_ids, fn(user_id) ->
+      try do
         Repo.transaction fn ->
-          process_user(user_id, generation_id, client)
+          generation_id = Repo.insert!(%Generation{}).id
+
+          Enum.each user_ids, fn(user_id) ->
+            Repo.transaction fn ->
+              process_user(user_id, generation_id, client)
+            end
+          end
         end
+      rescue
+        _ ->
+          :timer.sleep 10000
+          collect user_ids, client, attempts_remaining - 1
       end
+    else
+      Logger.error "Failed to collect"
     end
   end
 
@@ -160,7 +181,7 @@ defmodule UwOsu.Data do
     end
 
     username = user_dict["username"]
-    Logger.info "Processing for user #{username} (#{id}) with generation #{generation_id}"
+    Logger.debug "Processing for user #{username} (#{id}) with generation #{generation_id}"
 
     # Update username
     Repo.update! Ecto.Changeset.change(user, username: username)

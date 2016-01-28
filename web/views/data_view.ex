@@ -47,7 +47,7 @@ defmodule UwOsu.DataView do
   def render("daily_snapshot.json", %{user: user}) do
     user
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :events, :snapshots])
+    |> Map.drop([:__struct__, :__meta__, :events, :snapshots, :scores])
     |> Map.update(:generations, [], fn(generations) ->
       generations
       |> Enum.map(fn(generation) ->
@@ -83,11 +83,11 @@ defmodule UwOsu.DataView do
       |> Enum.map(fn(score) ->
         score
         |> Map.from_struct
-        |> Map.drop([:__struct__, :__meta__])
+        |> Map.drop([:__struct__, :__meta__, :beatmap])
         |> Map.update(:user, nil, fn(user) ->
           user
           |> Map.from_struct
-          |> Map.drop([:__struct__, :__meta__, :events, :snapshots, :generations])
+          |> Map.drop([:__struct__, :__meta__, :events, :snapshots, :generations, :scores])
         end)
       end)
       |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
@@ -101,12 +101,35 @@ defmodule UwOsu.DataView do
   def render("player.json", %{player: player}) do
     player
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :snapshots, :events, :generations])
+    |> Map.drop([:__struct__, :__meta__, :snapshots, :events, :generations, :scores])
     |> Map.merge(
       Enum.at(player.snapshots, 0)
       |> Map.from_struct
       |> Map.drop([:__struct__, :__meta__, :generation, :user])
     )
+  end
+
+  def render("latest_scores.json", %{users: users}) do
+    render_many users, UwOsu.DataView, "score.json", as: :user
+  end
+
+  def render("score.json", %{user: user}) do
+    user
+    |> Map.from_struct
+    |> Map.drop([:__struct__, :__meta__, :snapshots, :generations, :events])
+    |> Map.update(:scores, [], fn(scores) ->
+      Enum.map(scores, fn(score) ->
+        score
+        |> Map.from_struct
+        |> Map.drop([:__struct__, :__meta__, :user])
+        |> Map.update(:beatmap, nil, fn(beatmap) ->
+          beatmap
+          |> Map.from_struct
+          |> Map.drop([:__struct__, :__meta__, :scores])
+        end)
+      end)
+      |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
+    end)
   end
 end
 

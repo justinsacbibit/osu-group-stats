@@ -304,4 +304,46 @@ defmodule UwOsu.DataViewTest do
       }]
     } = u2_g2
   end
+
+  test "get latest scores" do
+    insert_user! %{
+      "id" => 1,
+      "username" => "a",
+    }
+    insert_user! %{
+      "id" => 2,
+      "username" => "b",
+    }
+    insert_beatmap! %{
+      "id" => 1,
+    }
+    insert_beatmap! %{
+      "id" => 2,
+    }
+    insert_score! %{
+      "beatmap_id" => 1,
+      "user_id" => 1,
+      "date" => "2016-01-14 05:00:00",
+    }
+    insert_score! %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2016-01-14 06:00:00",
+    }
+    insert_score! %{
+      "beatmap_id" => 2,
+      "user_id" => 1,
+      "date" => "2016-01-13 05:00:00",
+    }
+    insert_score! %{
+      "beatmap_id" => 1,
+      "user_id" => 2,
+      "date" => "2016-01-13 05:00:00",
+    }
+
+    conn = get conn, "/api/latest-scores"
+    resp = json_response(conn, 200)
+
+    [u1, u2] = resp
+  end
 end
