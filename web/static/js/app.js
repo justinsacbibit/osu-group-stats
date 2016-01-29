@@ -548,6 +548,8 @@ export default class App extends Component {
         <div className='ui fixed inverted menu'>
           <div className='ui container'>
             <a className='header item'>
+              <img src="https://images-2.discordapp.net/.eJwNw1EOgyAMANC7cAAqs1DnbQgyJEFKaPdldveZl3eb72xmN6fqkB3gqJJ4HlaUZyzZFubSchxVbOILompM55W7CrgVkQJ69yTv1iWAw9djW4g2j-_gKcCn9tjs6MX8_r9rId8.fd5DC21xXbzrhs-baG_WXqgCMkY.png" />
+              &nbsp;
               UW/Laurier osu! Stats
             </a>
           </div>
