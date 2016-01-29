@@ -318,7 +318,7 @@ class PlayerCharts extends Component {
     $(() => {
       const { player1, player2 } = this.state;
       const usernames = [player1, player2];
-      data = data.filter(data => usernames.indexOf(data.username) >= 0);
+      data = data.filter(data => usernames.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
       const text = stat === 0 ? 'Performance Points' : 'Play Count';
       $('#container').highcharts({
         chart: {
