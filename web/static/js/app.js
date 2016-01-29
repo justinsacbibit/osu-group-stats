@@ -335,9 +335,12 @@ class PlayerCharts extends Component {
             text,
           }
         },
-        series: data.map((user) => {
+        series: data.map((user, i) => {
           return {
             name: user.username,
+            marker: {
+              symbol: i === 0 ? 'url(http://i.imgur.com/yS4qY82.png?3)' : 'url(http://i.imgur.com/wIm0QCK.png?1)',
+            },
             data: user.generations.map((generation, index) => {
               const { snapshots: [snapshot] } = generation;
               let date = new Date(generation.inserted_at.split('T')[0]);
@@ -474,9 +477,10 @@ class Scores extends Component {
                 {user.username}
                 <div className='list'>
                   {user.scores.map((score, scoreIndex) => {
+                    const scoreDate = new Date(score.date);
                     return (
                       <div className='item' key={scoreIndex}>
-                        [<strong>{score.pp}pp</strong>] <strong>{getModsArray(score.enabled_mods).join('')}</strong> {score.beatmap.artist} - {score.beatmap.title} [{score.beatmap.version}] \\ {score.beatmap.creator}
+                        [<strong>{score.pp}pp</strong>] <strong>{getModsArray(score.enabled_mods).join('')}</strong> {score.beatmap.artist} - {score.beatmap.title} [{score.beatmap.version}] \\ {score.beatmap.creator} - {scoreDate.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' })}
                       </div>
                     );
                   })}
