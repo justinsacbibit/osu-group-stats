@@ -139,14 +139,18 @@ defmodule UwOsu.Data do
   end
 
   def collect(
-    user_ids \\ Application.get_env(:uw_osu, :user_ids),
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)},
     attempts_remaining \\ 5
   ) do
     if attempts_remaining > 0 do
+      attempt_number = 5 - attempts_remaining + 1
       Osu.start
 
       try do
+        query = from u in User,
+          select: u.id
+        user_ids = Repo.all query
+
         Repo.transaction fn ->
           generation_id = Repo.insert!(%Generation{}).id
 
@@ -156,13 +160,16 @@ defmodule UwOsu.Data do
             end
           end
         end
+        Logger.info "Successfully collected on try ##{attempt_number}"
       rescue
-        _ ->
+        e ->
+          # TODO: Pass error through logger
+          IO.inspect e
+          Logger.error "Failed to collect on try ##{attempt_number}"
           :timer.sleep 10000
-          collect user_ids, client, attempts_remaining - 1
+          collect client, attempts_remaining - 1
       end
     else
-      Logger.error "Failed to collect"
     end
   end
 

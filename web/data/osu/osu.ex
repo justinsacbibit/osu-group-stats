@@ -29,7 +29,8 @@ defmodule UwOsu.Osu do
 
   defp _get!(path, client, params \\ %{}) do
     params = Dict.merge(params, %{k: client.api_key})
-    get!(path, [], params: params)
+    one_minute = 60000
+    get!(path, [], params: params, timeout: one_minute, recv_timeout: one_minute)
   end
 end
 

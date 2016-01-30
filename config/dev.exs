@@ -42,7 +42,3 @@ config :uw_osu, UwOsu.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :uw_osu, user_ids: [
-  1579374
-]
-
