@@ -15,13 +15,6 @@ defmodule UwOsu.Router do
     plug PlugExometer
   end
 
-  scope "/", UwOsu do
-    pipe_through :browser # Use the default browser stack
-
-    get "/", PageController, :index
-  end
-
-  # Other scopes may use custom stacks.
   scope "/api", UwOsu do
     pipe_through :api
 
@@ -30,5 +23,11 @@ defmodule UwOsu.Router do
     get "/players", DataController, :players
     get "/daily-snapshots", DataController, :daily_snapshots
     get "/latest-scores", DataController, :latest_scores
+  end
+
+  scope "/", UwOsu do
+    pipe_through :browser # Use the default browser stack
+
+    get "*path", PageController, :index
   end
 end
