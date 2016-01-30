@@ -7,6 +7,7 @@ defmodule UwOsu.Data do
   alias UwOsu.Models.Generation
   alias UwOsu.Models.Score
   alias UwOsu.Models.User
+  alias UwOsu.Models.UserGroup
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
 
@@ -20,6 +21,8 @@ defmodule UwOsu.Data do
     from u in User,
       join: s in assoc(u, :snapshots),
       join: g in assoc(s, :generation),
+      join: gr in UserGroup,
+      on: gr.group_id == 1 and gr.user_id == u.id,
       where: s.generation_id in fragment("(
         SELECT g.id
         FROM generation g
@@ -33,6 +36,8 @@ defmodule UwOsu.Data do
   def get_users_with_snapshots do
     from u in User,
       join: g in Generation,
+      join: gr in UserGroup,
+      on: gr.group_id == 1 and gr.user_id == u.id,
       join: i in fragment("SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date"),
         on: g.inserted_at == i.min,
       left_join: s in UserSnapshot,
@@ -72,6 +77,8 @@ defmodule UwOsu.Data do
     from b in Beatmap,
       join: sc in assoc(b, :scores),
       join: u in assoc(sc, :user),
+      join: gr in UserGroup,
+      on: gr.group_id == 1 and gr.user_id == u.id,
       where: sc.id in fragment("(
         SELECT DISTINCT ON (beatmap_id) id
         FROM score sc
@@ -105,6 +112,8 @@ defmodule UwOsu.Data do
     from u in User,
       join: s in assoc(u, :scores),
       join: b in assoc(s, :beatmap),
+      join: gr in UserGroup,
+      on: gr.group_id == 1 and gr.user_id == u.id,
       where: fragment("(?) >= '2016-01-01'", s.date) and fragment("(?) < '2016-02-01'", s.date),
       order_by: [desc: s.date],
       distinct: [u.id, s.beatmap_id],
