@@ -153,6 +153,7 @@ defmodule UwOsu.Data do
   ) do
     if attempts_remaining > 0 do
       attempt_number = 5 - attempts_remaining + 1
+      Logger.info "Beginning collection on try ##{attempt_number}"
       Osu.start
 
       try do
