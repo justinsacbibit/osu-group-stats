@@ -338,9 +338,9 @@ class PlayerCharts extends Component {
         series: data.map((user, i) => {
           return {
             name: user.username,
-            marker: {
-              symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
-            },
+            //marker: {
+              //symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
+            //},
             data: user.generations.map((generation, index) => {
               const { snapshots: [snapshot] } = generation;
               let date = new Date(generation.inserted_at.split('T')[0]);
