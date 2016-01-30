@@ -297,7 +297,7 @@ class PlayerCharts extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/daily-snapshots`, (data) => {
+    $.get(`${root}/api/daily-snapshots`, { g: 1 }, (data) => {
       this.setState({
         data,
       });
@@ -453,7 +453,7 @@ class Scores extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/latest-scores`, (data) => {
+    $.get(`${root}/api/latest-scores`, { g: 1 }, (data) => {
       this.setState({
         data,
       });
@@ -509,12 +509,12 @@ export default class App extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/farmed-beatmaps`, beatmaps => {
+    $.get(`${root}/api/farmed-beatmaps`, { g: 1 }, beatmaps => {
       this.setState({
         beatmaps,
       });
     });
-    $.get(`${root}/api/players`, players => {
+    $.get(`${root}/api/players`, { g: 1 }, players => {
       this.setState({
         players,
       });

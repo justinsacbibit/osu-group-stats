@@ -17,12 +17,12 @@ defmodule UwOsu.Data do
       on: g.inserted_at == i.min
   end
 
-  def get_users do
+  def get_users(group_id) do
     from u in User,
       join: s in assoc(u, :snapshots),
       join: g in assoc(s, :generation),
       join: gr in UserGroup,
-      on: gr.group_id == 1 and gr.user_id == u.id,
+      on: gr.group_id == ^group_id and gr.user_id == u.id,
       where: s.generation_id in fragment("(
         SELECT g.id
         FROM generation g
@@ -33,11 +33,11 @@ defmodule UwOsu.Data do
       preload: [snapshots: s]
   end
 
-  def get_users_with_snapshots do
+  def get_users_with_snapshots(group_id) do
     from u in User,
       join: g in Generation,
       join: gr in UserGroup,
-      on: gr.group_id == 1 and gr.user_id == u.id,
+      on: gr.group_id == ^group_id and gr.user_id == u.id,
       join: i in fragment("SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date"),
         on: g.inserted_at == i.min,
       left_join: s in UserSnapshot,
@@ -73,12 +73,12 @@ defmodule UwOsu.Data do
       }
   end
 
-  def get_farmed_beatmaps do
+  def get_farmed_beatmaps(group_id) do
     from b in Beatmap,
       join: sc in assoc(b, :scores),
       join: u in assoc(sc, :user),
       join: gr in UserGroup,
-      on: gr.group_id == 1 and gr.user_id == u.id,
+      on: gr.group_id == ^group_id and gr.user_id == u.id,
       where: sc.id in fragment("(
         SELECT DISTINCT ON (beatmap_id) id
         FROM score sc
@@ -108,12 +108,12 @@ defmodule UwOsu.Data do
       select: b
   end
 
-  def get_latest_scores do
+  def get_latest_scores(group_id) do
     from u in User,
       join: s in assoc(u, :scores),
       join: b in assoc(s, :beatmap),
       join: gr in UserGroup,
-      on: gr.group_id == 1 and gr.user_id == u.id,
+      on: gr.group_id == ^group_id and gr.user_id == u.id,
       where: fragment("(?) >= '2016-01-01'", s.date) and fragment("(?) < '2016-02-01'", s.date),
       order_by: [desc: s.date],
       distinct: [u.id, s.beatmap_id],

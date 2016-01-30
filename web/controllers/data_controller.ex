@@ -8,23 +8,23 @@ defmodule UwOsu.DataController do
     render conn, "weekly_snapshots.json", snapshots: snapshots
   end
 
-  def farmed_beatmaps(conn, _params) do
-    beatmaps = Repo.all Data.get_farmed_beatmaps
+  def farmed_beatmaps(conn, %{"g" => group_id}) do
+    beatmaps = Repo.all Data.get_farmed_beatmaps(group_id)
     render conn, "farmed_beatmaps.json", beatmaps: beatmaps
   end
 
-  def players(conn, _params) do
-    players = Repo.all Data.get_users
+  def players(conn, %{"g" => group_id}) do
+    players = Repo.all Data.get_users(group_id)
     render conn, "players.json", players: players
   end
 
-  def daily_snapshots(conn, params) do
-    users = Repo.all Data.get_users_with_snapshots
+  def daily_snapshots(conn, %{"g" => group_id}) do
+    users = Repo.all Data.get_users_with_snapshots(group_id)
     render conn, "daily_snapshots.json", users: users
   end
 
-  def latest_scores(conn, _params) do
-    users = Repo.all Data.get_latest_scores
+  def latest_scores(conn, %{"g" => group_id}) do
+    users = Repo.all Data.get_latest_scores(group_id)
     render conn, "latest_scores.json", users: users
   end
 end
