@@ -12,17 +12,22 @@ var plugins = [
   }),
   new ExtractTextPlugin('app.css'),
   new CopyWebpackPlugin([
-      { from: './web/static/assets' },
-      { from: './deps/phoenix_html/web/static/js/phoenix_html.js',
-        to: 'js/phoenix_html.js' }
-    ])
+    {
+      from: './web/static/assets',
+      to: ''
+    },
+    {
+      from: './deps/phoenix_html/web/static/js/phoenix_html.js',
+      to: 'js/phoenix_html.js'
+    }
+  ])
 ];
 
 // This is necessary to get the sass @import's working
 var stylePathResolves = (
-    'includePaths[]=' + path.resolve('./') + '&' +
+  'includePaths[]=' + path.resolve('./') + '&' +
     'includePaths[]=' + path.resolve('./node_modules')
-  );
+);
 
 if (isProduction) {
   plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
@@ -32,8 +37,8 @@ module.exports = {
   entry: './web/static/js/index.js',
 
   output: {
-    path: './priv/static/js',
-    filename: 'app.js'
+    path: './priv/static',
+    filename: 'js/app.js'
   },
 
   resolve: {
@@ -43,24 +48,23 @@ module.exports = {
   },
 
   module: {
-        loaders: [
-            {
-              test: /\.jsx?$/,
-              exclude: /(node_modules|bower_components)/,
-              loader: 'babel',
-              query: {
-                presets: ['es2015', 'react']
-              }
-            },
-            {
-              test: /\.scss$/,
-              loader: ExtractTextPlugin.extract(
-                'style',
-                'css' + '!sass?outputStyle=expanded&' + stylePathResolves
-              )
-            }
-
-        ]
+    loaders: [
+      {
+        test: /\.jsx?$/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel',
+        query: {
+          presets: ['es2015', 'react']
+        }
+      },
+      {
+        test: /\.scss$/,
+        loader: ExtractTextPlugin.extract(
+          'style',
+          'css' + '!sass?outputStyle=expanded&' + stylePathResolves
+        )
+      },
+    ]
   },
 
   plugins: plugins
