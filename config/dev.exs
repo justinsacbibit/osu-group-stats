@@ -43,6 +43,6 @@ config :uw_osu, UwOsu.Repo,
   pool_size: 10
 
 config :uw_osu, user_ids: [
-  "influxd",
+  1579374
 ]
 

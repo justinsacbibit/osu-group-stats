@@ -140,7 +140,7 @@ config :uw_osu, user_ids: [
   2446880,
   2130039,
   5063503,
-  "Arneshie-",
-  "blunt master",
+  5208390,
+  3644763
 ]
 
