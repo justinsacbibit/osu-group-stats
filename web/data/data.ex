@@ -35,15 +35,19 @@ defmodule UwOsu.Data do
 
   def get_users_with_snapshots(group_id) do
     from u in User,
-      join: g in Generation,
       join: gr in UserGroup,
       on: gr.group_id == ^group_id and gr.user_id == u.id,
-      join: i in fragment("SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date"),
-        on: g.inserted_at == i.min,
-      left_join: s in UserSnapshot,
-        on: s.user_id == u.id and s.generation_id == g.id,
-      order_by: [desc: g.id],
-      select: {u, g, s}
+      join: s in UserSnapshot,
+        on: s.user_id == u.id,
+      join: i in fragment("
+      SELECT MIN(inserted_at), s.user_id
+      FROM user_snapshot s
+      WHERE inserted_at::time >= '5:00'
+      GROUP BY inserted_at::date, s.user_id
+      "),
+        on: s.inserted_at == i.min and s.user_id == i.user_id,
+      order_by: [asc: s.inserted_at],
+      preload: [snapshots: s]
   end
 
   def get_weekly_snapshots do

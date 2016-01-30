@@ -8,6 +8,7 @@ export default class R extends React.Component {
     return (
       <Router history={browserHistory}>
         <Route path="/" component={App} />
+        <Route path="/g/:groupId" component={App} />
       </Router>
     );
   }

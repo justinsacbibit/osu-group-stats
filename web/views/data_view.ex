@@ -33,39 +33,19 @@ defmodule UwOsu.DataView do
   end
 
   def render("daily_snapshots.json", %{users: users}) do
-    users = users
-    |> Enum.group_by(fn({%User{id: id}, _, _}) -> id end)
-    |> Enum.map(fn({_, tuples}) ->
-      [{u, _, _} | _] = tuples
-      %{ u | generations:
-         Enum.map(tuples, fn({_, g, s}) -> %{ g | snapshots: [s] } end)
-       }
-    end)
     render_many(users, UwOsu.DataView, "daily_snapshot.json", as: :user)
   end
 
   def render("daily_snapshot.json", %{user: user}) do
     user
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :events, :snapshots, :scores])
-    |> Map.update(:generations, [], fn(generations) ->
-      generations
-      |> Enum.map(fn(generation) ->
-        generation
+    |> Map.drop([:__struct__, :__meta__, :events, :generations, :scores])
+    |> Map.update(:snapshots, [], fn(snapshots) ->
+      snapshots
+      |> Enum.map(fn(snapshot) ->
+        snapshot
         |> Map.from_struct
-        |> Map.update(:snapshots, [], fn(snapshots) ->
-          case snapshots do
-            [nil] ->
-              [nil]
-            [snapshot] ->
-              snapshot = snapshot
-              |> Map.from_struct
-              |> Map.drop([:__struct__, :__meta__, :generation, :user])
-
-              [snapshot]
-          end
-        end)
-        |> Map.drop([:__struct__, :__meta__])
+        |> Map.drop([:__struct__, :__meta__, :generation, :user])
       end)
     end)
   end

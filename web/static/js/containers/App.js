@@ -35,7 +35,7 @@ function getModsArray(curMods) {
 
 
 class Beatmaps extends Component {
-    handleOnRowSelection(selectedRow) {
+  handleOnRowSelection(selectedRow) {
     this.props.onRowSelection(selectedRow);
   }
 
@@ -297,7 +297,7 @@ class PlayerCharts extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/daily-snapshots`, { g: 1 }, (data) => {
+    $.get(`${root}/api/daily-snapshots`, { g: this.props.groupId }, (data) => {
       this.setState({
         data,
       });
@@ -341,9 +341,8 @@ class PlayerCharts extends Component {
             //marker: {
               //symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
             //},
-            data: user.generations.map((generation, index) => {
-              const { snapshots: [snapshot] } = generation;
-              let date = new Date(generation.inserted_at.split('T')[0]);
+            data: user.snapshots.map((snapshot, index) => {
+              let date = new Date(snapshot.inserted_at.split('T')[0]);
               date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
               let data = null;
               if (snapshot) {
@@ -453,7 +452,7 @@ class Scores extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/latest-scores`, { g: 1 }, (data) => {
+    $.get(`${root}/api/latest-scores`, { g: this.props.groupId }, (data) => {
       this.setState({
         data,
       });
@@ -509,12 +508,13 @@ export default class App extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    $.get(`${root}/api/farmed-beatmaps`, { g: 1 }, beatmaps => {
+    const { groupId } = this.props.params;
+    $.get(`${root}/api/farmed-beatmaps`, { g: groupId }, beatmaps => {
       this.setState({
         beatmaps,
       });
     });
-    $.get(`${root}/api/players`, { g: 1 }, players => {
+    $.get(`${root}/api/players`, { g: groupId }, players => {
       this.setState({
         players,
       });
@@ -535,6 +535,7 @@ export default class App extends Component {
 
   render() {
     const { selectedTabIndex } = this.state;
+    const { groupId = 1 } = this.props.params;
 
     const menuItems = [
       'Players',
@@ -571,13 +572,16 @@ export default class App extends Component {
             players={this.state.players}
             visible={selectedTabIndex === 0} />
           <Scores
+            groupId={groupId}
             visible={selectedTabIndex === 1} />
           <PlayerCharts
+            groupId={groupId}
             snapshots={this.state.snapshots}
             visible={selectedTabIndex === 2} />
           {selectedTabIndex === 3 ?
             <Beatmaps
               beatmaps={this.state.beatmaps}
+              groupId={groupId}
               onRowSelection={this.handleOnRowSelection.bind(this)}
               selectedBeatmapIndex={this.state.selectedBeatmapIndex} />
           : null}
