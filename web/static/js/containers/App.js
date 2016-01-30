@@ -342,7 +342,7 @@ class PlayerCharts extends Component {
               //symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
             //},
             data: user.snapshots.map((snapshot, index) => {
-              let date = new Date(snapshot.inserted_at.split('T')[0]);
+              let date = new Date(snapshot.inserted_at);
               date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
               let data = null;
               if (snapshot) {
@@ -508,7 +508,7 @@ export default class App extends Component {
 
   componentDidMount() {
     const root = location.protocol + '//' + location.host;
-    const { groupId } = this.props.params;
+    const { groupId = 1 } = this.props.params;
     $.get(`${root}/api/farmed-beatmaps`, { g: groupId }, beatmaps => {
       this.setState({
         beatmaps,
