@@ -339,7 +339,7 @@ class PlayerCharts extends Component {
           return {
             name: user.username,
             marker: {
-              symbol: i === 0 ? 'url(http://i.imgur.com/yS4qY82.png?3)' : 'url(http://i.imgur.com/wIm0QCK.png?1)',
+              symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
             },
             data: user.generations.map((generation, index) => {
               const { snapshots: [snapshot] } = generation;
@@ -398,17 +398,17 @@ class PlayerCharts extends Component {
     const style = this.props.visible ? {} : { display: 'none' };
     return (
       <div style={style}>
-        <div className="ui form">
-          <div className="inline fields">
-            <div className="field">
-              <div className="ui radio checkbox">
-                <input onChange={this.handleOnClickPP.bind(this)} type="radio" name="frequency" checked={this.state.stat === 0} />
+        <div className='ui form'>
+          <div className='inline fields'>
+            <div className='field'>
+              <div className='ui radio checkbox'>
+                <input onChange={this.handleOnClickPP.bind(this)} type='radio' name='frequency' checked={this.state.stat === 0} />
                 <label>PP</label>
               </div>
             </div>
-            <div className="field">
-              <div className="ui radio checkbox">
-                <input onChange={this.handleOnClickPlaycount.bind(this)} type="radio" name="frequency" checked={this.state.stat === 1} />
+            <div className='field'>
+              <div className='ui radio checkbox'>
+                <input onChange={this.handleOnClickPlaycount.bind(this)} type='radio' name='frequency' checked={this.state.stat === 1} />
                 <label>Playcount</label>
               </div>
             </div>
@@ -470,10 +470,10 @@ class Scores extends Component {
         <h2 className='ui header'>
           January 2016 Scores
         </h2>
-        <div className="ui list">
+        <div className='ui list'>
           {this.state.data.map((user, index) => {
             return (
-              <div className="item" key={index}>
+              <div className='item' key={index}>
                 {user.username}
                 <div className='list'>
                   {user.scores.map((score, scoreIndex) => {
@@ -548,7 +548,7 @@ export default class App extends Component {
         <div className='ui fixed inverted menu'>
           <div className='ui container'>
             <a className='header item'>
-              <img src="https://images-2.discordapp.net/.eJwNw1EOgyAMANC7cAAqs1DnbQgyJEFKaPdldveZl3eb72xmN6fqkB3gqJJ4HlaUZyzZFubSchxVbOILompM55W7CrgVkQJ69yTv1iWAw9djW4g2j-_gKcCn9tjs6MX8_r9rId8.fd5DC21xXbzrhs-baG_WXqgCMkY.png" />
+              <img src='/images/uw.png' />
               &nbsp;
               UW/Laurier osu! Stats
             </a>
