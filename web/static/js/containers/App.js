@@ -287,10 +287,11 @@ class PlayerCharts extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      addPlayerValue: '',
       data: [],
       players: ['influxd', 'Arneshie-'],
+      showDeltas: false,
       stat: 0,
-      addPlayerValue: '',
     };
   }
 
@@ -309,26 +310,13 @@ class PlayerCharts extends Component {
     $(() => {
       data = data.filter(data => usernames.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
       const text = stat === 0 ? 'Performance Points' : 'Play Count';
-      $('#container').highcharts({
-        chart: {
-          type: 'line'
-        },
-        title: {
-          text: `UW/Laurier osu! ${text}`
-        },
-        xAxis: {
-          type: 'datetime'
-        },
-        yAxis: {
-          title: {
-            text,
-          }
-        },
-        series: data.map((user, i) => {
+      let series;
+      if (!this.state.showDeltas) {
+        series = data.map((user, i) => {
           return {
             name: user.username,
             //marker: {
-              //symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
+            //symbol: i === 0 ? 'url(/images/red.png)' : 'url(/images/green.png)',
             //},
             data: user.snapshots.map((snapshot, index) => {
               let date = new Date(snapshot.inserted_at);
@@ -347,7 +335,48 @@ class PlayerCharts extends Component {
               ];
             })
           };
-        })
+        });
+      } else {
+        series = data.map((user, i) => {
+          const res = [];
+          for (let i = 0; i < user.snapshots.length - 1; i++) {
+            const d1 = user.snapshots[i];
+            const d2 = user.snapshots[i+1];
+            let date = new Date(d1.inserted_at);
+            date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+            let data = null;
+            if (d1 && d2) {
+              if (stat === 0) {
+                data = d2.pp_raw - d1.pp_raw;
+              } else {
+                data = d2.playcount - d1.playcount;
+              }
+            }
+            res.push([date, data]);
+          }
+          return {
+            name: user.username,
+            data: res,
+          };
+        });
+      }
+
+      $('#container').highcharts({
+        chart: {
+          type: 'line'
+        },
+        title: {
+          text: `UW/Laurier osu! ${text}`
+        },
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: {
+          title: {
+            text,
+          }
+        },
+        series,
       });
     });
   }
@@ -355,7 +384,11 @@ class PlayerCharts extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (!prevProps.visible && this.props.visible && this.state.players.length > 0 && this.state.data.length > 0) {
       this._initHighChart();
-    } else if (this.props.visible && (prevState.players !== this.state.players || prevState.data !== this.state.data || prevState.stat !== this.state.stat)) {
+    } else if (this.props.visible &&
+                (prevState.players !== this.state.players
+                  || prevState.data !== this.state.data
+                    || prevState.stat !== this.state.stat
+                      || prevState.showDeltas !== this.state.showDeltas)) {
       this._initHighChart();
     }
   }
@@ -369,6 +402,12 @@ class PlayerCharts extends Component {
   handleOnClickPlaycount() {
     this.setState({
       stat: 1,
+    });
+  }
+
+  handleOnClickShowDeltas() {
+    this.setState({
+      showDeltas: !this.state.showDeltas,
     });
   }
 
@@ -411,6 +450,15 @@ class PlayerCharts extends Component {
               <div className='ui radio checkbox'>
                 <input onChange={this.handleOnClickPlaycount.bind(this)} type='radio' name='frequency' checked={this.state.stat === 1} />
                 <label>Playcount</label>
+              </div>
+            </div>
+            <div className='field'>
+              <div className='ui slider checkbox'>
+                <input
+                  onChange={this.handleOnClickShowDeltas.bind(this)}
+                  type='checkbox'
+                  value={this.state.showDeltas} />
+                <label>Show daily deltas</label>
               </div>
             </div>
             <div className='field'>
