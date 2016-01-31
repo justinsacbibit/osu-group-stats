@@ -4,7 +4,7 @@ import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { syncHistory, routeReducer } from 'react-router-redux';
 import { Router, Route, browserHistory } from 'react-router';
-import rootReducer from '../reducers';
+import rootReducer from '../reducers/reducers';
 import DevTools from '../containers/DevTools';
 
 const reducer = combineReducers(Object.assign({}, rootReducer, {

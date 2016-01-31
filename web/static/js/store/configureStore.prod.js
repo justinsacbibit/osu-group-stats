@@ -2,7 +2,7 @@ import { combineReducers, createStore, applyMiddleware, compose } from 'redux';
 import { syncHistory, routeReducer } from 'react-router-redux';
 import { Router, Route, browserHistory } from 'react-router';
 import thunkMiddleware from 'redux-thunk';
-import rootReducer from '../reducers';
+import rootReducer from '../reducers/reducers';
 
 const reducer = combineReducers(Object.assign({}, rootReducer, {
   routing: routeReducer

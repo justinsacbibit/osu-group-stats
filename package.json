@@ -2,8 +2,11 @@
   "license": "MIT",
   "repository": {},
   "dependencies": {
+    "babel-plugin-transform-class-properties": "^6.4.0",
     "classnames": "2.2.3",
+    "es6-promise": "^3.0.2",
     "history": "1.17.0",
+    "isomorphic-fetch": "^2.2.1",
     "react": "0.14.6",
     "react-dom": "0.14.6",
     "react-redux": "4.0.0",
