@@ -16,6 +16,7 @@ export const FETCH_DAILY_SNAPSHOTS_SUCCESS = 'FETCH_DAILY_SNAPSHOTS_SUCCESS';
 export const CHANGED_STATS_CHART_ADD_PLAYER_INPUT_VALUE = 'CHANGED_STATS_CHART_ADD_PLAYER_INPUT_VALUE';
 export const ADDED_STATS_CHART_PLAYER = 'ADDED_STATS_CHART_PLAYER';
 export const REMOVED_STATS_CHART_PLAYER = 'REMOVED_STATS_CHART_PLAYER';
+export const CHANGED_STATS_CHART_PLAYERS = 'CHANGED_STATS_CHART_PLAYERS';
 export const CHANGED_STATS_CHART_STAT = 'CHANGED_STATS_CHART_STAT';
 export const CHANGED_STATS_CHART_SHOW_DELTAS = 'CHANGED_STATS_CHART_SHOW_DELTAS';
 
@@ -193,6 +194,15 @@ export function removeStatsChartPlayer(index) {
       index,
     },
     type: REMOVED_STATS_CHART_PLAYER,
+  };
+}
+
+export function changeStatsChartPlayers(players) {
+  return {
+    payload: {
+      players,
+    },
+    type: CHANGED_STATS_CHART_PLAYERS,
   };
 }
 

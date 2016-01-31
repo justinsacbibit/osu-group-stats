@@ -8,8 +8,44 @@ import {
   removeStatsChartPlayer,
   addStatsChartPlayer,
   changeStatsChartAddPlayerInput,
+  changeStatsChartPlayers,
 } from '../actions';
 import { STAT_TYPES } from '../constants';
+
+const stats = [
+  {
+    text: 'PP',
+    value: 'pp_raw',
+  },
+  {
+    text: 'Play Count',
+    value: 'playcount',
+  },
+  {
+    text: 'Total Score',
+    value: 'total_score',
+  },
+  {
+    text: 'Ranked Score',
+    value: 'ranked_score',
+  },
+  {
+    text: 'PP Rank',
+    value: 'pp_rank',
+  },
+  {
+    text: 'PP Country Rank',
+    value: 'pp_country_rank',
+  },
+  {
+    text: 'Level',
+    value: 'level',
+  },
+  {
+    text: 'Accuracy',
+    value: 'accuracy',
+  },
+];
 
 
 class StatsChart extends React.Component {
@@ -35,6 +71,15 @@ class StatsChart extends React.Component {
     if (dailySnapshots.length === 0) {
       dispatch(fetchDailySnapshots(groupId));
     }
+
+    $('.ui.dropdown.stat').dropdown('set selected', 'pp_raw'); // eslint-disable-line no-undef
+    $('.ui.dropdown.stat').dropdown({ // eslint-disable-line no-undef
+      onChange: this.handleOnChangeSelectedStat.bind(this),
+    });
+
+    $('.ui.dropdown.players').dropdown({ // eslint-disable-line no-undef
+      onChange: this.handleOnChangeSelectedPlayers.bind(this),
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -58,10 +103,7 @@ class StatsChart extends React.Component {
 
     $(() => { // eslint-disable-line no-undef
       const filteredData = dailySnapshots.filter(data => players.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
-      const text = {
-        [STAT_TYPES.PP]: 'Performance Points',
-        [STAT_TYPES.PLAYCOUNT]: 'Play Count',
-      }[selectedStat];
+      const { text } = stats.findIndex(stat => stat.value === selectedStat);
       let series;
       if (!this.props.showDeltas) {
         series = filteredData.map((user) => {
@@ -122,12 +164,13 @@ class StatsChart extends React.Component {
     });
   }
 
-  handleOnClickPP() {
-    this.props.dispatch(changeStatsChartStat(STAT_TYPES.PP));
+  handleOnChangeSelectedStat(e) {
+    this.props.dispatch(changeStatsChartStat(e));
   }
 
-  handleOnClickPlaycount() {
-    this.props.dispatch(changeStatsChartStat(STAT_TYPES.PLAYCOUNT));
+  handleOnChangeSelectedPlayers(e) {
+    const players = e.length ? e.split(',') : [];
+    this.props.dispatch(changeStatsChartPlayers(players));
   }
 
   handleOnClickShowDeltas() {
@@ -155,15 +198,41 @@ class StatsChart extends React.Component {
         <div className='ui form'>
           <div className='inline fields'>
             <div className='field'>
-              <div className='ui radio checkbox'>
-                <input onChange={this.handleOnClickPP.bind(this)} type='radio' name='frequency' checked={this.props.selectedStat === STAT_TYPES.PP} />
-                <label>PP</label>
+              <div className='ui multiple search normal selection dropdown players'>
+                <input type='hidden' />
+                <i className='dropdown icon'></i>
+                <div className='default text'>Select Players</div>
+                <div className='menu'>
+                  {this.props.dailySnapshots.map((user, index) => {
+                    const { username } = user;
+                    return (
+                      <div
+                        className='item'
+                        data-value={username}
+                        key={index}>
+                        {username}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             <div className='field'>
-              <div className='ui radio checkbox'>
-                <input onChange={this.handleOnClickPlaycount.bind(this)} type='radio' name='frequency' checked={this.props.selectedStat === STAT_TYPES.PLAYCOUNT} />
-                <label>Playcount</label>
+              <div className='ui selection dropdown stat'>
+                <i className='dropdown icon' />
+                <div className='default text'>Stat</div>
+                <div className='menu'>
+                  {stats.map((stat, index) => {
+                    return (
+                      <div
+                        className='item'
+                        data-value={stat.value}
+                        key={index}>
+                        {stat.text}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             <div className='field'>
@@ -174,27 +243,6 @@ class StatsChart extends React.Component {
                   value={this.props.showDeltas} />
                 <label>Show daily deltas</label>
               </div>
-            </div>
-            <div className='field'>
-              <input
-                type='text'
-                placeholder='Add another player'
-                onKeyUp={this.handleOnAddPlayer.bind(this)}
-                value={this.props.addPlayerInputValue}
-                onChange={this.handleOnChangeAddPlayerValue.bind(this)} />
-            </div>
-          </div>
-          <div>
-            <div className='ui blue labels'>
-              {this.props.players.map((username, index) => {
-                return (
-                  <a className='ui label' key={index}>
-                    {username} <i
-                      className='icon close'
-                      onClick={this.handleOnClickRemove.bind(this, index)} />
-                  </a>
-                  );
-              })}
             </div>
           </div>
         </div>

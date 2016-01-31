@@ -7,6 +7,7 @@ import {
   CHANGED_STATS_CHART_ADD_PLAYER_INPUT_VALUE,
   ADDED_STATS_CHART_PLAYER,
   REMOVED_STATS_CHART_PLAYER,
+  CHANGED_STATS_CHART_PLAYERS,
   CHANGED_STATS_CHART_STAT,
   CHANGED_STATS_CHART_SHOW_DELTAS,
 } from '../actions';
@@ -63,6 +64,9 @@ function players(state = [], event) {
       const newPlayers = [].concat(state);
       newPlayers.splice(event.payload.index, 1);
       return newPlayers;
+
+    case CHANGED_STATS_CHART_PLAYERS:
+      return event.payload.players;
   }
 
   return state;
