@@ -288,10 +288,9 @@ class PlayerCharts extends Component {
     super(props);
     this.state = {
       data: [],
-      initted: false,
-      player1: 'influxd',
-      player2: 'Arneshie-',
+      players: ['influxd', 'Arneshie-'],
       stat: 0,
+      addPlayerValue: '',
     };
   }
 
@@ -300,24 +299,14 @@ class PlayerCharts extends Component {
     $.get(`${root}/api/daily-snapshots`, { g: this.props.groupId }, (data) => {
       this.setState({
         data,
+        players: data.slice(0, 3).map(user => user.username),
       });
     });
   }
 
-  componentDidUpdate(prevProps) {
-    if (!this.state.initted && !prevProps.visible && this.props.visible) {
-      this._initHighChart();
-      this.setState({
-        initted: true,
-      });
-    }
-  }
-
-  _initHighChart(stat = 0) {
-    let { data } = this.state;
+  _initHighChart() {
+    let { data, players: usernames, stat } = this.state;
     $(() => {
-      const { player1, player2 } = this.state;
-      const usernames = [player1, player2];
       data = data.filter(data => usernames.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
       const text = stat === 0 ? 'Performance Points' : 'Play Count';
       $('#container').highcharts({
@@ -363,34 +352,47 @@ class PlayerCharts extends Component {
     });
   }
 
-  handleOnChangePlayer1Value({ target: { value } }) {
-    this.setState({
-      player1: value,
-    });
-  }
-
-  handleOnChangePlayer2Value({ target: { value } }) {
-    this.setState({
-      player2: value,
-    });
-  }
-
-  handleOnClickUpdate() {
-    this._initHighChart();
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevProps.visible && this.props.visible && this.state.players.length > 0 && this.state.data.length > 0) {
+      this._initHighChart();
+    } else if (this.props.visible && (prevState.players !== this.state.players || prevState.data !== this.state.data || prevState.stat !== this.state.stat)) {
+      this._initHighChart();
+    }
   }
 
   handleOnClickPP(stat) {
     this.setState({
       stat: 0,
     });
-    this._initHighChart(0);
   }
 
   handleOnClickPlaycount() {
     this.setState({
       stat: 1,
     });
-    this._initHighChart(1);
+  }
+
+  handleOnClickRemove(index) {
+    const players = this.state.players.concat([]);
+    players.splice(index, 1);
+    this.setState({
+      players,
+    });
+  }
+
+  handleOnAddPlayer(e) {
+    if (e.key === 'Enter' && this.state.addPlayerValue.length > 0) {
+      this.setState({
+        players: this.state.players.concat([this.state.addPlayerValue]),
+        addPlayerValue: '',
+      });
+    }
+  }
+
+  handleOnChangeAddPlayerValue(e) {
+    this.setState({
+      addPlayerValue: e.target.value,
+    });
   }
 
   render() {
@@ -411,27 +413,27 @@ class PlayerCharts extends Component {
                 <label>Playcount</label>
               </div>
             </div>
+            <div className='field'>
+              <input
+                type='text'
+                placeholder='Add another player'
+                onKeyUp={this.handleOnAddPlayer.bind(this)}
+                value={this.state.addPlayerValue}
+                onChange={this.handleOnChangeAddPlayerValue.bind(this)} />
+            </div>
           </div>
-        </div>
-        <div>
-          <div className='ui input'>
-            <input
-              type='text'
-              placeholder='Player 1'
-              onChange={this.handleOnChangePlayer1Value.bind(this)}
-              value={this.state.player1} />
-          </div>
-          <div className='ui input'>
-            <input
-              type='text'
-              placeholder='Player 2'
-              onChange={this.handleOnChangePlayer2Value.bind(this)}
-              value={this.state.player2} />
-          </div>
-          <div
-            className='ui button'
-            onClick={this.handleOnClickUpdate.bind(this)}>
-            Update
+          <div>
+            <div className='ui blue labels'>
+              {this.state.players.map((username, index) => {
+                return (
+                  <a className='ui label' key={index}>
+                    {username} <i
+                      className='icon close'
+                      onClick={this.handleOnClickRemove.bind(this, index)} />
+                  </a>
+                  );
+              })}
+            </div>
           </div>
         </div>
         <div id='container'>
@@ -576,7 +578,6 @@ export default class App extends Component {
             visible={selectedTabIndex === 1} />
           <PlayerCharts
             groupId={groupId}
-            snapshots={this.state.snapshots}
             visible={selectedTabIndex === 2} />
           {selectedTabIndex === 3 ?
             <Beatmaps
