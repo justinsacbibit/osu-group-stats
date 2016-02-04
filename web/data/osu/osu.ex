@@ -15,12 +15,12 @@ defmodule UwOsu.Osu do
     |> Poison.decode!
   end
 
-  def get_user!(user, client) do
-    _get!("/get_user", client, %{u: user})
+  def get_user!(user, mode, client) do
+    _get!("/get_user", client, %{u: user, m: mode})
   end
 
-  def get_user_best!(user, client) do
-    _get!("/get_user_best", client, %{u: user, limit: 100})
+  def get_user_best!(user, mode, client) do
+    _get!("/get_user_best", client, %{u: user, limit: 100, m: mode})
   end
 
   def get_beatmaps!(params, client) do

@@ -35,8 +35,8 @@ defmodule UwOsu.Models.Beatmap do
     timestamps
   end
 
-  @required_fields ~w(id approved approved_date last_update artist beatmapset_id bpm creator difficultyrating diff_size diff_overall diff_approach diff_drain hit_length source genre_id language_id title total_length version file_md5 mode tags favourite_count playcount passcount max_combo)
-  @optional_fields ~w()
+  @required_fields ~w(id approved approved_date last_update artist beatmapset_id bpm creator difficultyrating diff_size diff_overall diff_approach diff_drain hit_length source genre_id language_id title total_length version file_md5 mode tags favourite_count playcount passcount)
+  @optional_fields ~w(max_combo)
 
   def changeset(event, params \\ :empty) do
     event

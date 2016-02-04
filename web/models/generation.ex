@@ -5,11 +5,12 @@ defmodule UwOsu.Models.Generation do
 
   schema "generation" do
     has_many :snapshots, UserSnapshot
+    field :mode, :integer
 
     timestamps
   end
 
-  @required_fields ~w()
+  @required_fields ~w(mode)
   @optional_fields ~w(id inserted_at updated_at)
 
   def changeset(event, params \\ :empty) do

@@ -6,11 +6,12 @@ defmodule UwOsu.Models.Group do
   schema "group" do
     has_many :user_groups, UserGroup
     has_many :users, through: [:user_groups, :user]
+    field :mode, :integer
 
     timestamps
   end
 
-  @required_fields ~w()
+  @required_fields ~w(mode)
   @optional_fields ~w(id inserted_at updated_at)
 
   def changeset(event, params \\ :empty) do

@@ -5,8 +5,8 @@ defmodule UwOsu.Models.UserGroup do
   alias UwOsu.Models.Group
 
   schema "user_group" do
-    belongs_to :user, User
     belongs_to :group, Group
+    belongs_to :user, User
 
     timestamps
   end

@@ -37,7 +37,14 @@ defmodule UwOsu.DataView do
   def render("daily_snapshot.json", %{user: user}) do
     user
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :events, :generations, :scores])
+    |> Map.drop([
+      :__meta__,
+      :__struct__,
+      :events,
+      :generations,
+      :scores,
+      :user_groups,
+    ])
     |> Map.update(:snapshots, [], fn(snapshots) ->
       snapshots
       |> Enum.map(fn(snapshot) ->
@@ -51,6 +58,7 @@ defmodule UwOsu.DataView do
   def render("farmed_beatmaps.json", %{beatmaps: beatmaps}) do
     render_many(beatmaps, UwOsu.DataView, "beatmap.json", as: :beatmap)
     |> Enum.sort_by(fn(%{scores: scores}) -> length scores end, &>/2)
+    |> Enum.take(10)
   end
 
   def render("beatmap.json", %{beatmap: beatmap}) do
@@ -66,7 +74,15 @@ defmodule UwOsu.DataView do
         |> Map.update(:user, nil, fn(user) ->
           user
           |> Map.from_struct
-          |> Map.drop([:__struct__, :__meta__, :events, :snapshots, :generations, :scores])
+          |> Map.drop([
+            :__meta__,
+            :__struct__,
+            :events,
+            :generations,
+            :scores,
+            :snapshots,
+            :user_groups,
+          ])
         end)
       end)
       |> Enum.sort_by(fn(%{pp: pp}) -> pp end, &>/2)
@@ -80,7 +96,15 @@ defmodule UwOsu.DataView do
   def render("player.json", %{player: player}) do
     player
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :snapshots, :events, :generations, :scores])
+    |> Map.drop([
+      :__meta__,
+      :__struct__,
+      :events,
+      :generations,
+      :scores,
+      :snapshots,
+      :user_groups
+    ])
     |> Map.merge(
       Enum.at(player.snapshots, 0)
       |> Map.from_struct
@@ -95,7 +119,14 @@ defmodule UwOsu.DataView do
   def render("score.json", %{user: user}) do
     user
     |> Map.from_struct
-    |> Map.drop([:__struct__, :__meta__, :snapshots, :generations, :events])
+    |> Map.drop([
+      :__meta__,
+      :__struct__,
+      :events,
+      :generations,
+      :snapshots,
+      :user_groups,
+    ])
     |> Map.update(:scores, [], fn(scores) ->
       Enum.map(scores, fn(score) ->
         score

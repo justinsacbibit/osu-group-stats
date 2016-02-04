@@ -1,16 +1,18 @@
 defmodule UwOsu.Models.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias UwOsu.Models.UserSnapshot
   alias UwOsu.Models.Event
   alias UwOsu.Models.Generation
   alias UwOsu.Models.Score
+  alias UwOsu.Models.UserGroup
+  alias UwOsu.Models.UserSnapshot
 
   schema "user" do
+    has_many :events, Event
     has_many :snapshots, UserSnapshot
     has_many :generations, through: [:snapshots, :generation]
-    has_many :events, Event
     has_many :scores, Score
+    has_many :user_groups, UserGroup
     field :username, :string
 
     timestamps

@@ -5,47 +5,53 @@ defmodule UwOsu.Data do
   alias UwOsu.Models.Beatmap
   alias UwOsu.Models.Event
   alias UwOsu.Models.Generation
+  alias UwOsu.Models.Group
   alias UwOsu.Models.Score
   alias UwOsu.Models.User
   alias UwOsu.Models.UserGroup
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
 
-  def get_daily_generations do
-    from g in Generation,
-      join: i in fragment("SELECT MIN(inserted_at) FROM generation WHERE inserted_at::time >= '5:00' GROUP BY inserted_at::date"),
-      on: g.inserted_at == i.min
-  end
-
   def get_users(group_id) do
     from u in User,
       join: s in assoc(u, :snapshots),
       join: g in assoc(s, :generation),
-      join: gr in UserGroup,
-      on: gr.group_id == ^group_id and gr.user_id == u.id,
+      join: ugr in UserGroup,
+        on: ugr.group_id == ^group_id and ugr.user_id == u.id,
+      join: gr in Group,
+        on: gr.id == ugr.group_id and gr.mode == g.mode,
       where: s.generation_id in fragment("(
         SELECT g.id
         FROM generation g
+        WHERE g.mode = (?)
         ORDER BY inserted_at DESC
         LIMIT 1
-      )"),
+      )", g.mode),
       order_by: [desc: s.pp_raw],
       preload: [snapshots: s]
   end
 
   def get_users_with_snapshots(group_id) do
     from u in User,
-      join: gr in UserGroup,
-      on: gr.group_id == ^group_id and gr.user_id == u.id,
+      join: ugr in UserGroup,
+        on: ugr.group_id == ^group_id and ugr.user_id == u.id,
+      join: gr in Group,
+        on: ugr.group_id == gr.id,
       join: s in UserSnapshot,
         on: s.user_id == u.id,
+      join: g in Generation,
+        on: s.generation_id == g.id and g.mode == gr.mode,
       join: i in fragment("
-      SELECT MIN(inserted_at), s.user_id
+      SELECT MIN(s.inserted_at), s.user_id, g.mode
       FROM user_snapshot s
-      WHERE inserted_at::time >= '5:00'
-      GROUP BY inserted_at::date, s.user_id
+      JOIN generation g
+      ON s.generation_id = g.id
+      WHERE s.inserted_at::time >= '5:00'
+      GROUP BY s.inserted_at::date, s.user_id, g.mode
       "),
-        on: s.inserted_at == i.min and s.user_id == i.user_id,
+        on: s.inserted_at == i.min
+        and s.user_id == i.user_id
+        and i.mode == gr.mode,
       order_by: [asc: s.inserted_at],
       preload: [snapshots: s]
   end
@@ -79,35 +85,45 @@ defmodule UwOsu.Data do
 
   def get_farmed_beatmaps(group_id) do
     from b in Beatmap,
-      join: sc in assoc(b, :scores),
-      join: u in assoc(sc, :user),
-      join: gr in UserGroup,
-      on: gr.group_id == ^group_id and gr.user_id == u.id,
-      where: sc.id in fragment("(
-        SELECT DISTINCT ON (beatmap_id) id
-        FROM score sc
-        WHERE sc.user_id = (?)
-        ORDER BY beatmap_id, date DESC
-        LIMIT 100
-      )", sc.user_id),
-      join: sc_ in fragment("
-        SELECT beatmap_id, count(*) score_count
+      join: sc_ in fragment("(
+      SELECT *
+      FROM (
+        SELECT *,
+          dense_rank()
+          OVER (PARTITION BY mode ORDER BY score_count DESC) AS score_ranking
         FROM (
-          SELECT * FROM score
-          WHERE id = ANY(
-            SELECT DISTINCT ON (beatmap_id) id
-            FROM score sc
-            WHERE sc.user_id = score.user_id
-            ORDER BY beatmap_id, date DESC
-            LIMIT 100
-          )
-        ) sc
-        GROUP BY beatmap_id
-        ORDER BY score_count DESC
-        LIMIT 50
-      "),
-      on: sc_.beatmap_id == b.id,
-      order_by: [desc: sc_.score_count],
+          SELECT *,
+            count(*)
+            OVER (PARTITION BY beatmap_id) AS score_count
+          FROM (
+            SELECT sc.*,
+              b.mode,
+              row_number()
+              OVER (PARTITION BY sc.user_id, b.mode
+                ORDER BY sc.pp DESC) AS ranking
+            FROM (
+              SELECT DISTINCT ON (sc.user_id, sc.beatmap_id) sc.*
+              FROM score sc
+              ORDER BY sc.user_id, sc.beatmap_id, sc.score DESC
+            ) sc
+            JOIN beatmap b
+              ON sc.beatmap_id = b.id
+          ) x
+          WHERE ranking <= 100
+        ) x
+      ) x
+      WHERE score_ranking <= 10
+      )"),
+        on: sc_.beatmap_id == b.id,
+      join: sc in Score,
+        on: sc.id == sc_.id,
+      join: u in User,
+        on: u.id == sc.user_id,
+      join: ugr in UserGroup,
+        on: ugr.group_id == ^group_id and ugr.user_id == u.id,
+      join: gr in Group,
+        on: ugr.group_id == gr.id and gr.mode == b.mode,
+      order_by: [desc: sc_.score_ranking],
       preload: [scores: {sc, user: u}],
       select: b
   end
@@ -116,10 +132,12 @@ defmodule UwOsu.Data do
     from u in User,
       join: s in assoc(u, :scores),
       join: b in assoc(s, :beatmap),
-      join: gr in UserGroup,
-      on: gr.group_id == ^group_id and gr.user_id == u.id,
+      join: ugr in UserGroup,
+        on: ugr.group_id == ^group_id and ugr.user_id == u.id,
+      join: gr in Group,
+        on: ugr.group_id == gr.id and b.mode == gr.mode,
       where: fragment("(?) >= '2016-01-01'", s.date) and fragment("(?) < '2016-02-01'", s.date),
-      order_by: [desc: s.date],
+      order_by: [desc: s.score],
       distinct: [u.id, s.beatmap_id],
       preload: [scores: {s, beatmap: b}]
   end
@@ -140,77 +158,109 @@ defmodule UwOsu.Data do
 
     Logger.info "Fetching #{length beatmap_ids} beatmaps"
 
-    Enum.each beatmap_ids, fn(beatmap_id) ->
-      Logger.debug "Fetching #{beatmap_id}"
-      %HTTPoison.Response{body: [beatmap | _]} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
-      beatmap = Dict.merge beatmap, %{
-        "id" => beatmap["beatmap_id"]
-      }
-      beatmap = Dict.delete beatmap, "beatmap_id"
-      Repo.insert!(Beatmap.changeset(%Beatmap{}, beatmap))
-    end
+    beatmap_ids
+    |> Enum.chunk(100, 100, [])
+    |> Enum.each(fn(beatmap_ids) ->
+      Enum.each beatmap_ids, fn(beatmap_id) ->
+        Logger.debug "Fetching #{beatmap_id}"
+        %HTTPoison.Response{body: [beatmap | _]} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
+        beatmap = Dict.merge beatmap, %{
+          "id" => beatmap["beatmap_id"]
+        }
+        beatmap = Dict.delete beatmap, "beatmap_id"
+        Repo.insert!(Beatmap.changeset(%Beatmap{}, beatmap))
+      end
+
+      :timer.sleep 30000 # sleep for 30 seconds
+    end)
   end
 
   def collect(
+    client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
+  ) do
+    modes = [0, 1, 2, 3]
+    Enum.each modes, fn(mode) ->
+      collect_mode mode, client
+    end
+  end
+
+  def collect_mode(
+    mode,
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)},
     attempts_remaining \\ 5
   ) do
     if attempts_remaining > 0 do
       attempt_number = 5 - attempts_remaining + 1
-      Logger.info "Beginning collection on try ##{attempt_number}"
+      Logger.info "Beginning collection of mode #{mode} on try ##{attempt_number}"
       Osu.start
 
       try do
         query = from u in User,
+          join: ugr in assoc(u, :user_groups),
+          join: gr in assoc(ugr, :group),
+          where: gr.mode == ^mode,
+          distinct: [u.id],
           select: u.id
         user_ids = Repo.all query
 
         Repo.transaction fn ->
-          generation_id = Repo.insert!(%Generation{}).id
+          changeset = Generation.changeset(%Generation{}, %{
+            mode: mode,
+          })
+          generation = Repo.insert!(changeset)
+          generation_id = generation.id
+          Logger.info "Generation #{generation_id}"
 
           Enum.each user_ids, fn(user_id) ->
             Repo.transaction fn ->
-              process_user(user_id, generation_id, client)
+              process_user(user_id, generation, client)
             end
           end
         end
-        Logger.info "Successfully collected on try ##{attempt_number}"
+        Logger.info "Successfully collected mode #{mode} on try ##{attempt_number}"
       rescue
         e ->
           # TODO: Pass error through logger
           IO.inspect e
-          Logger.error "Failed to collect on try ##{attempt_number}"
+          Logger.error "Failed to collect mode #{mode} on try ##{attempt_number}"
           :timer.sleep 10000
-          collect client, attempts_remaining - 1
+          collect_mode mode, client, attempts_remaining - 1
       end
-    else
     end
   end
 
-  defp process_user(user_id_or_username, generation_id, client) do
+  defp process_user(user_id, generation, client) do
     # Get user
-    %HTTPoison.Response{body: [user_dict | _]} = Osu.get_user!(user_id_or_username, client)
+    %HTTPoison.Response{
+      body: body,
+    } = Osu.get_user!(user_id, generation.mode, client)
 
-    # Insert into user table if the user is not already there
-    id = user_dict["user_id"]
-    user = case Repo.get(User, id) do
-      nil ->
-        changeset = User.changeset %User{}, %{id: id}
-        Repo.insert! changeset
-      user ->
-        user
+    case body do
+      [user_dict | _] ->
+        case user_dict["count300"] do
+          nil ->
+            Logger.warn "Skipping user with id #{user_id} for mode #{generation.mode}"
+          _ ->
+            process_user_dict user_dict, generation, client
+        end
+      _ ->
+        Logger.warn "Skipping user with id #{user_id} - get_user returned empty array"
     end
+  end
 
+  defp process_user_dict(user_dict, generation, client) do
     username = user_dict["username"]
-    Logger.debug "Processing for user #{username} (#{id}) with generation #{generation_id}"
+    id = user_dict["user_id"]
+    Logger.debug "Processing for user #{username} (#{id}) with generation #{generation.id}"
 
     # Update username
+    user = Repo.get!(User, id)
     Repo.update! Ecto.Changeset.change(user, username: username)
 
     # Create snapshot
     snapshot_dict = Dict.merge user_dict, %{
       "user_id" => id,
-      "generation_id" => generation_id,
+      "generation_id" => generation.id
     }
     snapshot = UserSnapshot.changeset(%UserSnapshot{}, snapshot_dict)
     Repo.insert!(snapshot)
@@ -241,7 +291,9 @@ defmodule UwOsu.Data do
     end)
 
     # Get user scores
-    %HTTPoison.Response{body: scores} = Osu.get_user_best!(user_id_or_username, client)
+    %HTTPoison.Response{
+      body: scores,
+    } = Osu.get_user_best!(id, generation.mode, client)
 
     Enum.each(scores, fn(score_dict) ->
       {:ok, date} = Ecto.DateTime.cast(score_dict["date"])
