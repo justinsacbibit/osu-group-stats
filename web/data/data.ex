@@ -142,10 +142,9 @@ defmodule UwOsu.Data do
       preload: [scores: {s, beatmap: b}]
   end
 
-  def collect_beatmaps(
-    client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
-  ) do
+  def collect_beatmaps do
     Osu.start
+    client = %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
     Logger.debug "Using API key #{client.api_key}"
 
     query = from s in Score,
@@ -162,17 +161,30 @@ defmodule UwOsu.Data do
     |> Enum.chunk(100, 100, [])
     |> Enum.each(fn(beatmap_ids) ->
       Enum.each beatmap_ids, fn(beatmap_id) ->
-        Logger.debug "Fetching #{beatmap_id}"
-        %HTTPoison.Response{body: [beatmap | _]} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
+        fetch_and_process_beatmap client, beatmap_id
+      end
+      :timer.sleep 30000 # sleep for 30 seconds
+    end)
+  end
+
+  defp fetch_and_process_beatmap(client, beatmap_id, attempts_remaining) when attempts_remaining == 0 do
+    Logger.error "Failed to fetch beatmap with id #{beatmap_id}"
+  end
+
+  defp fetch_and_process_beatmap(client, beatmap_id, attempts_remaining \\ 5) do
+    Logger.debug "Fetching beatmap with id #{beatmap_id}"
+    %HTTPoison.Response{body: body} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
+    case body do
+      [beatmap | _] ->
         beatmap = Dict.merge beatmap, %{
           "id" => beatmap["beatmap_id"]
         }
         beatmap = Dict.delete beatmap, "beatmap_id"
         Repo.insert!(Beatmap.changeset(%Beatmap{}, beatmap))
-      end
-
-      :timer.sleep 30000 # sleep for 30 seconds
-    end)
+      _ ->
+        :timer.sleep 10000 # sleep for 10 seconds
+        fetch_and_process_beatmap beatmap_id, attempts_remaining - 1
+    end
   end
 
   def collect(
