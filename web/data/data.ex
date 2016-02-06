@@ -161,7 +161,7 @@ defmodule UwOsu.Data do
     |> Enum.chunk(100, 100, [])
     |> Enum.each(fn(beatmap_ids) ->
       Enum.each beatmap_ids, fn(beatmap_id) ->
-        fetch_and_process_beatmap client, beatmap_id
+        fetch_and_process_beatmap client, beatmap_id, 5
       end
       :timer.sleep 30000 # sleep for 30 seconds
     end)
@@ -171,7 +171,7 @@ defmodule UwOsu.Data do
     Logger.error "Failed to fetch beatmap with id #{beatmap_id}"
   end
 
-  defp fetch_and_process_beatmap(client, beatmap_id, attempts_remaining \\ 5) do
+  defp fetch_and_process_beatmap(client, beatmap_id, attempts_remaining) do
     Logger.debug "Fetching beatmap with id #{beatmap_id}"
     %HTTPoison.Response{body: body} = Osu.get_beatmaps!(%{b: beatmap_id}, client)
     case body do
@@ -183,7 +183,7 @@ defmodule UwOsu.Data do
         Repo.insert!(Beatmap.changeset(%Beatmap{}, beatmap))
       _ ->
         :timer.sleep 10000 # sleep for 10 seconds
-        fetch_and_process_beatmap beatmap_id, attempts_remaining - 1
+        fetch_and_process_beatmap client, beatmap_id, attempts_remaining - 1
     end
   end
 
