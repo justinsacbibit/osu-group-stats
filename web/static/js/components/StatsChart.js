@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import Highcharts from 'highcharts';
 
 import {
   fetchDailySnapshots,
@@ -10,11 +11,10 @@ import {
   changeStatsChartAddPlayerInput,
   changeStatsChartPlayers,
 } from '../actions';
-import { STAT_TYPES } from '../constants';
 
 const stats = [
   {
-    text: 'PP',
+    text: 'Performance Points',
     value: 'pp_raw',
   },
   {
@@ -46,6 +46,43 @@ const stats = [
     value: 'accuracy',
   },
 ];
+
+
+class Chart extends React.Component {
+  static propTypes = {
+    container: PropTypes.string.isRequired,
+    options: PropTypes.object.isRequired,
+    type: PropTypes.string,
+  };
+  static defaultProps = {
+    type: 'chart',
+  };
+
+  componentDidMount() {
+    this.chart = Highcharts[this.props.type](
+      this.props.container,
+      this.props.options
+    );
+  }
+
+  componentDidUpdate() {
+    this.chart.destroy();
+    this.chart = Highcharts[this.props.type](
+      this.props.container,
+      this.props.options
+    );
+  }
+
+  componentWillUnmount() {
+    this.chart.destroy();
+  }
+
+  render() {
+    return (
+      <div id={this.props.container} />
+    );
+  }
+}
 
 
 class StatsChart extends React.Component {
@@ -82,86 +119,79 @@ class StatsChart extends React.Component {
     });
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.visible && this.props.visible && this.props.players.length > 0 && this.props.dailySnapshots.length > 0) {
-      this._initHighChart();
-    } else if (this.props.visible &&
-                (prevProps.players !== this.props.players
-                  || prevProps.dailySnapshots !== this.props.dailySnapshots
-                    || prevProps.selectedStat !== this.props.selectedStat
-                      || prevProps.showDeltas !== this.props.showDeltas)) {
-      this._initHighChart();
-    }
-  }
-
-  _initHighChart() {
+  buildHighChartOptions() {
     const {
       dailySnapshots,
       players,
       selectedStat,
     } = this.props;
 
-    $(() => { // eslint-disable-line no-undef
-      const filteredData = dailySnapshots.filter(data => players.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
-      const { text } = stats.findIndex(stat => stat.value === selectedStat);
-      let series;
-      if (!this.props.showDeltas) {
-        series = filteredData.map((user) => {
-          return {
-            name: user.username,
-            data: user.snapshots.map((snapshot) => {
-              let date = new Date(snapshot.inserted_at);
-              date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-              let data = null;
-              if (snapshot) {
-                data = snapshot[selectedStat];
-              }
-              return [
-                date,
-                data,
-              ];
-            })
-          };
-        });
-      } else {
-        series = filteredData.map((user) => {
-          const res = [];
-          for (let i = 0; i < user.snapshots.length - 1; i++) {
-            const d1 = user.snapshots[i];
-            const d2 = user.snapshots[i+1];
-            let date = new Date(d1.inserted_at);
-            date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-            let data = null;
-            if (d1 && d2) {
-              data = d2[selectedStat] - d1[selectedStat];
-            }
-            res.push([date, data]);
+    const filteredData = dailySnapshots.filter(data => players.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
+    const { text } = stats.find(stat => stat.value === selectedStat);
+    let series;
+    if (!this.props.showDeltas) {
+      series = filteredData.map((user) => {
+        const data = user.snapshots.map((snapshot) => {
+          let date = new Date(snapshot.inserted_at);
+          date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+          let data = null;
+          if (snapshot) {
+            data = snapshot[selectedStat];
           }
-          return {
-            name: user.username,
-            data: res,
-          };
+          return [
+            date,
+            data,
+          ];
         });
-      }
+        return {
+          name: user.username,
+          data,
+        };
+      });
+    } else {
+      series = filteredData.map((user) => {
+        const res = [];
+        for (let i = 0; i < user.snapshots.length - 1; i++) {
+          const d1 = user.snapshots[i];
+          const d2 = user.snapshots[i+1];
+          let date = new Date(d1.inserted_at);
+          date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+          let data = null;
+          if (d1 && d2) {
+            data = d2[selectedStat] - d1[selectedStat];
+          }
+          res.push([date, data]);
+        }
+        return {
+          name: user.username,
+          data: res,
+        };
+      });
+    }
 
-      $('#container').highcharts({ // eslint-disable-line no-undef
-        chart: {
-          type: 'line'
-        },
+    return {
+      chart: {
+        type: 'line',
+        zoomType: 'x'
+      },
+      title: {
+        text: `${text} over time`,
+      },
+      subtitle: {
+        text: document.ontouchstart === undefined ?
+          'Click and drag in the plot area to zoom in' :
+            'Pinch the chart to zoom in'
+      },
+      xAxis: {
+        type: 'datetime'
+      },
+      yAxis: {
         title: {
           text,
-        },
-        xAxis: {
-          type: 'datetime'
-        },
-        yAxis: {
-          title: {
-            text,
-          }
-        },
-        series,
-      });
-    });
+        }
+      },
+      series,
+    };
   }
 
   handleOnChangeSelectedStat(e) {
@@ -246,8 +276,12 @@ class StatsChart extends React.Component {
             </div>
           </div>
         </div>
-        <div id='container'>
-        </div>
+        {this.props.dailySnapshots.length ?
+          <Chart
+            container='chart'
+            options={this.buildHighChartOptions()}
+            ref='chart' />
+        : null}
       </div>
     );
   }
