@@ -63,6 +63,7 @@ class Chart extends React.Component {
       this.props.container,
       this.props.options
     );
+    this.chart.reflow();
   }
 
   componentDidUpdate(prevProps) {
@@ -105,7 +106,6 @@ class StatsChart extends React.Component {
     players: PropTypes.array.isRequired,
     selectedStat: PropTypes.string.isRequired,
     showDeltas: PropTypes.bool.isRequired,
-    visible: PropTypes.bool.isRequired,
   };
 
   componentDidMount() {
@@ -232,9 +232,8 @@ class StatsChart extends React.Component {
   }
 
   render() {
-    const style = this.props.visible ? {} : { display: 'none' };
     return (
-      <div style={style}>
+      <div>
         <div className='ui form'>
           <div className='inline fields'>
             <div className='field'>
