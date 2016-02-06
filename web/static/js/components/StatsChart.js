@@ -65,12 +65,22 @@ class Chart extends React.Component {
     );
   }
 
-  componentDidUpdate() {
-    this.chart.destroy();
-    this.chart = Highcharts[this.props.type](
-      this.props.container,
-      this.props.options
-    );
+  componentDidUpdate(prevProps) {
+    if (prevProps.options.title.text !== this.props.options.title.text) {
+      this.chart.setTitle(this.props.options.title);
+      this.chart.yAxis[0].setTitle({
+        text: this.props.options.yAxis.title.text,
+      });
+    }
+    const removed = this.chart.series.filter(series => this.props.options.series.indexOf(series) < 0);
+    removed.forEach(series => series.remove());
+    const added = this.props.options.series.filter(series => this.chart.series.indexOf(series) < 0);
+    added.forEach(series => this.chart.addSeries(series));
+    //this.chart.destroy();
+    //this.chart = Highcharts[this.props.type](
+      //this.props.container,
+      //this.props.options
+    //);
   }
 
   componentWillUnmount() {
