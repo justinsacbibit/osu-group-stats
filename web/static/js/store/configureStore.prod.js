@@ -1,6 +1,6 @@
-import { combineReducers, createStore, applyMiddleware, compose } from 'redux';
+import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { syncHistory, routeReducer } from 'react-router-redux';
-import { Router, Route, browserHistory } from 'react-router';
+import { browserHistory } from 'react-router';
 import thunkMiddleware from 'redux-thunk';
 import rootReducer from '../reducers/reducers';
 
