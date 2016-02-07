@@ -7,12 +7,10 @@ defmodule UwOsu.Models.UserGroup do
   schema "user_group" do
     belongs_to :group, Group
     belongs_to :user, User
-
-    timestamps
   end
 
   @required_fields ~w(user_id group_id)
-  @optional_fields ~w(id inserted_at updated_at)
+  @optional_fields ~w(id)
 
   def changeset(event, params \\ :empty) do
     event
