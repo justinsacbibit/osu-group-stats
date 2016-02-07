@@ -188,10 +188,10 @@ export function addStatsChartPlayer(player) {
   };
 }
 
-export function removeStatsChartPlayer(index) {
+export function removeStatsChartPlayer(player) {
   return {
     payload: {
-      index,
+      player,
     },
     type: REMOVED_STATS_CHART_PLAYER,
   };

@@ -3,13 +3,12 @@ import { connect } from 'react-redux';
 import Highcharts from 'highcharts';
 
 import {
-  fetchDailySnapshots,
-  changeStatsChartShowDeltas,
-  changeStatsChartStat,
-  removeStatsChartPlayer,
   addStatsChartPlayer,
   changeStatsChartAddPlayerInput,
-  changeStatsChartPlayers,
+  changeStatsChartShowDeltas,
+  changeStatsChartStat,
+  fetchDailySnapshots,
+  removeStatsChartPlayer,
 } from '../actions';
 
 const stats = [
@@ -72,16 +71,11 @@ class Chart extends React.Component {
       this.chart.yAxis[0].setTitle({
         text: this.props.options.yAxis.title.text,
       });
+      const removed = this.chart.series.filter(series => this.props.options.series.indexOf(series) < 0);
+      removed.forEach(series => series.remove());
+      const added = this.props.options.series.filter(series => this.chart.series.indexOf(series) < 0);
+      added.forEach(series => this.chart.addSeries(series));
     }
-    const removed = this.chart.series.filter(series => this.props.options.series.indexOf(series) < 0);
-    removed.forEach(series => series.remove());
-    const added = this.props.options.series.filter(series => this.chart.series.indexOf(series) < 0);
-    added.forEach(series => this.chart.addSeries(series));
-    //this.chart.destroy();
-    //this.chart = Highcharts[this.props.type](
-      //this.props.container,
-      //this.props.options
-    //);
   }
 
   componentWillUnmount() {
@@ -94,7 +88,6 @@ class Chart extends React.Component {
     );
   }
 }
-
 
 class StatsChart extends React.Component {
   static propTypes = {
@@ -125,8 +118,49 @@ class StatsChart extends React.Component {
     });
 
     $('.ui.dropdown.players').dropdown({ // eslint-disable-line no-undef
-      onChange: this.handleOnChangeSelectedPlayers.bind(this),
+      onAdd: this.handleOnAddSelectedPlayer.bind(this),
+      onRemove: this.handleOnRemoveSelectedPlayer.bind(this),
     });
+  }
+
+  computeSeries(showDeltas, selectedStat, user) {
+    let series;
+    if (!showDeltas) {
+      const data = user.snapshots.map((snapshot) => {
+        let date = new Date(snapshot.inserted_at);
+        date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+        let data = null;
+        if (snapshot) {
+          data = snapshot[selectedStat];
+        }
+        return [
+          date,
+          data,
+        ];
+      });
+      series = {
+        name: user.username,
+        data,
+      };
+    } else {
+      const res = [];
+      for (let i = 0; i < user.snapshots.length - 1; i++) {
+        const d1 = user.snapshots[i];
+        const d2 = user.snapshots[i+1];
+        let date = new Date(d1.inserted_at);
+        date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+        let data = null;
+        if (d1 && d2) {
+          data = d2[selectedStat] - d1[selectedStat];
+        }
+        res.push([date, data]);
+      }
+      series = {
+        name: user.username,
+        data: res,
+      };
+    }
+    return series;
   }
 
   buildHighChartOptions() {
@@ -134,50 +168,12 @@ class StatsChart extends React.Component {
       dailySnapshots,
       players,
       selectedStat,
+      showDeltas,
     } = this.props;
 
     const filteredData = dailySnapshots.filter(data => players.map(username => username.toLowerCase()).indexOf(data.username.toLowerCase()) >= 0);
     const { text } = stats.find(stat => stat.value === selectedStat);
-    let series;
-    if (!this.props.showDeltas) {
-      series = filteredData.map((user) => {
-        const data = user.snapshots.map((snapshot) => {
-          let date = new Date(snapshot.inserted_at);
-          date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-          let data = null;
-          if (snapshot) {
-            data = snapshot[selectedStat];
-          }
-          return [
-            date,
-            data,
-          ];
-        });
-        return {
-          name: user.username,
-          data,
-        };
-      });
-    } else {
-      series = filteredData.map((user) => {
-        const res = [];
-        for (let i = 0; i < user.snapshots.length - 1; i++) {
-          const d1 = user.snapshots[i];
-          const d2 = user.snapshots[i+1];
-          let date = new Date(d1.inserted_at);
-          date = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-          let data = null;
-          if (d1 && d2) {
-            data = d2[selectedStat] - d1[selectedStat];
-          }
-          res.push([date, data]);
-        }
-        return {
-          name: user.username,
-          data: res,
-        };
-      });
-    }
+    const series = filteredData.map(this.computeSeries.bind(this, showDeltas, selectedStat));
 
     return {
       chart: {
@@ -185,7 +181,7 @@ class StatsChart extends React.Component {
         zoomType: 'x'
       },
       title: {
-        text: `${text} over time`,
+        text: showDeltas ? `${text} per day` : `${text} over time`,
       },
       subtitle: {
         text: document.ontouchstart === undefined ?
@@ -208,17 +204,23 @@ class StatsChart extends React.Component {
     this.props.dispatch(changeStatsChartStat(e));
   }
 
-  handleOnChangeSelectedPlayers(e) {
-    const players = e.length ? e.split(',') : [];
-    this.props.dispatch(changeStatsChartPlayers(players));
+  handleOnAddSelectedPlayer(e) {
+    const {
+      dailySnapshots,
+      selectedStat,
+      showDeltas,
+    } = this.props;
+    this.refs.chart.chart.addSeries(this.computeSeries(showDeltas, selectedStat, dailySnapshots.find(player => player.username === e)));
+    this.props.dispatch(addStatsChartPlayer(e));
+  }
+
+  handleOnRemoveSelectedPlayer(e) {
+    this.refs.chart.chart.series.find(series => series.name === e).remove();
+    this.props.dispatch(removeStatsChartPlayer(e));
   }
 
   handleOnClickShowDeltas() {
     this.props.dispatch(changeStatsChartShowDeltas());
-  }
-
-  handleOnClickRemove(index) {
-    this.props.dispatch(removeStatsChartPlayer(index));
   }
 
   handleOnAddPlayer(e) {

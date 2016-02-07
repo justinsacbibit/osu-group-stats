@@ -55,14 +55,16 @@ function isLoading(state = false, event) {
 function players(state = [], event) {
   switch (event.type) {
     case FETCH_DAILY_SNAPSHOTS_SUCCESS:
-      return event.payload.dailySnapshots.slice(0, 3).map(user => user.username);
+      //return event.payload.dailySnapshots.slice(0, 3).map(user => user.username);
+      return [];
 
     case ADDED_STATS_CHART_PLAYER:
       return state.concat([event.payload.player]);
 
     case REMOVED_STATS_CHART_PLAYER:
       const newPlayers = [].concat(state);
-      newPlayers.splice(event.payload.index, 1);
+      const index = newPlayers.findIndex(player => player === event.payload.player);
+      newPlayers.splice(index, 1);
       return newPlayers;
 
     case CHANGED_STATS_CHART_PLAYERS:
