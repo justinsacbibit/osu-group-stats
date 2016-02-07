@@ -121,6 +121,11 @@ class StatsChart extends React.Component {
       onAdd: this.handleOnAddSelectedPlayer.bind(this),
       onRemove: this.handleOnRemoveSelectedPlayer.bind(this),
     });
+    $('.ui.dropdown.players') // eslint-disable-line no-undef
+    .dropdown(
+      'set selected',
+      this.props.players
+    );
   }
 
   computeSeries(showDeltas, selectedStat, user) {
