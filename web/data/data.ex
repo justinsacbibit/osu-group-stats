@@ -128,7 +128,9 @@ defmodule UwOsu.Data do
       select: b
   end
 
-  def get_latest_scores(group_id) do
+  def get_latest_scores(group_id, before, since) do
+    {:ok, before} = Ecto.DateTime.cast before
+    {:ok, since} = Ecto.DateTime.cast since
     from u in User,
       join: s in assoc(u, :scores),
       join: b in assoc(s, :beatmap),
@@ -136,7 +138,7 @@ defmodule UwOsu.Data do
         on: ugr.group_id == ^group_id and ugr.user_id == u.id,
       join: gr in Group,
         on: ugr.group_id == gr.id and b.mode == gr.mode,
-      where: fragment("(?) >= '2016-01-01'", s.date) and fragment("(?) < '2016-02-01'", s.date),
+      where: fragment("(?) >= (?)", s.date, type(^since, Ecto.DateTime)) and fragment("(?) < (?)", s.date, type(^before, Ecto.DateTime)),
       order_by: [desc: s.score],
       distinct: [u.id, s.beatmap_id],
       preload: [scores: {s, beatmap: b}]

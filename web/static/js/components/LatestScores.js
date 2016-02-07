@@ -22,8 +22,11 @@ class LatestScores extends React.Component {
       scores,
     } = this.props;
 
+    const before = '2016-02-01T00:00:00Z';
+    const since = '2016-01-01T00:00:00Z';
+
     if (scores.length === 0) {
-      dispatch(fetchLatestScores(groupId));
+      dispatch(fetchLatestScores(groupId, before, since));
     }
   }
 

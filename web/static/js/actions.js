@@ -249,11 +249,11 @@ function fetchLatestScoresFailure(error) {
   };
 }
 
-export function fetchLatestScores(groupId) {
+export function fetchLatestScores(groupId, before, since) {
   return dispatch => {
     dispatch(fetchLatestScoresRequest(groupId));
 
-    return fetch(`${root}/api/latest-scores?g=${groupId}`)
+    return fetch(`${root}/api/latest-scores?g=${groupId}&before=${before}&since=${since}`)
     .then(response => {
       if (response.status >= 400) {
         throw new Error();

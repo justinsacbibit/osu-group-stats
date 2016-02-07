@@ -23,8 +23,8 @@ defmodule UwOsu.DataController do
     render conn, "daily_snapshots.json", users: users
   end
 
-  def latest_scores(conn, %{"g" => group_id}) do
-    users = Repo.all Data.get_latest_scores(group_id)
+  def latest_scores(conn, %{"g" => group_id, "before" => before, "since" => since}) do
+    users = Repo.all Data.get_latest_scores(group_id, before, since)
     render conn, "latest_scores.json", users: users
   end
 end
