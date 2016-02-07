@@ -99,6 +99,7 @@ class StatsChart extends React.Component {
     players: PropTypes.array.isRequired,
     selectedStat: PropTypes.string.isRequired,
     showDeltas: PropTypes.bool.isRequired,
+    visible: PropTypes.bool.isRequired,
   };
 
   componentDidMount() {
@@ -239,8 +240,9 @@ class StatsChart extends React.Component {
   }
 
   render() {
+    const style = this.props.visible ? {} : { display: 'none' };
     return (
-      <div>
+      <div style={style}>
         <div className='ui form'>
           <div className='inline fields'>
             <div className='field'>
@@ -292,7 +294,7 @@ class StatsChart extends React.Component {
             </div>
           </div>
         </div>
-        {this.props.dailySnapshots.length ?
+        {(this.props.visible || this.refs.chart) && this.props.dailySnapshots.length ?
           <Chart
             container='chart'
             options={this.buildHighChartOptions()}
