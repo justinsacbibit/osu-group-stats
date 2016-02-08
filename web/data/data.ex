@@ -91,14 +91,16 @@ defmodule UwOsu.Data do
 
   def get_farmed_beatmaps(group_id) do
     from b in Beatmap,
-      join: sc_ in fragment("(
+      join: sc_ in fragment(
+      """
+      (
       SELECT *
       FROM (
         SELECT *,
           dense_rank()
-          OVER (PARTITION BY mode ORDER BY score_count DESC) AS score_ranking
+          OVER (PARTITION BY group_id ORDER BY score_count DESC) AS score_ranking
         FROM (
-          SELECT *,
+          SELECT x.mode, beatmap_id, x.id, group_id,
             count(*)
             OVER (PARTITION BY beatmap_id) AS score_count
           FROM (
@@ -115,11 +117,16 @@ defmodule UwOsu.Data do
             JOIN beatmap b
               ON sc.beatmap_id = b.id
           ) x
+          JOIN user_group ugr
+            ON ugr.user_id = x.user_id
+          JOIN "group" g
+            ON ugr.group_id = g.id
           WHERE ranking <= 100
         ) x
       ) x
       WHERE score_ranking <= 10
-      )"),
+      )
+      """),
         on: sc_.beatmap_id == b.id,
       join: sc in Score,
         on: sc.id == sc_.id,
