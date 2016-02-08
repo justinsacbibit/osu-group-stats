@@ -23,6 +23,7 @@ defmodule UwOsu.Router do
     get "/players", DataController, :players
     get "/daily-snapshots", DataController, :daily_snapshots
     get "/latest-scores", DataController, :latest_scores
+    get "/groups", DataController, :groups
   end
 
   scope "/", UwOsu do

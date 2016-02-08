@@ -48,44 +48,31 @@ class TabbedStats extends React.Component {
 
     return (
       <div>
-        <div className='ui fixed inverted menu'>
-          <div className='ui container'>
-            <a className='header item'>
-              <img src='/images/uw.png' />
-              &nbsp;
-              UW/Laurier osu! Stats
-            </a>
-          </div>
+        <div className='ui tabular menu'>
+          {menuItems.map((item, index) => {
+            return (
+              <a
+                className={classNames('item', { active: selectedTabIndex === index })}
+                key={index}
+                onClick={this.handleMenuItemSelection.bind(this, index)}>{item}</a>
+              );
+          })}
         </div>
-        <div
-          className='ui main container'
-          style={{ marginTop: '7em' }}>
-          <div className='ui tabular menu'>
-            {menuItems.map((item, index) => {
-              return (
-                <a
-                  className={classNames('item', { active: selectedTabIndex === index })}
-                  key={index}
-                  onClick={this.handleMenuItemSelection.bind(this, index)}>{item}</a>
-                );
-            })}
-          </div>
-          {selectedTabIndex === 0 ?
-            <PlayerTable
-              groupId={groupId} />
-          : null}
-          {selectedTabIndex === 1 ?
-            <LatestScores
-              groupId={groupId} />
-          : null}
-          <StatsChart
-            groupId={groupId}
-            visible={selectedTabIndex === 2} />
-          {selectedTabIndex === 3 ?
-            <FarmedBeatmaps
-              groupId={groupId} />
-          : null}
-        </div>
+        {selectedTabIndex === 0 ?
+          <PlayerTable
+            groupId={groupId} />
+        : null}
+        {selectedTabIndex === 1 ?
+          <LatestScores
+            groupId={groupId} />
+        : null}
+        <StatsChart
+          groupId={groupId}
+          visible={selectedTabIndex === 2} />
+        {selectedTabIndex === 3 ?
+          <FarmedBeatmaps
+            groupId={groupId} />
+        : null}
       </div>
     );
   }

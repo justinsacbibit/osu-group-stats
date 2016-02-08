@@ -142,5 +142,30 @@ defmodule UwOsu.DataView do
       |> Enum.take(10)
     end)
   end
+
+  def render("groups.json", %{groups: groups}) do
+    render_many groups, UwOsu.DataView, "group.json", as: :group
+  end
+
+  def render("group.json", %{group: group}) do
+    group
+    |> Map.from_struct
+    |> Map.drop([:__meta__, :__struct__, :user_groups])
+    |> Map.update(:users, [], fn(users) ->
+      Enum.map(users, fn(user) ->
+        user
+        |> Map.from_struct
+        |> Map.drop([
+          :__meta__,
+          :__struct__,
+          :events,
+          :generations,
+          :scores,
+          :user_groups,
+          :snapshots,
+        ])
+      end)
+    end)
+  end
 end
 

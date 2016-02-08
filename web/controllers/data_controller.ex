@@ -27,4 +27,9 @@ defmodule UwOsu.DataController do
     users = Repo.all Data.get_latest_scores(group_id, before, since)
     render conn, "latest_scores.json", users: users
   end
+
+  def groups(conn, _params) do
+    groups = Repo.all Data.get_groups
+    render conn, "groups.json", groups: groups
+  end
 end

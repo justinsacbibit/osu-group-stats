@@ -24,6 +24,10 @@ export const FETCH_LATEST_SCORES_REQUEST = 'FETCH_LATEST_SCORES_REQUEST';
 export const FETCH_LATEST_SCORES_SUCCESS = 'FETCH_LATEST_SCORES_SUCCESS';
 export const FETCH_LATEST_SCORES_FAILURE = 'FETCH_LATEST_SCORES_FAILURE';
 
+export const FETCH_GROUPS_REQUEST = 'FETCH_GROUPS_REQUEST';
+export const FETCH_GROUPS_SUCCESS = 'FETCH_GROUPS_SUCCESS';
+export const FETCH_GROUPS_FAILURE = 'FETCH_GROUPS_FAILURE';
+
 const root = location.protocol + '//' + location.host;
 
 function fetchFarmedBeatmapsRequest(groupId) {
@@ -263,6 +267,50 @@ export function fetchLatestScores(groupId, before, since) {
       return dispatch(fetchLatestScoresSuccess(response));
     }, error => {
       return dispatch(fetchLatestScoresFailure(error));
+    });
+  };
+}
+
+function fetchGroupsRequest() {
+  return {
+    payload: {
+    },
+    type: FETCH_GROUPS_REQUEST,
+  };
+}
+
+function fetchGroupsSuccess(groups) {
+  return {
+    payload: {
+      groups,
+    },
+    type: FETCH_GROUPS_SUCCESS,
+  };
+}
+
+function fetchGroupsFailure(error) {
+  return {
+    payload: {
+      error,
+    },
+    type: FETCH_GROUPS_FAILURE,
+  };
+}
+
+export function fetchGroups() {
+  return dispatch => {
+    dispatch(fetchGroupsRequest());
+
+    return fetch(`${root}/api/groups`)
+    .then(response => {
+      if (response.status >= 400) {
+        throw new Error();
+      }
+      return response.json();
+    }).then(response => {
+      return dispatch(fetchGroupsSuccess(response));
+    }, error => {
+      return dispatch(fetchGroupsFailure(error));
     });
   };
 }

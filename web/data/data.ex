@@ -12,6 +12,12 @@ defmodule UwOsu.Data do
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
 
+  def get_groups do
+    from g in Group,
+      #join: u in assoc(g, users),
+      preload: [:users]
+  end
+
   def get_users(group_id) do
     from u in User,
       join: s in assoc(u, :snapshots),
