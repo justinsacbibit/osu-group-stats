@@ -25,9 +25,7 @@ class FarmedBeatmaps extends React.Component {
       groupId,
     } = this.props;
 
-    if (beatmaps.length === 0) {
-      dispatch(fetchFarmedBeatmaps(groupId));
-    }
+    dispatch(fetchFarmedBeatmaps(groupId));
   }
 
   handleOnRowSelection(selectedRow) {

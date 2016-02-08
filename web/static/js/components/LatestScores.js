@@ -7,6 +7,9 @@ import {
 import { getModsArray } from '../utils';
 
 
+const before = '2016-02-01T00:00:00Z';
+const since = '2016-01-01T00:00:00Z';
+
 class LatestScores extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
@@ -19,15 +22,9 @@ class LatestScores extends React.Component {
     const {
       dispatch,
       groupId,
-      scores,
     } = this.props;
 
-    const before = '2016-02-01T00:00:00Z';
-    const since = '2016-01-01T00:00:00Z';
-
-    if (scores.length === 0) {
-      dispatch(fetchLatestScores(groupId, before, since));
-    }
+    dispatch(fetchLatestScores(groupId, before, since));
   }
 
   render() {

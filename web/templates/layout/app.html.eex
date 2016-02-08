@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js"></script>
+    <!-- TODO: Comment once Highcharts > 4.22 is released -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
   </head>
   <body>
     <%= render @view_module, @view_template, assigns %>

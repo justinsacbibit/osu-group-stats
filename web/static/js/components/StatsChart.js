@@ -1,10 +1,12 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import Highcharts from 'highcharts';
+// TODO: Uncomment when Highcharts > 4.2.2 is released
+// import Highcharts from 'highcharts';
 
 import {
   addStatsChartPlayer,
   changeStatsChartAddPlayerInput,
+  changeStatsChartPlayers,
   changeStatsChartShowDeltas,
   changeStatsChartStat,
   fetchDailySnapshots,
@@ -104,14 +106,11 @@ class StatsChart extends React.Component {
 
   componentDidMount() {
     const {
-      dailySnapshots,
       dispatch,
       groupId,
     } = this.props;
 
-    if (dailySnapshots.length === 0) {
-      dispatch(fetchDailySnapshots(groupId));
-    }
+    dispatch(fetchDailySnapshots(groupId));
 
     $('.ui.dropdown.stat').dropdown('set selected', 'pp_raw'); // eslint-disable-line no-undef
     $('.ui.dropdown.stat').dropdown({ // eslint-disable-line no-undef
@@ -124,9 +123,13 @@ class StatsChart extends React.Component {
     });
     $('.ui.dropdown.players') // eslint-disable-line no-undef
     .dropdown(
-      'set selected',
+      'set exactly',
       this.props.players
     );
+  }
+
+  componentWillUnmount() {
+    this.props.dispatch(changeStatsChartPlayers([]));
   }
 
   computeSeries(showDeltas, selectedStat, user) {
@@ -216,12 +219,16 @@ class StatsChart extends React.Component {
       selectedStat,
       showDeltas,
     } = this.props;
-    this.refs.chart.chart.addSeries(this.computeSeries(showDeltas, selectedStat, dailySnapshots.find(player => player.username === e)));
+    if (this.refs.chart) {
+      this.refs.chart.chart.addSeries(this.computeSeries(showDeltas, selectedStat, dailySnapshots.find(player => player.username === e)));
+    }
     this.props.dispatch(addStatsChartPlayer(e));
   }
 
   handleOnRemoveSelectedPlayer(e) {
-    this.refs.chart.chart.series.find(series => series.name === e).remove();
+    if (this.refs.chart) {
+      this.refs.chart.chart.series.find(series => series.name === e).remove();
+    }
     this.props.dispatch(removeStatsChartPlayer(e));
   }
 

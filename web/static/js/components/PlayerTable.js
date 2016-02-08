@@ -31,9 +31,7 @@ class PlayerTable extends React.Component {
       players,
     } = this.props;
 
-    if (players.length === 0) {
-      dispatch(fetchPlayers(groupId));
-    }
+    dispatch(fetchPlayers(groupId));
   }
 
   handleOnClickSortableColumn(index) {
