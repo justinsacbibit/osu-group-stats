@@ -32,7 +32,7 @@ rules:
   no-unused-vars: 2
   no-use-before-define: [ 2, 'nofunc' ]
   no-var: 2
-  no-warning-comments: [1, { terms: [ 'todo', 'fixme' ], location: 'anywhere' }]
+  # no-warning-comments: [1, { terms: [ 'todo', 'fixme' ], location: 'anywhere' }]
   object-curly-spacing: [ 2, 'always' ]
   quotes: [ 2, 'single' ]
   semi: [ 2, 'always' ]
