@@ -28,7 +28,6 @@ class PlayerTable extends React.Component {
     const {
       dispatch,
       groupId,
-      players,
     } = this.props;
 
     dispatch(fetchPlayers(groupId));

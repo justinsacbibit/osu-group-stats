@@ -2,7 +2,6 @@ defmodule UwOsu.Models.User do
   use Ecto.Schema
   import Ecto.Changeset
   alias UwOsu.Models.Event
-  alias UwOsu.Models.Generation
   alias UwOsu.Models.Score
   alias UwOsu.Models.UserGroup
   alias UwOsu.Models.UserSnapshot

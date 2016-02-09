@@ -20,7 +20,6 @@ class FarmedBeatmaps extends React.Component {
 
   componentDidMount() {
     const {
-      beatmaps,
       dispatch,
       groupId,
     } = this.props;

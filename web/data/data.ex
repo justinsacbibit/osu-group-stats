@@ -182,7 +182,7 @@ defmodule UwOsu.Data do
     end)
   end
 
-  defp fetch_and_process_beatmap(client, beatmap_id, attempts_remaining) when attempts_remaining == 0 do
+  defp fetch_and_process_beatmap(_client, beatmap_id, attempts_remaining) when attempts_remaining == 0 do
     Logger.error "Failed to fetch beatmap with id #{beatmap_id}"
   end
 
