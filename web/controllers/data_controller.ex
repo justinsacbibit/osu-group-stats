@@ -2,6 +2,7 @@ defmodule UwOsu.DataController do
   use UwOsu.Web, :controller
   alias UwOsu.Data
   alias UwOsu.Repo
+  alias UwOsu.Models.Generation
 
   def weekly_snapshots(conn, _params) do
     snapshots = Repo.all Data.get_weekly_snapshots
@@ -31,5 +32,11 @@ defmodule UwOsu.DataController do
   def groups(conn, _params) do
     groups = Repo.all Data.get_groups
     render conn, "groups.json", groups: groups
+  end
+
+  def generations(conn, _params) do
+    generations = Repo.all from g in Generation,
+      order_by: [desc: g.id]
+    render conn, "generations.json", generations: generations
   end
 end

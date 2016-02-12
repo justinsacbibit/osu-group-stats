@@ -167,5 +167,15 @@ defmodule UwOsu.DataView do
       end)
     end)
   end
+
+  def render("generations.json", %{generations: generations}) do
+    render_many generations, UwOsu.DataView, "generation.json", as: :generation
+  end
+
+  def render("generation.json", %{generation: generation}) do
+    generation
+    |> Map.from_struct
+    |> Map.drop([:__meta__, :__struct__, :snapshots])
+  end
 end
 
