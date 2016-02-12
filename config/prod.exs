@@ -70,3 +70,11 @@ config :uw_osu, UwOsu.Repo,
   url: System.get_env("DATABASE_URL"),
   pool_size: 20
 
+config :quantum, cron: [
+  # Daily at midnight EST
+  "0 5 * * *": {UwOsu.Data, :collect},
+
+  # Daily 1:00 AM EST
+  "0 6 * * *": {UwOsu.Data, :collect_beatmaps},
+]
+
