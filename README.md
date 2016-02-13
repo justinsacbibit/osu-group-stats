@@ -1,4 +1,4 @@
-# osu! Group Stats
+# osu! Group Stats [![Build Status](https://travis-ci.org/justinsacbibit/osu-group-stats.svg?branch=master)](https://travis-ci.org/justinsacbibit/osu-group-stats)
 
 ## Required software
 
