@@ -2,11 +2,13 @@ defmodule UwOsu.RepoHelper do
   alias UwOsu.ApiData
   alias UwOsu.Repo
   alias UwOsu.Models.Beatmap
-  alias UwOsu.Models.Generation
   alias UwOsu.Models.Event
-  alias UwOsu.Models.User
-  alias UwOsu.Models.UserSnapshot
+  alias UwOsu.Models.Generation
+  alias UwOsu.Models.Group
   alias UwOsu.Models.Score
+  alias UwOsu.Models.User
+  alias UwOsu.Models.UserGroup
+  alias UwOsu.Models.UserSnapshot
 
   def insert_score!(overrides \\ %{}) do
     changeset = Score.changeset %Score{}, ApiData.score overrides

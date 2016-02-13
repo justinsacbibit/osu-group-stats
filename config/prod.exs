@@ -72,9 +72,9 @@ config :uw_osu, UwOsu.Repo,
 
 config :quantum, cron: [
   # Daily at midnight EST
-  "0 5 * * *": {UwOsu.Data, :collect},
+  "0 5 * * *": {UwOsu.Data.UserCollection, :collect},
 
   # Daily 1:00 AM EST
-  "0 6 * * *": {UwOsu.Data, :collect_beatmaps},
+  "0 6 * * *": {UwOsu.Data.BeatmapCollection, :collect_beatmaps},
 ]
 

@@ -18,7 +18,7 @@ defmodule UwOsu.Models.User do
   end
 
   @required_fields ~w(id)
-  @optional_fields ~w(username)
+  @optional_fields ~w(username inserted_at updated_at)
 
   def changeset(event, params \\ :empty) do
     event

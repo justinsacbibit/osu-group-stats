@@ -28,7 +28,7 @@ defmodule UwOsu.Models.UserSnapshot do
   end
 
   @required_fields ~w(user_id generation_id username count300 count100 count50 playcount ranked_score total_score pp_rank level pp_raw accuracy count_rank_ss count_rank_s count_rank_a country pp_country_rank)
-  @optional_fields ~w()
+  @optional_fields ~w(inserted_at updated_at)
 
   def changeset(event, params \\ :empty) do
     event
