@@ -15,3 +15,5 @@ To run the osu! Group Stats app:
   3. Start Phoenix endpoint with `mix phoenix.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+
+Note that these instructions have not been tested on a "fresh" machine, so there may be additional steps required that I may have forgotten about. Please file an issue if you're having trouble getting set up!
