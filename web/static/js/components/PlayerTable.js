@@ -3,8 +3,10 @@ import classNames from 'classnames';
 import { connect } from 'react-redux';
 
 import {
+  changePlayerTableSortOrder,
   fetchPlayers,
 } from '../actions';
+import { SORT_ORDERS } from '../constants';
 
 
 class PlayerTable extends React.Component {
@@ -13,16 +15,11 @@ class PlayerTable extends React.Component {
     groupId: PropTypes.string.isRequired,
     isLoading: PropTypes.bool.isRequired,
     players: PropTypes.array.isRequired,
+    sortOrder: PropTypes.shape({
+      direction: PropTypes.string.isRequired,
+      index: PropTypes.number.isRequired,
+    }).isRequired,
   };
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      sortIndex: 0,
-      sortDirection: 'descending',
-    };
-  }
 
   componentDidMount() {
     const {
@@ -34,22 +31,9 @@ class PlayerTable extends React.Component {
   }
 
   handleOnClickSortableColumn(index) {
-    if (index === this.state.sortIndex) {
-      if (this.state.sortDirection === 'ascending') {
-        this.setState({
-          sortDirection: 'descending',
-        });
-      } else {
-        this.setState({
-          sortDirection: 'ascending',
-        });
-      }
-    } else {
-      this.setState({
-        sortDirection: 'descending',
-        sortIndex: index,
-      });
-    }
+    const { dispatch } = this.props;
+
+    dispatch(changePlayerTableSortOrder(index));
   }
 
   _sortPlayers(p1, p2) {
@@ -60,10 +44,10 @@ class PlayerTable extends React.Component {
       [p => p.playcount, -1],
       [p => p.accuracy, -1],
     ];
-    const column = columnMap[this.state.sortIndex];
+    const column = columnMap[this.props.sortOrder.index];
     let d1 = column[0](p1);
     let d2 = column[0](p2);
-    if (this.state.sortDirection === 'ascending') {
+    if (this.props.sortOrder.direction === SORT_ORDERS.ASCENDING) {
       const temp = d1;
       d1 = d2;
       d2 = temp;
@@ -101,12 +85,12 @@ class PlayerTable extends React.Component {
                 Username
               </th>
               {sortableColumns.map((header, index) => {
-                const sorted = index === this.state.sortIndex;
+                const sorted = index === this.props.sortOrder.index;
                 return (
                   <th
                     className={classNames(sorted, {
                       'sorted': sorted,
-                      [this.state.sortDirection]: sorted,
+                      [this.props.sortOrder.direction]: sorted,
                     })}
                     key={index}
                     onClick={this.handleOnClickSortableColumn.bind(this, index)}>
@@ -156,6 +140,7 @@ function select(state) {
   return {
     isLoading: state.players.isLoading,
     players: state.players.players,
+    sortOrder: state.players.sortOrder,
   };
 }
 

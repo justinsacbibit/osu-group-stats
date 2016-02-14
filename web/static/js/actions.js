@@ -10,6 +10,8 @@ export const FETCH_PLAYERS_FAILURE = 'FETCH_PLAYERS_FAILURE';
 export const FETCH_PLAYERS_REQUEST = 'FETCH_PLAYERS_REQUEST';
 export const FETCH_PLAYERS_SUCCESS = 'FETCH_PLAYERS_SUCCESS';
 
+export const CHANGED_PLAYER_TABLE_SORT_ORDER = 'CHANGED_PLAYER_TABLE_SORT_ORDER';
+
 export const FETCH_DAILY_SNAPSHOTS_FAILURE = 'FETCH_DAILY_SNAPSHOTS_FAILURE';
 export const FETCH_DAILY_SNAPSHOTS_REQUEST = 'FETCH_DAILY_SNAPSHOTS_REQUEST';
 export const FETCH_DAILY_SNAPSHOTS_SUCCESS = 'FETCH_DAILY_SNAPSHOTS_SUCCESS';
@@ -126,6 +128,15 @@ export function fetchPlayers(groupId) {
     }, error => {
       return dispatch(fetchPlayersFailure(error));
     });
+  };
+}
+
+export function changePlayerTableSortOrder(index) {
+  return {
+    payload: {
+      index,
+    },
+    type: CHANGED_PLAYER_TABLE_SORT_ORDER,
   };
 }
 
