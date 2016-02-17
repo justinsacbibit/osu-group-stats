@@ -12,6 +12,25 @@ defmodule UwOsu.Data.UserCollection do
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
 
+  def find_top do
+    HTTPoison.start
+    pages = 1..200
+    pages = 1..20
+    pages
+    |> Enum.map(fn(page) ->
+      url = "https://osu.ppy.sh/p/pp/?m=0&s=3&o=1&page=#{page}"
+      %HTTPoison.Response{body: body} = HTTPoison.get!(url)
+
+      ids = Regex.scan(~r/a href=("|')\/u\/(?<id>\d+)("|')/, body)
+      |> Enum.map(fn([_, _, string_id, _]) ->
+        {int, _} = Integer.parse(string_id)
+        int
+      end)
+    end)
+    |> List.flatten
+    |> Enum.chunk(500)
+  end
+
   def collect(
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
   ) do
