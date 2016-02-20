@@ -1,11 +1,13 @@
 defmodule UwOsu.Models.Group do
   use Ecto.Schema
   import Ecto.Changeset
+  alias UwOsu.Models.DynamicGroup
   alias UwOsu.Models.UserGroup
 
   schema "group" do
     has_many :user_groups, UserGroup
     has_many :users, through: [:user_groups, :user]
+    has_one :dynamic_group, DynamicGroup
     field :mode, :integer
 
     timestamps

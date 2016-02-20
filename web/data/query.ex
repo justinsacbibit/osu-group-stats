@@ -14,6 +14,9 @@ defmodule UwOsu.Data.Query do
     from g in Group,
       preload: [:users]
   end
+  
+  # TODO: Modify queries that use the generation table to instead use
+  # an inserted_at column
 
   def get_users(group_id) do
     from u in User,
