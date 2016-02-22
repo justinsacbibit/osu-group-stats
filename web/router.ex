@@ -7,12 +7,10 @@ defmodule UwOsu.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug PlugExometer
   end
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug PlugExometer
   end
 
   scope "/api", UwOsu do

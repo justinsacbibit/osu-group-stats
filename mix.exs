@@ -19,7 +19,7 @@ defmodule UwOsu.Mixfile do
   def application do
     [mod: {UwOsu, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :quantum, :httpoison, :exometer]]
+                    :phoenix_ecto, :postgrex, :quantum, :httpoison, :timex]]
   end
 
   # Specifies which paths to compile per environment.
@@ -42,8 +42,7 @@ defmodule UwOsu.Mixfile do
      {:poison, "~> 1.5"},
      {:mock, "~> 0.1.1", only: :test},
      {:mix_test_watch, "~> 0.2", only: :dev},
-     {:exometer_core, github: "PSPDFKit-labs/exometer_core", override: true},
-     {:exometer, github: "PSPDFKit-labs/exometer"},
+     {:timex, "~> 1.0.1"},
      {:edown, github: "uwiger/edown", tag: "0.7", override: true}]
   end
 

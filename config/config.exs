@@ -21,8 +21,6 @@ config :logger, :console,
 
 config :uw_osu, osu_api_key: System.get_env("OSU_API_KEY")
 
-import_config "exometer.exs"
-
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
