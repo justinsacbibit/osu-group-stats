@@ -1,5 +1,6 @@
 defmodule UwOsu.Data.Query do
   import Ecto.Query, only: [from: 2]
+  use Timex
   alias UwOsu.Models.Beatmap
   alias UwOsu.Models.Event
   alias UwOsu.Models.Generation
@@ -15,7 +16,10 @@ defmodule UwOsu.Data.Query do
       preload: [:users]
   end
 
-  def get_users(group_id) do
+  def get_users(group_id, days_delta \\ 0) do
+    date = Date.now("America/Toronto")
+    |> Date.subtract({0, days_delta * 86400, 0})
+    IO.inspect date
     from u in User,
       join: s in assoc(u, :snapshots),
       join: g in assoc(s, :generation),
@@ -23,14 +27,9 @@ defmodule UwOsu.Data.Query do
         on: ugr.group_id == ^group_id and ugr.user_id == u.id,
       join: gr in Group,
         on: gr.id == ugr.group_id and gr.mode == g.mode,
-      where: s.generation_id in fragment("(
-        SELECT g.id
-        FROM generation g
-        WHERE g.mode = (?)
-        ORDER BY inserted_at DESC
-        LIMIT 1
-      )", g.mode),
-      order_by: [desc: s.pp_raw],
+      # TODO: Use window function to find the snapshot that is closest to midnight EST?
+      where: fragment("(?)::date", s.inserted_at) == type(^date, Ecto.Date),
+      distinct: [u.id],
       preload: [snapshots: s]
   end
 

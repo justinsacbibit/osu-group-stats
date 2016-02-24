@@ -15,7 +15,7 @@ export default class Dropdown extends React.Component {
     onChange: PropTypes.func,
     onRemove: PropTypes.func,
     type: PropTypes.string,
-    value: PropTypes.any.isRequired,
+    value: PropTypes.any,
   };
   static defaultProps = {
     type: DROPDOWN_TYPES.DEFAULT,
@@ -42,7 +42,7 @@ export default class Dropdown extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.value !== this.props.value) {
-      //this.dropdown.dropdown('set exactly', this.props.value);
+      this.dropdown.dropdown('set exactly', this.props.value);
     }
   }
 

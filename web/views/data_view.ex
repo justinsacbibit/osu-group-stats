@@ -90,7 +90,7 @@ defmodule UwOsu.DataView do
   end
 
   def render("players.json", %{players: players}) do
-    render_many players, UwOsu.DataView, "player.json", as: :player
+    render_many(players, UwOsu.DataView, "player.json", as: :player)
   end
 
   def render("player.json", %{player: player}) do

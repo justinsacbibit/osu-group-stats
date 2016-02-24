@@ -15,7 +15,7 @@ export default class Slider extends React.Component {
       this.checkbox.checkbox('set checked');
     }
     this.checkbox.checkbox({
-      onChange: this.props.onChange,
+      onChange: () => this.props.onChange(!this.props.value),
     });
   }
 

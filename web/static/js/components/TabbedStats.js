@@ -54,7 +54,9 @@ class TabbedStats extends React.Component {
               <a
                 className={classNames('item', { active: selectedTabIndex === index })}
                 key={index}
-                onClick={this.handleMenuItemSelection.bind(this, index)}>{item}</a>
+                onClick={this.handleMenuItemSelection.bind(this, index)}>
+                {item}
+              </a>
               );
           })}
         </div>

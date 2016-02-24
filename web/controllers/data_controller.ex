@@ -14,8 +14,15 @@ defmodule UwOsu.DataController do
     render conn, "farmed_beatmaps.json", beatmaps: beatmaps
   end
 
-  def players(conn, %{"g" => group_id}) do
-    players = Repo.all(Query.get_users(group_id))
+  def players(conn, %{"g" => group_id} = params) do
+    query = case params do
+      %{"d" => days_delta} ->
+        {days_delta, _} = Integer.parse(days_delta)
+        Query.get_users(group_id, days_delta)
+      _ ->
+        Query.get_users(group_id)
+    end
+    players = Repo.all(query)
     render conn, "players.json", players: players
   end
 

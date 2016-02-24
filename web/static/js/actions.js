@@ -11,6 +11,8 @@ export const FETCH_PLAYERS_REQUEST = 'FETCH_PLAYERS_REQUEST';
 export const FETCH_PLAYERS_SUCCESS = 'FETCH_PLAYERS_SUCCESS';
 
 export const CHANGED_PLAYER_TABLE_SORT_ORDER = 'CHANGED_PLAYER_TABLE_SORT_ORDER';
+export const CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES = 'CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES';
+export const CHANGED_PLAYER_TABLE_RECENT_CHANGES_STAT = 'CHANGED_PLAYER_TABLE_RECENT_CHANGES_STAT';
 
 export const FETCH_DAILY_SNAPSHOTS_FAILURE = 'FETCH_DAILY_SNAPSHOTS_FAILURE';
 export const FETCH_DAILY_SNAPSHOTS_REQUEST = 'FETCH_DAILY_SNAPSHOTS_REQUEST';
@@ -86,47 +88,50 @@ export function selectFarmedBeatmap(index) {
   };
 }
 
-function fetchPlayersRequest(groupId) {
+function fetchPlayersRequest(groupId, daysDelta) {
   return {
     payload: {
+      daysDelta,
       groupId,
     },
     type: FETCH_PLAYERS_REQUEST,
   };
 }
 
-function fetchPlayersSuccess(players) {
+function fetchPlayersSuccess(players, daysDelta) {
   return {
     payload: {
+      daysDelta,
       players,
     },
     type: FETCH_PLAYERS_SUCCESS,
   };
 }
 
-function fetchPlayersFailure(error) {
+function fetchPlayersFailure(error, daysDelta) {
   return {
     payload: {
+      daysDelta,
       error,
     },
     type: FETCH_PLAYERS_FAILURE,
   };
 }
 
-export function fetchPlayers(groupId) {
+export function fetchPlayers(groupId, daysDelta = 0) {
   return dispatch => {
-    dispatch(fetchPlayersRequest(groupId));
+    dispatch(fetchPlayersRequest(groupId, daysDelta));
 
-    return fetch(`${root}/api/players?g=${groupId}`)
+    return fetch(`${root}/api/players?g=${groupId}&d=${daysDelta}`)
     .then(response => {
       if (response.status >= 400) {
         throw new Error();
       }
       return response.json();
     }).then(response => {
-      return dispatch(fetchPlayersSuccess(response));
+      return dispatch(fetchPlayersSuccess(response, daysDelta));
     }, error => {
-      return dispatch(fetchPlayersFailure(error));
+      return dispatch(fetchPlayersFailure(error, daysDelta));
     });
   };
 }
@@ -137,6 +142,24 @@ export function changePlayerTableSortOrder(index) {
       index,
     },
     type: CHANGED_PLAYER_TABLE_SORT_ORDER,
+  };
+}
+
+export function changePlayerTableShowRecentChanges(showRecentChanges) {
+  return {
+    payload: {
+      showRecentChanges,
+    },
+    type: CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES,
+  };
+}
+
+export function changePlayerTableRecentChangesStat(stat) {
+  return {
+    payload: {
+      stat,
+    },
+    type: CHANGED_PLAYER_TABLE_RECENT_CHANGES_STAT,
   };
 }
 

@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux';
 
 import {
+  CHANGED_PLAYER_TABLE_RECENT_CHANGES_STAT,
+  CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES,
   CHANGED_PLAYER_TABLE_SORT_ORDER,
   FETCH_PLAYERS_FAILURE,
   FETCH_PLAYERS_REQUEST,
@@ -8,28 +10,76 @@ import {
 } from '../actions';
 import { SORT_ORDERS } from '../constants';
 
-function isLoading(state = false, event) {
+const initialIsLoadingState = {
+  0: false,
+  1: false,
+  30: false,
+  7: false,
+};
+function isLoading(state = initialIsLoadingState, event) {
   switch (event.type) {
     case FETCH_PLAYERS_REQUEST:
-      return true;
+      return Object.assign({}, state, {
+        [event.payload.daysDelta]: true,
+      });
 
     case FETCH_PLAYERS_FAILURE:
-      return false;
+      return Object.assign({}, state, {
+        [event.payload.daysDelta]: false,
+      });
 
     case FETCH_PLAYERS_SUCCESS:
-      return false;
+      return Object.assign({}, state, {
+        [event.payload.daysDelta]: false,
+      });
   }
 
   return state;
 }
 
-function players(state = [], event) {
+const initialPlayersState = {
+  0: {},
+  1: {},
+  30: {},
+  7: {},
+};
+function players(state = initialPlayersState, event) {
   switch (event.type) {
     case FETCH_PLAYERS_SUCCESS:
-      return [].concat(event.payload.players);
+      const playerMap = {};
+      event.payload.players.forEach(player => {
+        playerMap[player.user_id] = player;
+      });
+      return Object.assign({}, state, {
+        [event.payload.daysDelta]: playerMap,
+      });
 
     case FETCH_PLAYERS_REQUEST:
-      return [];
+      return Object.assign({}, state, {
+        [event.payload.daysDelta]: {},
+      });
+  }
+
+  return state;
+}
+
+const initialRecentChangesState = {
+  show: false,
+  stat: 'PP',
+};
+function recentChanges(state = initialRecentChangesState, event) {
+  switch (event.type) {
+    case CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES:
+      return {
+        show: event.payload.showRecentChanges,
+        stat: state.stat,
+      };
+
+    case CHANGED_PLAYER_TABLE_RECENT_CHANGES_STAT:
+      return {
+        show: state.show,
+        stat: event.payload.stat,
+      };
   }
 
   return state;
@@ -57,6 +107,9 @@ function sortOrder(state = initialSortOrderState, event) {
         direction,
         index,
       };
+
+    case CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES:
+      return initialSortOrderState;
   }
 
   return state;
@@ -65,6 +118,7 @@ function sortOrder(state = initialSortOrderState, event) {
 export default combineReducers({
   isLoading,
   players,
+  recentChanges,
   sortOrder,
 });
 
