@@ -80,6 +80,9 @@ function recentChanges(state = initialRecentChangesState, event) {
         show: state.show,
         stat: event.payload.stat,
       };
+
+    case '@@router/UPDATE_LOCATION':
+      return initialRecentChangesState;
   }
 
   return state;
@@ -109,6 +112,9 @@ function sortOrder(state = initialSortOrderState, event) {
       };
 
     case CHANGED_PLAYER_TABLE_SHOW_RECENT_CHANGES:
+      return initialSortOrderState;
+
+    case '@@router/UPDATE_LOCATION':
       return initialSortOrderState;
   }
 
