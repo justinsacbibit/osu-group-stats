@@ -77,9 +77,17 @@ class PlayerTable extends React.Component {
     let d1 = column[0](p1);
     let d2 = column[0](p2);
     if (deltas && this.props.sortOrder.index > 0) {
-      const map = [null, 1, 7, 30];
-      d1 = d1 - column[0](this.props.players[map[this.props.sortOrder.index]][p1.user_id]);
-      d2 = d2 - column[0](this.props.players[map[this.props.sortOrder.index]][p2.user_id]);
+      const daysDelta = [null, 1, 7, 30][this.props.sortOrder.index];
+      if (this.props.players[daysDelta][p1.user_id]) {
+        d1 = d1 - column[0](this.props.players[daysDelta][p1.user_id]);
+      } else {
+        d1 = 0;
+      }
+      if (this.props.players[daysDelta][p2.user_id]) {
+        d2 = d2 - column[0](this.props.players[daysDelta][p2.user_id]);
+      } else {
+        d2 = 0;
+      }
     }
     if (this.props.sortOrder.direction === SORT_ORDERS.ASCENDING) {
       const temp = d1;
@@ -229,9 +237,38 @@ class PlayerTable extends React.Component {
                 const columnFunc = columnMap[i][0];
 
                 const current = columnFunc(player);
-                const oneDayChange = current - columnFunc(this.props.players[1][player.user_id]);
-                const sevenDayChange = current - columnFunc(this.props.players[7][player.user_id]);
-                const thirtyDayChange = current - columnFunc(this.props.players[30][player.user_id]);
+                let oneDayChange = current - columnFunc(this.props.players[1][player.user_id]);
+                let sevenDayChange = current - columnFunc(this.props.players[7][player.user_id]);
+                let thirtyDayChange = null;
+                if (this.props.players[30][player.user_id]) {
+                  thirtyDayChange = current - columnFunc(this.props.players[30][player.user_id]);
+                }
+                if (i === 0 || i === 4) {
+                  oneDayChange = oneDayChange.toFixed(2);
+                  sevenDayChange = sevenDayChange.toFixed(2);
+                  if (thirtyDayChange) {
+                    thirtyDayChange = thirtyDayChange.toFixed(2);
+                  }
+                }
+                if (i === 1 || i === 2) {
+                  oneDayChange = -oneDayChange;
+                  sevenDayChange = -sevenDayChange;
+                  if (thirtyDayChange) {
+                    thirtyDayChange = -thirtyDayChange;
+                  }
+                }
+                const changes = [oneDayChange, sevenDayChange, thirtyDayChange];
+                const styleFunc = (i, change) => {
+                  if (i === 3) {
+                    return {};
+                  }
+                  if (change > 0) {
+                    return { color: 'green' };
+                  } else if (change < 0) {
+                    return { color: 'red' };
+                  }
+                  return {};
+                };
                 return (
                   <tr key={index}>
                     <td>
@@ -241,17 +278,17 @@ class PlayerTable extends React.Component {
                       {player.username}
                     </td>
                     <td>
-                      {current}
+                      {i === 4 ? current.toFixed(2) : current}
                     </td>
-                    <td>
-                      {oneDayChange.toFixed(2)}
-                    </td>
-                    <td>
-                      {sevenDayChange.toFixed(2)}
-                    </td>
-                    <td>
-                      {thirtyDayChange.toFixed(2)}
-                    </td>
+                    {changes.map((change, changeIndex) => {
+                      return (
+                        <td
+                          key={changeIndex}
+                          style={styleFunc(i, change)}>
+                          {change === null ? '-' : change}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               }
