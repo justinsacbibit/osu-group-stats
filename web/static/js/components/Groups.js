@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { routeActions } from 'react-router-redux';
 
 import { fetchGroups } from '../actions';
+import { MODES } from '../constants/osu';
 
 
 class Groups extends React.Component {
@@ -43,7 +44,7 @@ class Groups extends React.Component {
                 className='ui link'
                 href='#'
                 onClick={this.handleOnClickGroup.bind(this, group.id)}>
-                {group.id} {group.mode}
+                {group.id} {MODES[group.mode]}
               </a>
             </div>
           );
