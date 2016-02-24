@@ -24,10 +24,10 @@ defmodule UwOsu.Data.UserCollection do
   def collect_mode(
     mode,
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)},
-    attempts_remaining \\ 5
+    attempts_remaining \\ 10
   ) do
     if attempts_remaining > 0 do
-      attempt_number = 5 - attempts_remaining + 1
+      attempt_number = 10 - attempts_remaining + 1
       Logger.info "Beginning collection of mode #{mode} on try ##{attempt_number}"
       Osu.start
 
