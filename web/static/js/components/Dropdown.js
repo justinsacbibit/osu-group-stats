@@ -40,18 +40,12 @@ export default class Dropdown extends React.Component {
     });
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.value !== this.props.value) {
-      this.dropdown.dropdown('set exactly', this.props.value);
-    }
-  }
-
   render() {
     return (
       <div
         className={`ui ${this.props.type} selection dropdown ${this.props.id}`}>
         {this.props.type === DROPDOWN_TYPES.MULTIPLE_SEARCH_NORMAL ?
-          <input type='hidden' />
+          <input type='hidden' value={this.props.value} />
         : null}
         <i className='dropdown icon' />
         <div className='default text'>{this.props.defaultText}</div>
