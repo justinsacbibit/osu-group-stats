@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { routeActions } from 'react-router-redux';
 
 import { fetchGroups } from '../actions';
+import Loader, { LOADER_SIZES } from '../components/Loader';
 import { MODES } from '../constants/osu';
 
 
@@ -29,7 +30,11 @@ class Groups extends React.Component {
 
     if (isLoading) {
       return (
-        <div className='ui active centered large inline loader' />
+        <Loader
+          active
+          centered
+          inline
+          size={LOADER_SIZES.LARGE} />
       );
     }
 

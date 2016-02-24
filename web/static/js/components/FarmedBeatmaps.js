@@ -6,6 +6,7 @@ import {
   fetchFarmedBeatmaps,
   selectFarmedBeatmap,
 } from '../actions';
+import Loader, { LOADER_SIZES } from '../components/Loader';
 import { getModsArray } from '../utils';
 
 
@@ -40,7 +41,11 @@ class FarmedBeatmaps extends React.Component {
 
     if (isLoading) {
       return (
-        <div className='ui active centered large inline loader' />
+        <Loader
+          active
+          centered
+          inline
+          size={LOADER_SIZES.LARGE} />
       );
     }
 
