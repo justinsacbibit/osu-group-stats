@@ -13,7 +13,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :uw_osu, UwOsu.Endpoint,
   http: [port: {:system, "PORT"}],
-  url: [host: "uw_osu.sacbibit.com", port: 80],
+  url: [host: "ogs.sacbibit.com", port: 443],
   cache_static_manifest: "priv/static/manifest.json"
 
 # Do not print debug messages in production
