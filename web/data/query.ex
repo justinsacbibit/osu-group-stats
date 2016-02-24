@@ -19,7 +19,6 @@ defmodule UwOsu.Data.Query do
   def get_users(group_id, days_delta \\ 0) do
     date = Date.now("America/Toronto")
     |> Date.subtract({0, days_delta * 86400, 0})
-    IO.inspect date
     from u in User,
       join: s in assoc(u, :snapshots),
       join: g in assoc(s, :generation),
