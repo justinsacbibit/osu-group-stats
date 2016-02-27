@@ -9,5 +9,9 @@ defmodule UwOsu.Osu.Client do
   def new(api_key) do
     %__MODULE__{api_key: api_key}
   end
+
+  def new do
+    new(Application.get_env(:uw_osu, :osu_api_key))
+  end
 end
 

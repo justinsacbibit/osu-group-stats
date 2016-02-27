@@ -6,11 +6,15 @@ defmodule UwOsu do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
+    {:ok, client} = ExIrc.start_client!
+
     children = [
       # Start the endpoint when the application starts
       supervisor(UwOsu.Endpoint, []),
       # Start the Ecto repository
       supervisor(UwOsu.Repo, []),
+      worker(IrcConnectionHandler, [client]),
+      worker(IrcLoginHandler, [client, []]),
       # Here you could define other workers and supervisors as children
       # worker(UwOsu.Worker, [arg1, arg2, arg3]),
     ]

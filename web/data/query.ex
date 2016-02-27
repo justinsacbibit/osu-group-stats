@@ -13,7 +13,7 @@ defmodule UwOsu.Data.Query do
 
   def get_groups do
     from g in Group,
-      preload: [:users]
+      preload: [:users, :creator]
   end
 
   def get_users(group_id, days_delta \\ 0) do

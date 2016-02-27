@@ -36,11 +36,6 @@ defmodule UwOsu.DataController do
     render conn, "latest_scores.json", users: users
   end
 
-  def groups(conn, _params) do
-    groups = Repo.all(Query.get_groups)
-    render conn, "groups.json", groups: groups
-  end
-
   def generations(conn, _params) do
     generations = Repo.all from g in Generation,
       order_by: [desc: g.id]

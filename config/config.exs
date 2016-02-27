@@ -21,6 +21,12 @@ config :logger, :console,
 
 config :uw_osu, osu_api_key: System.get_env("OSU_API_KEY")
 
+# The maximum allowed group size for a non-admin creator
+config :uw_osu, max_group_size: System.get_env("MAX_GROUP_SIZE") || 25
+
+# The maximum allowed number of groups for a non-admin creator
+config :uw_osu, max_groups: System.get_env("MAX_GROUPS") || 2
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
