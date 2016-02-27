@@ -51,7 +51,7 @@ defmodule UwOsu.Data.Group do
   Creates or retrieves a token when a user messages us with "!token" through the
   osu! IRC.
   """
-  def handle_irc(message, from) when message == "!token\n" do
+  def handle_irc(_message, from) do
     case find_user_id(from) do
       {:ok, user_id} ->
         case Repo.get_by(Token, user_id: user_id) do
