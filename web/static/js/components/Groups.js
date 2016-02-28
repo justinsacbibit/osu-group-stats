@@ -28,32 +28,32 @@ class Groups extends React.Component {
       isLoading,
     } = this.props;
 
-    if (isLoading) {
-      return (
-        <Loader
-          active
-          centered
-          inline
-          size={LOADER_SIZES.LARGE} />
-      );
-    }
-
     return (
       <div>
-        {groups.map((group, index) => {
-          return (
-            <div
-              className=''
-              key={index}>
-              <a
-                className='ui link'
-                href='#'
-                onClick={this.handleOnClickGroup.bind(this, group.id)}>
-                {group.id} {MODES[group.mode]}
-              </a>
-            </div>
-          );
-        })}
+        {isLoading ?
+          <Loader
+            active
+            centered
+            inline
+            size={LOADER_SIZES.LARGE} />
+        :
+          <div>
+            {groups.map((group, index) => {
+              return (
+                <div
+                  className=''
+                  key={index}>
+                  <a
+                    className='ui link'
+                    href='#'
+                    onClick={this.handleOnClickGroup.bind(this, group.id)}>
+                    Group ID: {group.id} | Group Name: {group.title} | Group Mode: {MODES[group.mode]}
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        }
       </div>
     );
   }
