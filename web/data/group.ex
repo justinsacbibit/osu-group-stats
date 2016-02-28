@@ -68,10 +68,8 @@ defmodule UwOsu.Data.Group do
 
   defp find_user_id(username, attempts_remaining \\ 5)
 
-  @doc ~S"""
-  Attempts to retrieve the user id for the user with the given username. Retries
-  up to 5 times.
-  """
+  # Attempts to retrieve the user id for the user with the given username. Retries
+  # up to 5 times.
   defp find_user_id(username, attempts_remaining) when attempts_remaining > 0 do
     client = Osu.Client.new()
     %HTTPoison.Response{

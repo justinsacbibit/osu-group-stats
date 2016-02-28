@@ -2,7 +2,6 @@ defmodule UwOsu.GroupController do
   use UwOsu.Web, :controller
   alias UwOsu.Data
   alias UwOsu.Data.Query
-  alias UwOsu.Models.{Group, Token, User}
   alias UwOsu.Repo
 
   def index(conn, _params) do

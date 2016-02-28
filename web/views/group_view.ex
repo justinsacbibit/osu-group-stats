@@ -22,7 +22,7 @@ defmodule UwOsu.GroupView do
       %Ecto.Association.NotLoaded{} ->
         group
         |> Map.drop([:users])
-      users ->
+      _users ->
         group
         |> Map.update(:users, [], fn(users) ->
           Enum.map(users, fn(user) ->

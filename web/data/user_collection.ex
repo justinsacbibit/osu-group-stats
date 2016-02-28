@@ -2,13 +2,10 @@ defmodule UwOsu.Data.UserCollection do
   import Ecto.Query, only: [from: 2]
   require Logger
   alias UwOsu.Osu
-  alias UwOsu.Models.Beatmap
   alias UwOsu.Models.Event
   alias UwOsu.Models.Generation
-  alias UwOsu.Models.Group
   alias UwOsu.Models.Score
   alias UwOsu.Models.User
-  alias UwOsu.Models.UserGroup
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
 
