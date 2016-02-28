@@ -17,7 +17,7 @@ defmodule IrcLoginHandler do
   end
 
   def handle_info({:received, message, from}, {client, _} = state) when message == "!token\n" do
-    case UwOsu.Data.Group.handle_irc(message, from) do
+    case UwOsu.Data.Group.get_token(from) do
       {:ok, token} ->
         # send token
         Logger.debug "Sending token #{token} to #{from}"
