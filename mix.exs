@@ -32,9 +32,9 @@ defmodule UwOsu.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [{:phoenix, "~> 1.1.1"},
-     {:phoenix_ecto, "~> 2.0"},
-     {:postgrex, ">= 0.0.0"},
-     {:phoenix_html, "~> 2.3"},
+     {:phoenix_ecto, "~> 3.0.0-beta.2"},
+     {:postgrex, ">= 0.11.1"},
+     {:phoenix_html, "~> 2.5"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:exirc, "~> 0.10.0"},
      {:gettext, "~> 0.9"},
