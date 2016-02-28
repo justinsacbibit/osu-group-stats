@@ -237,22 +237,36 @@ class PlayerTable extends React.Component {
                 const columnFunc = columnMap[i][0];
 
                 const current = columnFunc(player);
-                let oneDayChange = current - columnFunc(this.props.players[1][player.user_id]);
-                let sevenDayChange = current - columnFunc(this.props.players[7][player.user_id]);
+                let oneDayChange = null;
+                let sevenDayChange = null;
                 let thirtyDayChange = null;
+                if (this.props.players[1][player.user_id]) {
+                  oneDayChange = current - columnFunc(this.props.players[1][player.user_id]);
+                }
+                if (this.props.players[7][player.user_id]) {
+                  sevenDayChange = current - columnFunc(this.props.players[7][player.user_id]);
+                }
                 if (this.props.players[30][player.user_id]) {
                   thirtyDayChange = current - columnFunc(this.props.players[30][player.user_id]);
                 }
                 if (i === 0 || i === 4) {
-                  oneDayChange = oneDayChange.toFixed(2);
-                  sevenDayChange = sevenDayChange.toFixed(2);
+                  if (oneDayChange) {
+                    oneDayChange = oneDayChange.toFixed(2);
+                  }
+                  if (sevenDayChange) {
+                    sevenDayChange = sevenDayChange.toFixed(2);
+                  }
                   if (thirtyDayChange) {
                     thirtyDayChange = thirtyDayChange.toFixed(2);
                   }
                 }
                 if (i === 1 || i === 2) {
-                  oneDayChange = -oneDayChange;
-                  sevenDayChange = -sevenDayChange;
+                  if (oneDayChange) {
+                    oneDayChange = -oneDayChange;
+                  }
+                  if (sevenDayChange) {
+                    sevenDayChange = -sevenDayChange;
+                  }
                   if (thirtyDayChange) {
                     thirtyDayChange = -thirtyDayChange;
                   }
