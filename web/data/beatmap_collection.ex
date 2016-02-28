@@ -3,13 +3,7 @@ defmodule UwOsu.Data.BeatmapCollection do
   require Logger
   alias UwOsu.Osu
   alias UwOsu.Models.Beatmap
-  alias UwOsu.Models.Event
-  alias UwOsu.Models.Generation
-  alias UwOsu.Models.Group
   alias UwOsu.Models.Score
-  alias UwOsu.Models.User
-  alias UwOsu.Models.UserGroup
-  alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
 
   def collect_beatmaps(client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}) do

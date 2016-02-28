@@ -2,14 +2,12 @@ defmodule UwOsu.Data.Query do
   import Ecto.Query, only: [from: 2]
   use Timex
   alias UwOsu.Models.Beatmap
-  alias UwOsu.Models.Event
   alias UwOsu.Models.Generation
   alias UwOsu.Models.Group
   alias UwOsu.Models.Score
   alias UwOsu.Models.User
   alias UwOsu.Models.UserGroup
   alias UwOsu.Models.UserSnapshot
-  alias UwOsu.Repo
 
   def get_groups do
     from g in Group,
