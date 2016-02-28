@@ -13,7 +13,8 @@ defmodule UwOsu.Data.Query do
 
   def get_groups do
     from g in Group,
-      preload: [:users, :creator]
+      preload: [:users, :creator],
+      order_by: [:id]
   end
 
   def get_users(group_id, days_delta \\ 0) do
@@ -28,6 +29,7 @@ defmodule UwOsu.Data.Query do
         on: gr.id == ugr.group_id and gr.mode == g.mode,
       # TODO: Use window function to find the snapshot that is closest to midnight EST?
       where: fragment("(?)::date", s.inserted_at) == type(^date, Ecto.Date),
+      order_by: [asc: s.inserted_at],
       distinct: [u.id],
       preload: [snapshots: s]
   end
