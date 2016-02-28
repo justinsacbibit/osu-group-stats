@@ -37,7 +37,7 @@ defmodule UwOsu.Data.UserCollection do
           select: u.id
         user_ids = Repo.all query
 
-        Repo.transaction([timeout: :infinity, pool_timeout: :infinity], fn ->
+        Repo.transaction(fn ->
           changeset = Generation.changeset(%Generation{}, %{
             mode: mode,
           })
