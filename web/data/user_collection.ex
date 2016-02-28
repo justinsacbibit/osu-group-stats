@@ -46,9 +46,7 @@ defmodule UwOsu.Data.UserCollection do
           Logger.info "Generation #{generation_id}"
 
           Enum.each user_ids, fn(user_id) ->
-            Repo.transaction fn ->
-              process_user(user_id, generation, client)
-            end
+            process_user(user_id, generation, client)
           end
         end)
         Logger.info "Successfully collected mode #{mode} on try ##{attempt_number}"
