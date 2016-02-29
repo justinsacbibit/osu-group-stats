@@ -193,7 +193,8 @@ defmodule UwOsu.Data.Group do
     end
   end
 
-  defp validate_max_groups(creator_id) when creator_id == 1579374 do
+  defp validate_max_groups(creator_id)
+  when creator_id == 1579374 or creator_id == "1579374" do
     # hardcoded exception for now.
     # TODO: in the future, the database should store
     # permissions so that certain users can create unlimited/more groups
