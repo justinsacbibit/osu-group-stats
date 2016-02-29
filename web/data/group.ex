@@ -24,8 +24,14 @@ defmodule UwOsu.Data.Group do
   defmodule DataFetchingError do
     defexception [:message]
 
-    def exception(_opts) do
-      %__MODULE__{message: "Error fetching data from the osu! API. Please try again later"}
+    def exception(opts) do
+      message = case Keyword.fetch(opts, :message) do
+        {:ok, value} ->
+          value
+        _ ->
+          "Error fetching data from the osu! API. Please try again later"
+      end
+      %__MODULE__{message: message}
     end
   end
 
