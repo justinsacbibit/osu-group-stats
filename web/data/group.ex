@@ -8,6 +8,23 @@ defmodule UwOsu.Data.Group do
   @max_group_size Application.get_env(:uw_osu, :max_group_size)
   @max_groups Application.get_env(:uw_osu, :max_groups)
 
+  defmodule ForbiddenError do
+    defexception [:message]
+
+    def exception(opts) do
+      message = Keyword.fetch!(opts, :message)
+      %__MODULE__{message: message}
+    end
+  end
+
+  defimpl Plug.Exception, for: ForbiddenError do
+    def status(_), do: 403
+  end
+
+  defimpl Plug.Exception, for: InvalidGroupParametersError do
+    def status(_), do: 400
+  end
+
   defmodule InvalidGroupParametersError do
     defexception [:message]
 
@@ -136,6 +153,36 @@ defmodule UwOsu.Data.Group do
     user_ids = validate_user_ids_or_usernames(user_ids_or_usernames)
 
     create_group(creator_id, user_ids, mode, title, token)
+  end
+
+  def add_to_group(token_str, user_ids_or_usernames, group_id) do
+    token = Repo.get_by(Token, token: token_str)
+    unless token do
+      raise InvalidTokenError, token: token_str
+    end
+    creator_id = token.user_id
+
+    group = Repo.get!(Group, group_id)
+
+    unless group.created_by == creator_id do
+      raise ForbiddenError, message: "You are not allowed to edit that group"
+    end
+
+    user_ids = validate_user_ids_or_usernames(user_ids_or_usernames)
+
+    {:ok, group} = Repo.transaction(fn ->
+      Enum.each(user_ids, fn(user_id) ->
+        changeset = UserGroup.changeset(%UserGroup{}, %{
+          user_id: user_id,
+          group_id: group.id,
+        })
+        Repo.insert!(changeset)
+      end)
+      Repo.delete!(token)
+      group
+    end)
+
+    group
   end
 
   defp create_group(creator_id, user_ids, mode, title, token) do
