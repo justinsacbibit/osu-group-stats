@@ -108,12 +108,6 @@ defmodule UwOsu.Data.Group do
     raise InvalidGroupParametersError, message: "must specify at least one user id/username"
   end
 
-  def create(_token, user_ids_or_usernames, _title, _mode)
-  when length(user_ids_or_usernames) > @max_group_size do
-    max_group_size = Application.get_env(:uw_osu, :max_group_size)
-    raise InvalidGroupParametersError, message: "cannot create a group with more than #{max_group_size} players"
-  end
-
   @doc ~S"""
   Attempts to create an group with the given user ids/usernames and title.
 
@@ -193,8 +187,7 @@ defmodule UwOsu.Data.Group do
     end
   end
 
-  defp validate_max_groups(creator_id)
-  when creator_id == 1579374 or creator_id == "1579374" do
+  defp validate_max_groups(creator_id) when creator_id == 1579374 do
     # hardcoded exception for now.
     # TODO: in the future, the database should store
     # permissions so that certain users can create unlimited/more groups
