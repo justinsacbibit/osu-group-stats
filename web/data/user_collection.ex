@@ -106,7 +106,7 @@ defmodule UwOsu.Data.UserCollection do
           and e.beatmap_id == ^beatmap_id
           and e.date == ^date
 
-      case Repo.one(query) do
+      case Repo.first(query) do
         nil ->
           event = Event.changeset(%Event{}, %{
             user_id: id,
@@ -134,7 +134,7 @@ defmodule UwOsu.Data.UserCollection do
         where: s.user_id == ^id
           and s.date == ^date
 
-      case Repo.one(query) do
+      case Repo.first(query) do
         nil ->
           score_dict = Dict.merge score_dict, %{
             "user_id" => id,

@@ -205,7 +205,7 @@ defmodule UwOsu.Data.Group do
       join: u in assoc(g, :creator),
       where: u.id == ^creator_id,
       select: count(g.id)
-    groups_created = Repo.one!(query)
+    groups_created = Repo.first!(query)
 
     unless groups_created < @max_groups do
       raise InvalidGroupParametersError, message: "you are not allowed to create more than #{@max_groups} groups"
