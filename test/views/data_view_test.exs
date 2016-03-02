@@ -1,4 +1,5 @@
 defmodule UwOsu.DataViewTest do
+  import Mock
   use UwOsu.ConnCase
   import UwOsu.RepoHelper
   alias UwOsu.Repo
@@ -172,7 +173,11 @@ defmodule UwOsu.DataViewTest do
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -211,7 +216,10 @@ defmodule UwOsu.DataViewTest do
     ] = resp
   end
 
-  test "get users" do
+  test_with_mock "get users", Timex.Date, [
+    now: fn(_) -> "2015-12-29 04:25:55" end,
+    subtract: fn(d, _) -> d end,
+  ] do
     insert_user! %{
       "id" => 1,
       "username" => "a",
@@ -222,32 +230,37 @@ defmodule UwOsu.DataViewTest do
     }
     insert_generation! %{
       "id" => 1,
-      "inserted_at" => "2015-12-28 04:25:55",
       "mode" => 0,
     }
     insert_generation! %{
       "id" => 2,
-      "inserted_at" => "2015-12-29 04:25:55",
       "mode" => 0,
     }
     insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 2,
+      "inserted_at" => "2015-12-29 04:25:55",
       "pp_raw" => 50,
     }
     insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 1,
+      "inserted_at" => "2015-12-28 04:25:55",
     }
     insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 2,
+      "inserted_at" => "2015-12-29 04:25:55",
       "pp_raw" => 70,
     }
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -261,7 +274,7 @@ defmodule UwOsu.DataViewTest do
     conn = get conn, "/api/players", g: group_id
     resp = json_response(conn, 200)
 
-    [u2, u1] = resp
+    [u1, u2] = resp
 
     assert u2["user_id"] == 2
     assert u2["pp_raw"] == 70
@@ -318,11 +331,17 @@ defmodule UwOsu.DataViewTest do
     insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 3,
+      "inserted_at" => "2015-12-31 05:00:00",
+      "updated_at" => "2015-12-31 05:00:00",
     }
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -394,7 +413,11 @@ defmodule UwOsu.DataViewTest do
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,

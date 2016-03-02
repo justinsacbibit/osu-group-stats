@@ -8,84 +8,61 @@ defmodule UwOsu.Data.Group do
   @max_group_size Application.get_env(:uw_osu, :max_group_size)
   @max_groups Application.get_env(:uw_osu, :max_groups)
 
-  defmodule ForbiddenError do
-    defexception [:message]
+  defmodule Error do
+    defexception reason: nil, status_code: nil
 
-    def exception(opts) do
-      message = Keyword.fetch!(opts, :message)
-      %__MODULE__{message: message}
+    def message(%__MODULE__{reason: reason, status_code: status_code}) do
+      "[Status code: #{status_code}] #{inspect reason}"
     end
   end
 
-  defimpl Plug.Exception, for: ForbiddenError do
-    def status(_), do: 403
-  end
-
-  defimpl Plug.Exception, for: InvalidGroupParametersError do
-    def status(_), do: 400
-  end
-
-  defmodule InvalidGroupParametersError do
-    defexception [:message]
-
-    def exception(opts) do
-      message = Keyword.fetch!(opts, :message)
-      %__MODULE__{message: message}
-    end
-  end
-
-  defimpl Plug.Exception, for: InvalidGroupParametersError do
-    def status(_), do: 400
-  end
-
-  defmodule DataFetchingError do
-    defexception [:message]
-
-    def exception(opts) do
-      message = case Keyword.fetch(opts, :message) do
-        {:ok, value} ->
-          value
-        _ ->
-          "Error fetching data from the osu! API. Please try again later"
-      end
-      %__MODULE__{message: message}
-    end
-  end
-
-  defimpl Plug.Exception, for: DataFetchingError do
-    def status(_), do: 500
-  end
-
-  defmodule InvalidTokenError do
-    defexception [:message]
-
-    def exception(opts) do
-      token = Keyword.fetch!(opts, :token)
-
-      %__MODULE__{message: "Invalid token: #{token}"}
-    end
-  end
-
-  defimpl Plug.Exception, for: InvalidTokenError do
-    def status(_), do: 400
+  defimpl Plug.Exception, for: Error do
+    def status(%Error{status_code: status_code}), do: status_code
   end
 
   @doc ~S"""
   Creates or retrieves a token when a user messages us with "!token" through the
   osu! IRC.
   """
-  def get_token(from) do
-    case find_user_id(from) do
-      {:ok, user_id} ->
-        case Repo.get_by(Token, user_id: user_id) do
-          nil ->
-            token = Token.new(user_id) |> Repo.insert!
-            {:ok, token.token}
-          token ->
-            {:ok, token.token}
+  def get_token(username) do
+    with {:ok, user_id} <- find_user_id(username),
+         {:ok, _} <- create_user_if_necessary(user_id, username),
+         do: get_token_for_user_id(user_id)
+  end
+
+  defp create_user_if_necessary(user_id, username) do
+    case Repo.get(User, user_id) do
+      nil ->
+        changeset = User.changeset(%User{}, %{
+          id: user_id,
+          username: username,
+        })
+
+        case Repo.insert(changeset) do
+          {:error, _error} ->
+            # TODO: Include changeset errors in error reason.
+            {:error, %Error{reason: "Failed to create user", status_code: 500}}
+          {:ok, user} ->
+            {:ok, user}
         end
-      error ->
-        error
+      user ->
+        {:ok, user}
+    end
+  end
+
+  defp get_token_for_user_id(user_id) do
+    case Repo.get_by(Token, user_id: user_id) do
+      nil ->
+        token = Token.new(user_id)
+        case Repo.insert(token) do
+          {:ok, token} ->
+            {:ok, token}
+          {:error, _changeset} ->
+            # TODO: Include changeset errors in error reason.
+            {:error, %Error{reason: "Failed to generate token", status_code: 500}}
+        end
+      token ->
+        {:ok, token}
     end
   end
 
@@ -108,27 +85,17 @@ defmodule UwOsu.Data.Group do
   end
 
   defp find_user_id(username, _attempts_remaining) do
-    {:error, "Failed to get user id for #{username}"}
+    {:error, %Error{reason: "Failed to get user id for #{username}", status_code: 502}}
   end
 
   def create(_token, user_ids_or_usernames, _mode, _title)
   when not is_list(user_ids_or_usernames) do
-    raise InvalidGroupParametersError, message: "user ids or usernames must be an array"
-  end
-
-  def create(_token, _user_ids_or_usernames, mode, _title)
-  when not is_number(mode) do
-    raise InvalidGroupParametersError, message: "mode must be a number"
-  end
-
-  def create(_token, _user_ids_or_usernames, mode, _title)
-  when mode < 0 or mode > 3 do
-    raise InvalidGroupParametersError, message: "must specify a mode between 0 and 3"
+    {:error, %Error{reason: "user ids or usernames must be an array", status_code: 400}}
   end
 
   def create(_token, user_ids_or_usernames, _title, _mode)
   when length(user_ids_or_usernames) == 0 do
-    raise InvalidGroupParametersError, message: "must specify at least one user id/username"
+    {:error, %Error{reason: "must specify at least one user id/username", status_code: 400}}
   end
 
   @doc ~S"""
@@ -142,53 +109,66 @@ defmodule UwOsu.Data.Group do
   a designated user (currently influxd)
   """
   def create(token_str, user_ids_or_usernames, mode, title) do
-    token = Repo.get_by(Token, token: token_str)
-    unless token do
-      raise InvalidTokenError, token: token_str
+    with {:ok, token} <- validate_token(token_str),
+         {:ok} <- validate_max_groups(token),
+         {:ok, user_ids} <- validate_user_ids_or_usernames(user_ids_or_usernames),
+         do: create_group(token, user_ids, mode, title)
+  end
+
+  def validate_token(token_str) do
+    case Repo.get_by(Token, token: token_str) do
+      nil ->
+        {:error, %Error{reason: "Invalid token: #{token_str}", status_code: 400}}
+      token ->
+        {:ok, token}
     end
-    creator_id = token.user_id
-    # validate that this creator has not exceeded the number of allowed groups
-    validate_max_groups(creator_id)
-
-    user_ids = validate_user_ids_or_usernames(user_ids_or_usernames)
-
-    create_group(creator_id, user_ids, mode, title, token)
   end
 
   def add_to_group(token_str, user_ids_or_usernames, group_id) do
-    token = Repo.get_by(Token, token: token_str)
-    unless token do
-      raise InvalidTokenError, token: token_str
-    end
-    creator_id = token.user_id
+    with {:ok, token} <- validate_token(token_str),
+         {:ok, group} <- get_group(token, group_id),
+         {:ok, user_ids} <- validate_user_ids_or_usernames(user_ids_or_usernames),
+         {:ok, _} <- add_user_groups(user_ids, group, token),
+         do: {:ok, group}
+  end
 
-    group = Repo.get!(Group, group_id)
+  defp add_user_groups(user_ids, group, token) do
+    transaction_result = Repo.transaction(fn ->
+      Repo.delete!(token)
 
-    unless group.created_by == creator_id do
-      raise ForbiddenError, message: "You are not allowed to edit that group"
-    end
-
-    user_ids = validate_user_ids_or_usernames(user_ids_or_usernames)
-
-    {:ok, group} = Repo.transaction(fn ->
-      Enum.each(user_ids, fn(user_id) ->
+      Enum.map(user_ids, fn(user_id) ->
         changeset = UserGroup.changeset(%UserGroup{}, %{
           user_id: user_id,
           group_id: group.id,
-        })
+          })
         Repo.insert!(changeset)
       end)
-      Repo.delete!(token)
-      group
     end)
 
-    group
+    case transaction_result do
+      {:ok, user_groups} ->
+        {:ok, user_groups}
+      error ->
+        {:error, %Error{status_code: 400, reason: "Error trying to add users to group"}}
+    end
   end
 
-  defp create_group(creator_id, user_ids, mode, title, token) do
-    {:ok, group} = Repo.transaction(fn ->
+  defp get_group(token, group_id) do
+    query = from g in Group,
+      where: g.id == ^group_id and ^token.user_id == g.created_by
+
+    case Repo.first(query) do
+      nil ->
+        {:error, %Error{reason: "That group does not exist", status_code: 404}}
+      group ->
+        {:ok, group}
+    end
+  end
+
+  defp create_group(token, user_ids, mode, title) do
+    Repo.transaction(fn ->
       changeset = Group.changeset(%Group{}, %{
-        created_by: creator_id,
+        created_by: token.user_id,
         mode: mode,
         title: title
       })
@@ -204,8 +184,6 @@ defmodule UwOsu.Data.Group do
       Repo.delete!(token)
       group
     end)
-
-    group
   end
 
   defp validate_user_ids_or_usernames(user_ids_or_usernames) do
@@ -219,44 +197,40 @@ defmodule UwOsu.Data.Group do
       case body do
         [user] ->
           # insert into DB if necessary
-          id = user["user_id"]
-          if Repo.get(User, id) |> is_nil do
-            changeset = User.changeset(%User{}, %{
-              id: id,
-              username: user["username"],
-            })
-            Repo.insert!(changeset)
-          end
-          {:cont, [id | acc]}
+          %{"user_id" => user_id, "username" => username} = user
+          {:ok, _} = create_user_if_necessary(user_id, username)
+          {:cont, [user_id | acc]}
         _ ->
           {:halt, user_id_or_username}
       end
     end)
 
-    unless is_list(valid_user_ids) do
-      raise DataFetchingError, message: "failed to get user #{valid_user_ids}, make sure user exists or try again later"
+    if is_list(valid_user_ids) do
+      {:ok, valid_user_ids}
     else
-      valid_user_ids
+      {:error, %Error{status_code: 502, reason: "failed to get user #{valid_user_ids}, make sure user exists or try again later"}}
     end
   end
 
-  defp validate_max_groups(creator_id) when creator_id == 1579374 do
+  defp validate_max_groups(%Token{user_id: user_id})
+  when user_id == 1579374 do
     # hardcoded exception for now.
     # TODO: in the future, the database should store
     # permissions so that certain users can create unlimited/more groups
-    :ok
+    {:ok}
   end
 
-  defp validate_max_groups(creator_id) do
+  defp validate_max_groups(%Token{user_id: user_id}) do
     query = from g in Group,
       join: u in assoc(g, :creator),
-      where: u.id == ^creator_id,
+      where: u.id == ^user_id,
       select: count(g.id)
-    groups_created = Repo.first!(query)
+    [groups_created] = Repo.all(query)
 
-    unless groups_created < @max_groups do
-      raise InvalidGroupParametersError, message: "you are not allowed to create more than #{@max_groups} groups"
+    if groups_created < @max_groups do
+      {:ok}
+    else
+      {:error, %Error{status_code: 400, reason: "You are not allowed to create more than #{@max_groups} groups"}}
     end
   end
 end
-

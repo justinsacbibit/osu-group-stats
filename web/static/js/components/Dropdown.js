@@ -40,6 +40,12 @@ export default class Dropdown extends React.Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.type !== DROPDOWN_TYPES.MULTIPLE_SEARCH_NORMAL && prevProps.value !== this.props.value) {
+      this.dropdown.dropdown('set selected', this.props.value);
+    }
+  }
+
   render() {
     return (
       <div

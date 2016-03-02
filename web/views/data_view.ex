@@ -44,6 +44,7 @@ defmodule UwOsu.DataView do
       :generations,
       :scores,
       :user_groups,
+      :groups,
     ])
     |> Map.update(:snapshots, [], fn(snapshots) ->
       snapshots
@@ -82,6 +83,7 @@ defmodule UwOsu.DataView do
             :scores,
             :snapshots,
             :user_groups,
+            :groups,
           ])
         end)
       end)
@@ -103,7 +105,8 @@ defmodule UwOsu.DataView do
       :generations,
       :scores,
       :snapshots,
-      :user_groups
+      :user_groups,
+      :groups
     ])
     |> Map.merge(
       Enum.at(player.snapshots, 0)
@@ -126,6 +129,7 @@ defmodule UwOsu.DataView do
       :generations,
       :snapshots,
       :user_groups,
+      :groups,
     ])
     |> Map.update(:scores, [], fn(scores) ->
       Enum.map(scores, fn(score) ->

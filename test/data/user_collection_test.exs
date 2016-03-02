@@ -16,55 +16,65 @@ defmodule UserCollectionTest do
   doctest UwOsu.Data.UserCollection
 
   test_with_mock "user's username is set", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, 123, m: 0) ->
       %HTTPoison.Response{body: [ApiData.user(%{"username" => "testuser"})]}
     end,
     get_user_best!: fn(_, _, _) -> %HTTPoison.Response{body: [ ]} end,
   ] do
+    user_id = 123
     # create a group with a single user (who has a nil username)
-    Repo.insert!(User.changeset(%User{}, %{id: 123}))
+    Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: user_id,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
-      user_id: 123,
+      user_id: user_id,
     }))
 
     UserCollection.collect(%Osu.Client{api_key: "abc"})
 
     # should update user's username
-    user = Repo.get!(User, 123)
+    user = Repo.get!(User, user_id)
     assert user.username == "testuser"
   end
 
   test_with_mock "user snapshot is saved", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, 123, m: 0) ->
       %HTTPoison.Response{body: [ApiData.user]}
     end,
     get_user_best!: fn(_, _, _) -> %HTTPoison.Response{body: [ ]} end,
   ] do
     # create a group with a single user
-    Repo.insert!(User.changeset(%User{}, %{id: 123}))
+    user_id = 123
+    Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: user_id,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
-      user_id: 123,
+      user_id: user_id,
     }))
 
     UserCollection.collect(%Osu.Client{api_key: "abc"})
 
     # should create user_snapshot
-    snapshot = Repo.one!(UserSnapshot)
-    assert snapshot.user_id == 123
+    [snapshot] = Repo.all(UserSnapshot)
+    assert snapshot.user_id == user_id
     assert snapshot.username == "testuser"
     assert snapshot.count300 == 8260346
     assert snapshot.count100 == 639175
@@ -84,29 +94,34 @@ defmodule UserCollectionTest do
   end
 
   test_with_mock "events are saved", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, 123, m: 0) -> %HTTPoison.Response{body: [
         ApiData.user %{"events" => [ApiData.event]}
       ]} end,
     get_user_best!: fn(_, _, _) -> %HTTPoison.Response{body: [
       ]} end,
   ] do
+    user_id = 123
     # create a group with a single user
-    Repo.insert!(User.changeset(%User{}, %{id: 123}))
+    Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: user_id,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
-      user_id: 123,
+      user_id: user_id,
     }))
 
     UserCollection.collect(%Osu.Client{api_key: "abc"})
 
     # should create event
-    event = Repo.get_by!(Event, user_id: 123)
+    event = Repo.get_by!(Event, user_id: user_id)
     assert event.display_html == "<img src='/images/S_small.png'/> <b><a href='/u/1579374'>influxd</a></b> achieved rank #998 on <a href='/b/696783?m=0'>AKINO from bless4 - MIIRO [Hime]</a> (osu!)"
     assert event.beatmap_id == 696783
     assert event.beatmapset_id == 312042
@@ -115,33 +130,38 @@ defmodule UserCollectionTest do
   end
 
   test_with_mock "should not create duplicate event", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, 123, m: 0) ->
       %HTTPoison.Response{body: [
         ApiData.user %{"events" => [ApiData.event, ApiData.event]}
       ]} end,
     get_user_best!: fn(_, _, _) -> %HTTPoison.Response{body: [ ]} end,
   ] do
+    user_id = 123
     # create a group with a single user
-    Repo.insert!(User.changeset(%User{}, %{id: 123}))
+    Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: user_id,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
-      user_id: 123,
+      user_id: user_id,
     }))
 
     UserCollection.collect(%Osu.Client{api_key: "abc"})
 
     query = from e in Event, select: count(e.id)
-    assert Repo.one!(query) == 1
+    assert Repo.all(query) == [1]
   end
 
   test_with_mock "top 100 scores are saved", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, 123, m: 0) ->
       %HTTPoison.Response{body: [
         ApiData.user
@@ -150,12 +170,17 @@ defmodule UserCollectionTest do
         ApiData.score
       ]} end,
   ] do
+    user_id = 123
     # create a group with a single user
-    Repo.insert!(User.changeset(%User{}, %{id: 123}))
+    Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: user_id,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -183,7 +208,7 @@ defmodule UserCollectionTest do
   end
 
   test_with_mock "should not save duplicate scores", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, 123, m: 0) ->
       %HTTPoison.Response{body: [
         ApiData.user
@@ -193,26 +218,31 @@ defmodule UserCollectionTest do
         ApiData.score
       ]} end,
   ] do
+    user_id = 123
     # create a group with a single user
-    Repo.insert!(User.changeset(%User{}, %{id: 123}))
+    Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: user_id,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
-      user_id: 123,
+      user_id: user_id,
     }))
 
     UserCollection.collect(%Osu.Client{api_key: "abc"})
 
     query = from s in Score, select: count(s.id)
-    assert Repo.one!(query) == 1
+    assert Repo.all(query) == [1]
   end
 
   test_with_mock "only one generation is created per run", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_user!: fn(%Osu.Client{api_key: "abc"}, id, m: 0) ->
       %HTTPoison.Response{body: [
         ApiData.user %{"user_id" => "#{id}"}
@@ -226,7 +256,11 @@ defmodule UserCollectionTest do
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 123,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -243,7 +277,7 @@ defmodule UserCollectionTest do
     query = from g in Generation,
       where: g.mode == 0,
       select: count(g.id)
-    assert Repo.one!(query) == 1
+    assert Repo.all(query) == [1]
   end
 end
 

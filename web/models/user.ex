@@ -12,6 +12,7 @@ defmodule UwOsu.Models.User do
     has_many :generations, through: [:snapshots, :generation]
     has_many :scores, Score
     has_many :user_groups, UserGroup
+    has_many :groups, through: [:user_groups, :group]
     field :username, :string
 
     timestamps

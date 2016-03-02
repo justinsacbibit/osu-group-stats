@@ -10,12 +10,17 @@ defmodule UwOsu.GroupController do
   end
 
   def create(conn, %{"group" => group_params}) do
-    group = Data.Group.create(
+    result = Data.Group.create(
       group_params["token"],
-      group_params["users"],
+      group_params["players"],
       group_params["mode"],
       group_params["title"]
     )
-    render(conn, "group.json", group: group)
+    case result do
+      {:ok, group} ->
+        render(conn, "group.json", group: group)
+      {:error, error} ->
+        raise error
+    end
   end
 end

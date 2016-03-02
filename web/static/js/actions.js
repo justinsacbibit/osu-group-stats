@@ -1,4 +1,6 @@
 import fetch from 'isomorphic-fetch';
+import request from 'superagent';
+import { routeActions } from 'react-router-redux';
 
 
 export const FETCH_FARMED_BEATMAPS_REQUEST = 'FETCH_FARMED_BEATMAPS_REQUEST';
@@ -31,6 +33,13 @@ export const FETCH_LATEST_SCORES_FAILURE = 'FETCH_LATEST_SCORES_FAILURE';
 export const FETCH_GROUPS_REQUEST = 'FETCH_GROUPS_REQUEST';
 export const FETCH_GROUPS_SUCCESS = 'FETCH_GROUPS_SUCCESS';
 export const FETCH_GROUPS_FAILURE = 'FETCH_GROUPS_FAILURE';
+
+export const CREATE_GROUP_REQUEST = 'CREATE_GROUP_REQUEST';
+export const CREATE_GROUP_SUCCESS = 'CREATE_GROUP_SUCCESS';
+export const CREATE_GROUP_FAILURE = 'CREATE_GROUP_FAILURE';
+
+export const GO_TO_FAQ = 'GO_TO_FAQ';
+export const GO_TO_CREATE_GROUP = 'GO_TO_CREATE_GROUP';
 
 const root = location.protocol + '//' + location.host;
 
@@ -346,6 +355,59 @@ export function fetchGroups() {
     }, error => {
       return dispatch(fetchGroupsFailure(error));
     });
+  };
+}
+
+function createGroupRequest() {
+  return {
+    payload: {
+    },
+    type: CREATE_GROUP_REQUEST,
+  };
+}
+
+function createGroupSuccess(group) {
+  return {
+    payload: {
+      group,
+    },
+    type: CREATE_GROUP_SUCCESS,
+  };
+}
+
+function createGroupFailure(error) {
+  return {
+    payload: {
+      error,
+    },
+    type: CREATE_GROUP_FAILURE,
+  };
+}
+
+export function createGroup(group) {
+  return dispatch => {
+    dispatch(createGroupRequest());
+
+    request.post(`${root}/api/groups`)
+    .send({ group })
+    .then(response => {
+      dispatch(createGroupSuccess(response.body));
+      return dispatch(routeActions.push(`/g/${response.body.id}/players`));
+    }, error => {
+      return dispatch(createGroupFailure(error));
+    });
+  };
+}
+
+export function goToFaq() {
+  return dispatch => {
+    return dispatch(routeActions.push('/faq'));
+  };
+}
+
+export function goToCreateGroup() {
+  return dispatch => {
+    return dispatch(routeActions.push('/g/new'));
   };
 }
 

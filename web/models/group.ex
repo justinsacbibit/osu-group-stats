@@ -14,13 +14,14 @@ defmodule UwOsu.Models.Group do
     timestamps
   end
 
-  @required_fields ~w(mode created_by)
-  @optional_fields ~w(id inserted_at updated_at title)
+  @required_fields ~w(mode created_by title)
+  @optional_fields ~w(id inserted_at updated_at)
 
   def changeset(event, params \\ :empty) do
     event
     |> cast(params, @required_fields, @optional_fields)
-    |> validate_length(:title, max: 30)
+    |> validate_number(:mode, greater_than_or_equal_to: 0, less_than_or_equal_to: 3)
+    |> validate_length(:title, min: 3, max: 30)
+    |> foreign_key_constraint(:created_by)
   end
 end
-

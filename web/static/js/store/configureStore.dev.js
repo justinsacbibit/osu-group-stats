@@ -6,9 +6,11 @@ import { syncHistory, routeReducer } from 'react-router-redux';
 import { browserHistory } from 'react-router';
 import rootReducer from '../reducers/reducers';
 import DevTools from '../containers/DevTools';
+import { reducer as formReducer } from 'redux-form';
 
 const reducer = combineReducers(Object.assign({}, rootReducer, {
-  routing: routeReducer
+  form: formReducer,
+  routing: routeReducer,
 }));
 
 // Sync dispatched route actions to the history

@@ -24,14 +24,16 @@ defmodule IrcLoginHandler do
         # TODO: send a link in the future instead of the raw token
         # (text)[url]
         if Mix.env == :prod do
-          ExIrc.Client.msg(client, :privmsg, from, token)
+          message = "https://ogs.sacbibit.com/g/new?t=#{token}"
+          Logger.debug message
+          ExIrc.Client.msg(client, :privmsg, from, message)
         end
         {:noreply, state}
-      _ ->
+      {:error, error} ->
         # log error
-        Logger.error "Failed to get a token for #{from}"
+        Logger.error "Failed to get a token for #{from}: #{inspect error}"
         if Mix.env == :prod do
-          message = "Sorry, there was an issue getting your user information from the osu! servers. Try again later."
+          message = "Sorry, there was an issue getting your user information from the osu! servers. Try again later. If this keeps occurring, send a PM to influxd."
           ExIrc.Client.msg(client, :privmsg, from, message)
         end
         {:noreply, state}

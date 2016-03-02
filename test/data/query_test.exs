@@ -1,4 +1,5 @@
 defmodule QueryTest do
+  import Mock
   use UwOsu.ModelCase
   import UwOsu.RepoHelper
   alias UwOsu.Data.Query
@@ -7,23 +8,20 @@ defmodule QueryTest do
   alias UwOsu.Repo
   doctest UwOsu.Data.Query
 
-  test "get users" do
+  test_with_mock "get users", Timex.Date, [
+    now: fn(_) -> "2015-01-02 05:00:00" end,
+    subtract: fn(d, _) -> d end,
+  ] do
     insert_generation! %{
       "id" => 1,
-      "inserted_at" => "2015-01-01 05:00:00",
-      "updated_at" => "2015-01-01 05:00:00",
       "mode" => 0,
     }
     insert_generation! %{
       "id" => 2,
-      "inserted_at" => "2015-01-01 06:00:00",
-      "updated_at" => "2015-01-01 06:00:00",
       "mode" => 0,
     }
     insert_generation! %{
       "id" => 3,
-      "inserted_at" => "2015-01-02 05:00:00",
-      "updated_at" => "2015-01-02 05:00:00",
       "mode" => 0,
     }
     insert_user! %{
@@ -33,14 +31,17 @@ defmodule QueryTest do
     insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 1,
+      "inserted_at" => "2015-01-01 05:00:00",
     }
     insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 2,
+      "inserted_at" => "2015-01-01 06:00:00",
     }
     insert_user_snapshot! %{
       "user_id" => 1,
       "generation_id" => 3,
+      "inserted_at" => "2015-01-02 05:00:00",
     }
     insert_user! %{
       "id" => 2,
@@ -49,19 +50,26 @@ defmodule QueryTest do
     insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 1,
+      "inserted_at" => "2015-01-01 05:00:00",
     }
     insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 2,
+      "inserted_at" => "2015-01-01 06:00:00",
     }
     insert_user_snapshot! %{
       "user_id" => 2,
       "generation_id" => 3,
+      "inserted_at" => "2015-01-02 05:00:00",
     }
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -203,7 +211,11 @@ defmodule QueryTest do
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,
@@ -273,7 +285,11 @@ defmodule QueryTest do
 
     %Group{
       id: group_id,
-    } = Repo.insert!(Group.changeset(%Group{}, %{mode: 0}))
+    } = Repo.insert!(Group.changeset(%Group{}, %{
+      mode: 0,
+      created_by: 1,
+      title: "Test Group",
+    }))
 
     Repo.insert!(UserGroup.changeset(%UserGroup{}, %{
       group_id: group_id,

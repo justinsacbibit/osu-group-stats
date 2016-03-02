@@ -19,6 +19,7 @@ defmodule UwOsu.Models.Token do
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:user_id)
     |> validate_length(:token, is: @token_length)
+    |> foreign_key_constraint(:user_id)
   end
 
   def new(user_id) do

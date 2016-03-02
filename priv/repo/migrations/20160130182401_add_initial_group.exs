@@ -22,5 +22,9 @@ defmodule UwOsu.Repo.Migrations.AddInitialGroup do
     select u.id, 1
     from "user" u
     """)
+
+    execute("""
+    insert into "user" (id, inserted_at, updated_at) values (1579374, '2016-01-01 05:00:00', '2016-01-01 05:00:00')
+    """)
   end
 end

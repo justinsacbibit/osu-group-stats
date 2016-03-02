@@ -11,7 +11,7 @@ defmodule BeatmapCollectionTest do
   doctest UwOsu.Data.BeatmapCollection
 
   test_with_mock "collect beatmaps", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_beatmaps!: fn(%Osu.Client{api_key: "abc"}, b: 234) ->
       %HTTPoison.Response{body: [
         ApiData.beatmap(%{
@@ -25,7 +25,7 @@ defmodule BeatmapCollectionTest do
     count_query = from b in Beatmap,
       where: b.id == 234,
       select: count(b.id)
-    assert Repo.one!(count_query) == 0
+    assert Repo.all(count_query) == [0]
 
     # insert a score that points to the 234 beatmap
     insert_user! %{id: 1}
@@ -36,7 +36,7 @@ defmodule BeatmapCollectionTest do
 
     BeatmapCollection.collect_beatmaps(%Osu.Client{api_key: "abc"})
 
-    assert Repo.one!(count_query) == 1
+    assert Repo.all(count_query) == [1]
 
     beatmap = Repo.get!(Beatmap, 234)
     assert beatmap.approved == 1
@@ -68,7 +68,7 @@ defmodule BeatmapCollectionTest do
   end
 
   test_with_mock "collect beatmaps only collects for distinct beatmap ids", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
     get_beatmaps!: fn(%Osu.Client{api_key: "abc"}, b: 234) ->
       %HTTPoison.Response{body: [
         ApiData.beatmap(%{
@@ -82,7 +82,7 @@ defmodule BeatmapCollectionTest do
     count_query = from b in Beatmap,
       where: b.id == 234,
       select: count(b.id)
-    assert Repo.one!(count_query) == 0
+    assert Repo.all(count_query) == [0]
 
     # insert two scores that point to the 234 beatmap
     insert_user! %{id: 1}
@@ -98,16 +98,16 @@ defmodule BeatmapCollectionTest do
 
     BeatmapCollection.collect_beatmaps %Osu.Client{api_key: "abc"}
 
-    assert Repo.one!(count_query) == 1
+    assert Repo.all(count_query) == [1]
   end
 
   test_with_mock "collect beatmaps does not collect a beatmap that already is in db", Osu, [
-    start: fn -> end,
+    start: fn -> :ok end,
   ] do
     count_query = from b in Beatmap,
       where: b.id == 234,
       select: count(b.id)
-    assert Repo.one!(count_query) == 0
+    assert Repo.all(count_query) == [0]
 
     insert_beatmap! %{
       "id" => "234",
@@ -115,7 +115,7 @@ defmodule BeatmapCollectionTest do
       "version" => "Overkill",
     }
 
-    assert Repo.one!(count_query) == 1
+    assert Repo.all(count_query) == [1]
 
     # insert a score that points to the 234 beatmap
     insert_user! %{id: 1}

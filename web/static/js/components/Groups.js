@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { routeActions } from 'react-router-redux';
 
 import { fetchGroups } from '../actions';
-import Loader, { LOADER_SIZES } from '../components/Loader';
-import { MODES } from '../constants/osu';
+import GroupTable from '../components/GroupTable';
+import Summary from '../components/Summary';
 
 
 class Groups extends React.Component {
@@ -30,30 +30,12 @@ class Groups extends React.Component {
 
     return (
       <div>
-        {isLoading ?
-          <Loader
-            active
-            centered
-            inline
-            size={LOADER_SIZES.LARGE} />
-        :
-          <div>
-            {groups.map((group, index) => {
-              return (
-                <div
-                  className=''
-                  key={index}>
-                  <a
-                    className='ui link'
-                    href='#'
-                    onClick={this.handleOnClickGroup.bind(this, group.id)}>
-                    Group ID: {group.id} | Group Name: {group.title} | Group Mode: {MODES[group.mode]}
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-        }
+        <Summary />
+        <br />
+        <GroupTable
+          groups={groups}
+          isLoading={isLoading}
+          onClickGroup={this.handleOnClickGroup.bind(this)} />
       </div>
     );
   }
@@ -67,4 +49,3 @@ function select(state) {
 }
 
 export default connect(select)(Groups);
-

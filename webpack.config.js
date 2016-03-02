@@ -10,11 +10,15 @@ var plugins = [
   new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'dev')
   }),
-  new ExtractTextPlugin('app.css'),
+  //new ExtractTextPlugin('app.css'),
   new CopyWebpackPlugin([
     {
       from: './web/static/assets',
       to: ''
+    },
+    {
+      from: './web/static/css',
+      to: 'css/'
     },
     {
       from: './deps/phoenix_html/web/static/js/phoenix_html.js',
@@ -57,13 +61,14 @@ module.exports = {
           presets: ['es2015', 'react', 'stage-0']
         }
       },
-      {
-        test: /\.scss$/,
-        loader: ExtractTextPlugin.extract(
-          'style',
-          'css' + '!sass?outputStyle=expanded&' + stylePathResolves
-        )
-      },
+      // {
+        // test: /\.css$/,
+        // loader: 'style-loader!css-loader?root=.',
+        // loader: ExtractTextPlugin.extract(
+        //   'style',
+        //   'css' + '!sass?outputStyle=expanded&' + stylePathResolves
+        // )
+      // },
     ]
   },
 

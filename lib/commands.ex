@@ -1,6 +1,10 @@
 defmodule UwOsu.Commands do
   alias UwOsu.Data
 
+  def get_token(username) do
+    Data.Group.get_token(username)
+  end
+
   def create_group(title, mode, players) do
     {:ok, token_str} = Data.Group.get_token("influxd")
 

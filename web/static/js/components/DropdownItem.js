@@ -4,7 +4,7 @@ import React, { PropTypes } from 'react';
 export default class DropdownItem extends React.Component {
   static propTypes = {
     children: PropTypes.node,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.any.isRequired,
   };
 
   render() {

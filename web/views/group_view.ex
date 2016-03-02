@@ -35,6 +35,7 @@ defmodule UwOsu.GroupView do
               :generations,
               :scores,
               :user_groups,
+              :groups,
               :snapshots,
             ])
           end)

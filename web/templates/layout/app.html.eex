@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js"></script>
     <!-- TODO: Remove once Highcharts > 4.22 is released -->
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <link rel="stylesheet" type="text/css" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
   <body>
     <%= render @view_module, @view_template, assigns %>
