@@ -19,7 +19,7 @@ defmodule DataGroupTest do
     user_id = 123
     Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
-    {:ok, token} = Data.Group.get_token_for_username("testuser")
+    {:ok, token} = Data.Group.get_token("testuser")
 
     assert token.user_id == user_id
   end
@@ -31,7 +31,7 @@ defmodule DataGroupTest do
       }
     end
   ] do
-    {:error, _} = Data.Group.get_token_for_username("testuser")
+    {:error, _} = Data.Group.get_token("testuser")
   end
 
   test_with_mock "get token reuses an existing token", Osu, [
@@ -44,8 +44,8 @@ defmodule DataGroupTest do
     user_id = 123
     Repo.insert!(User.changeset(%User{}, %{id: user_id}))
 
-    {:ok, token} = Data.Group.get_token_for_username("testuser")
-    {:ok, second_token} = Data.Group.get_token_for_username("testuser")
+    {:ok, token} = Data.Group.get_token("testuser")
+    {:ok, second_token} = Data.Group.get_token("testuser")
 
     assert token.id == second_token.id
   end
@@ -57,7 +57,7 @@ defmodule DataGroupTest do
       }
     end
   ] do
-    {:ok, token} = Data.Group.get_token_for_username("testuser")
+    {:ok, token} = Data.Group.get_token("testuser")
 
     user_id = 123
     Repo.get!(User, user_id)
