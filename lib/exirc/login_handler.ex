@@ -20,7 +20,7 @@ defmodule IrcLoginHandler do
     case UwOsu.Data.Group.get_token(from) do
       {:ok, token} ->
         if Mix.env == :prod do
-          message = "https://ogs.sacbibit.com/g/new?t=#{token}"
+          message = "https://ogs.sacbibit.com/g/new?t=#{token.token}"
           Logger.info message
           ExIrc.Client.msg(client, :privmsg, from, message)
         end
