@@ -19,13 +19,9 @@ defmodule IrcLoginHandler do
   def handle_info({:received, message, from}, {client, _} = state) when message == "!token\n" do
     case UwOsu.Data.Group.get_token(from) do
       {:ok, token} ->
-        # send token
-        Logger.debug "Sending token #{token} to #{from}"
-        # TODO: send a link in the future instead of the raw token
-        # (text)[url]
         if Mix.env == :prod do
           message = "https://ogs.sacbibit.com/g/new?t=#{token}"
-          Logger.debug message
+          Logger.info message
           ExIrc.Client.msg(client, :privmsg, from, message)
         end
         {:noreply, state}
