@@ -24,6 +24,7 @@ defmodule UwOsu.Router do
     get "/generations", DataController, :generations
 
     get "/groups", GroupController, :index
+    get "/groups/:id", GroupController, :show
     post "/groups", GroupController, :create
   end
 

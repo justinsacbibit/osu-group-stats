@@ -34,6 +34,10 @@ export const FETCH_GROUPS_REQUEST = 'FETCH_GROUPS_REQUEST';
 export const FETCH_GROUPS_SUCCESS = 'FETCH_GROUPS_SUCCESS';
 export const FETCH_GROUPS_FAILURE = 'FETCH_GROUPS_FAILURE';
 
+export const FETCH_GROUP_REQUEST = 'FETCH_GROUP_REQUEST';
+export const FETCH_GROUP_SUCCESS = 'FETCH_GROUP_SUCCESS';
+export const FETCH_GROUP_FAILURE = 'FETCH_GROUP_FAILURE';
+
 export const CREATE_GROUP_REQUEST = 'CREATE_GROUP_REQUEST';
 export const CREATE_GROUP_SUCCESS = 'CREATE_GROUP_SUCCESS';
 export const CREATE_GROUP_FAILURE = 'CREATE_GROUP_FAILURE';
@@ -354,6 +358,51 @@ export function fetchGroups() {
       return dispatch(fetchGroupsSuccess(response));
     }, error => {
       return dispatch(fetchGroupsFailure(error));
+    });
+  };
+}
+
+function fetchGroupRequest(groupId) {
+  return {
+    payload: {
+      groupId,
+    },
+    type: FETCH_GROUP_REQUEST,
+  };
+}
+
+function fetchGroupSuccess(group) {
+  return {
+    payload: {
+      group,
+    },
+    type: FETCH_GROUP_SUCCESS,
+  };
+}
+
+function fetchGroupFailure(error) {
+  return {
+    payload: {
+      error,
+    },
+    type: FETCH_GROUP_FAILURE,
+  };
+}
+
+export function fetchGroup(groupId) {
+  return dispatch => {
+    dispatch(fetchGroupRequest(groupId));
+
+    return fetch(`${root}/api/groups/${groupId}`)
+    .then(response => {
+      if (response.status >= 400) {
+        throw new Error();
+      }
+      return response.json();
+    }).then(response => {
+      return dispatch(fetchGroupSuccess(response));
+    }, error => {
+      return dispatch(fetchGroupFailure(error));
     });
   };
 }

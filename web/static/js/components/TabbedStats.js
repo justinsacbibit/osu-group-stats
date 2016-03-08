@@ -3,7 +3,12 @@ import classNames from 'classnames';
 import { routeActions } from 'react-router-redux';
 import { connect } from 'react-redux';
 
+import {
+  fetchGroup,
+} from '../actions';
+
 import FarmedBeatmaps from '../components/FarmedBeatmaps';
+import GroupHeader from '../components/GroupHeader';
 import LatestScores from '../components/LatestScores';
 import PlayerTable from '../components/PlayerTable';
 import StatsChart from '../components/StatsChart';
@@ -13,11 +18,14 @@ class TabbedStats extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     groupId: PropTypes.string.isRequired,
+    group: PropTypes.object,
     tab: PropTypes.string,
   };
-  static defaultProps = {
-    groupId: '1',
-  };
+
+  componentDidMount() {
+    const { dispatch, groupId } = this.props;
+    dispatch(fetchGroup(groupId));
+  }
 
   handleMenuItemSelection(index) {
     const routes = [
@@ -31,7 +39,7 @@ class TabbedStats extends React.Component {
   }
 
   render() {
-    const { groupId, tab } = this.props;
+    const { groupId, group, tab } = this.props;
     const selectedTabIndex = {
       players: 0,
       scores: 1,
@@ -48,6 +56,9 @@ class TabbedStats extends React.Component {
 
     return (
       <div>
+        {group ?
+          <GroupHeader group={group} />
+          : null}
         <div className='ui tabular menu'>
           {menuItems.map((item, index) => {
             return (
@@ -80,5 +91,11 @@ class TabbedStats extends React.Component {
   }
 }
 
-export default connect(() => ({}))(TabbedStats);
+function select(state) {
+  return {
+    group: state.group.group,
+  };
+}
+
+export default connect(select)(TabbedStats);
 

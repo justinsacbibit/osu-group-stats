@@ -10,15 +10,29 @@ defmodule UwOsu.GroupView do
     |> Map.from_struct
     |> Map.drop([:__meta__, :__struct__, :user_groups, :created_by])
     |> Map.update(:creator, %{}, fn(creator) ->
-      creator
-      |> Map.from_struct
-      |> Map.take([
-        :id,
-        :username,
-      ])
+      case creator do
+        %Ecto.Association.NotLoaded{} ->
+          nil
+
+        _ ->
+          creator
+          |> Map.from_struct
+          |> Map.take([
+            :id,
+            :username,
+          ])
+          end
     end)
 
-    case group[:users] do
+    group = case group[:creator] do
+      nil ->
+        group
+        |> Map.drop([:creator])
+      _ ->
+        group
+    end
+
+    group = case group[:users] do
       %Ecto.Association.NotLoaded{} ->
         group
         |> Map.drop([:users])
@@ -41,5 +55,7 @@ defmodule UwOsu.GroupView do
           end)
         end)
     end
+
+    group
   end
 end
