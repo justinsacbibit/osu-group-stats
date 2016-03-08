@@ -9,6 +9,7 @@ import {
 
 import FarmedBeatmaps from '../components/FarmedBeatmaps';
 import GroupHeader from '../components/GroupHeader';
+import InfoPanel from '../components/InfoPanel';
 import LatestScores from '../components/LatestScores';
 import PlayerTable from '../components/PlayerTable';
 import StatsChart from '../components/StatsChart';
@@ -29,6 +30,7 @@ class TabbedStats extends React.Component {
 
   handleMenuItemSelection(index) {
     const routes = [
+      'info',
       'players',
       'scores',
       'graph',
@@ -41,13 +43,15 @@ class TabbedStats extends React.Component {
   render() {
     const { groupId, group, tab } = this.props;
     const selectedTabIndex = {
-      players: 0,
-      scores: 1,
-      graph: 2,
-      beatmaps: 3,
+      info: 0,
+      players: 1,
+      scores: 2,
+      graph: 3,
+      beatmaps: 4,
     }[tab];
 
     const menuItems = [
+      'Info',
       'Players',
       'Scores',
       'Player Charts',
@@ -72,17 +76,21 @@ class TabbedStats extends React.Component {
           })}
         </div>
         {selectedTabIndex === 0 ?
-          <PlayerTable
+          <InfoPanel
             groupId={groupId} />
         : null}
         {selectedTabIndex === 1 ?
+          <PlayerTable
+            groupId={groupId} />
+        : null}
+        {selectedTabIndex === 2 ?
           <LatestScores
             groupId={groupId} />
         : null}
         <StatsChart
           groupId={groupId}
-          visible={selectedTabIndex === 2} />
-        {selectedTabIndex === 3 ?
+          visible={selectedTabIndex === 3} />
+        {selectedTabIndex === 4 ?
           <FarmedBeatmaps
             groupId={groupId} />
         : null}
