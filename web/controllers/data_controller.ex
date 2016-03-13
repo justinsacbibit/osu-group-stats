@@ -26,6 +26,12 @@ defmodule UwOsu.DataController do
     render conn, "players.json", players: players
   end
 
+  def show_player(conn, %{"id" => id, "d" => days_delta}) do
+    {days_delta, _} = Integer.parse(days_delta)
+    player = Repo.first(Query.get_user(id, 0, days_delta))
+    render conn, "player.json", player: player
+  end
+
   def daily_snapshots(conn, %{"g" => group_id}) do
     users = Repo.all(Query.get_users_with_snapshots(group_id))
     render conn, "daily_snapshots.json", users: users

@@ -15,6 +15,26 @@ defmodule UwOsu.Data.Query do
       order_by: [:id]
   end
 
+  def get_user(username_or_id, mode \\ 0, days_delta \\ 0) do
+    date = Date.now("America/Toronto")
+    |> Date.subtract({0, days_delta * 86400, 0})
+    id = case Integer.parse(username_or_id) do
+      {id, _} ->
+        id
+      _ ->
+        0
+    end
+    from u in User,
+      join: s in assoc(u, :snapshots),
+      join: g in assoc(s, :generation),
+      # TODO: Use window function to find the snapshot that is closest to midnight EST?
+      where: fragment("(?)::date", s.inserted_at) == type(^date, Ecto.Date),
+      order_by: [asc: s.inserted_at],
+      distinct: [u.id],
+      where: (u.username == ^username_or_id or u.id == ^id) and g.mode == ^mode,
+      preload: [snapshots: s]
+  end
+
   def get_users(group_id, days_delta \\ 0) do
     date = Date.now("America/Toronto")
     |> Date.subtract({0, days_delta * 86400, 0})
