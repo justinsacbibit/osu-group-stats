@@ -28,7 +28,7 @@ defmodule UwOsu.DataController do
 
   def show_player(conn, %{"id" => id, "d" => days_delta}) do
     {days_delta, _} = Integer.parse(days_delta)
-    player = Repo.first(Query.get_user(id, 0, days_delta))
+    player = Repo.first!(Query.get_user(id, 0, days_delta))
     render conn, "player.json", player: player
   end
 
