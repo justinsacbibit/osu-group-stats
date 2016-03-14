@@ -156,5 +156,21 @@ defmodule UwOsu.DataView do
     |> Map.from_struct
     |> Map.drop([:__meta__, :__struct__, :snapshots])
   end
+
+  def render("scores.json", %{scores: scores}) do
+    render_many scores, UwOsu.DataView, "score.json", as: :score
+  end
+
+  def render("score.json", %{score: score}) do
+    score
+    |> Map.from_struct
+    |> Map.take([:beatmap, :score, :rank, :pp, :maxcombo])
+    |> Map.put(:username, score.user.username)
+    |> Map.update(:beatmap, %{}, fn(beatmap) ->
+      beatmap
+      |> Map.from_struct
+      |> Map.take([:version, :title, :artist, :creator])
+    end)
+  end
 end
 

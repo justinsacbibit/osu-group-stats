@@ -1,6 +1,6 @@
 defmodule UwOsu.DataController do
   use UwOsu.Web, :controller
-  alias UwOsu.Models.Generation
+  alias UwOsu.Models.{Generation, Score}
   alias UwOsu.Data.Query
   alias UwOsu.Repo
 
@@ -46,5 +46,13 @@ defmodule UwOsu.DataController do
     generations = Repo.all from g in Generation,
       order_by: [desc: g.id]
     render conn, "generations.json", generations: generations
+  end
+
+  def scores(conn, %{"u" => user_id}) do
+    query = from s in Score,
+      where: s.user_id == ^user_id,
+      preload: [:beatmap, :user]
+    scores = Repo.all(query)
+    render conn, "scores.json", scores: scores
   end
 end
