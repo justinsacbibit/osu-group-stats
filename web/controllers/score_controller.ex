@@ -1,7 +1,5 @@
 defmodule UwOsu.ScoreController do
   use UwOsu.Web, :controller
-  alias UwOsu.Data
-  alias UwOsu.Data.Query
   alias UwOsu.Models.Score
   alias UwOsu.Repo
 

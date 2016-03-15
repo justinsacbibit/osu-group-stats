@@ -1,6 +1,6 @@
 defmodule UwOsu.DataController do
   use UwOsu.Web, :controller
-  alias UwOsu.Models.{Generation, Score}
+  alias UwOsu.Models.Generation
   alias UwOsu.Data.Query
   alias UwOsu.Repo
 

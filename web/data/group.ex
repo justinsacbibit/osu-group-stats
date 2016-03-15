@@ -148,7 +148,8 @@ defmodule UwOsu.Data.Group do
     case transaction_result do
       {:ok, user_groups} ->
         {:ok, user_groups}
-      error ->
+      _error ->
+        # TODO: Use error
         {:error, %Error{status_code: 400, reason: "Error trying to add users to group"}}
     end
   end

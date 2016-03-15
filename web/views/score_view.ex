@@ -6,7 +6,7 @@ defmodule UwOsu.ScoreView do
   end
 
   def render("score.json", %{score: score}) do
-    score = score
+    score
     |> Map.from_struct
     |> Map.drop([:__meta__, :__struct__])
     |> Map.update(:beatmap, %{}, fn(beatmap) ->
