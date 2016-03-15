@@ -47,12 +47,4 @@ defmodule UwOsu.DataController do
       order_by: [desc: g.id]
     render conn, "generations.json", generations: generations
   end
-
-  def scores(conn, %{"u" => user_id}) do
-    query = from s in Score,
-      where: s.user_id == ^user_id,
-      preload: [:beatmap, :user]
-    scores = Repo.all(query)
-    render conn, "scores.json", scores: scores
-  end
 end

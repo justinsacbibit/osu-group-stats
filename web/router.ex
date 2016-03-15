@@ -28,7 +28,7 @@ defmodule UwOsu.Router do
     get "/groups/:id", GroupController, :show
     post "/groups", GroupController, :create
 
-    get "/scores", DataController, :scores
+    get "/scores", ScoreController, :index
   end
 
   scope "/", UwOsu do
