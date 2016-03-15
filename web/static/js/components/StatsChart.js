@@ -26,6 +26,13 @@ function buildHighChartOptions(dailySnapshots, players, selectedStat, showDeltas
       type: 'line',
       zoomType: 'x'
     },
+    plotOptions: {
+      series: {
+        marker: {
+          enabled: false,
+        },
+      },
+    },
     title: {
       text: showDeltas ? `${text} per day` : `${text} over time`,
     },
