@@ -42,7 +42,7 @@ class RecentScores extends React.Component {
             const modsString = score.enabled_mods > 0 ? ` +${getModsArray(score.enabled_mods).join(',')}` : ``;
             return (
               <div className='item' key={index}>
-                <a href={userLink(score.user.id, score.beatmap.mode)}>{score.user.username}</a> achieved <strong>{score.pp.toFixed(2)}pp</strong> on <a href={beatmapLink(score.beatmap.id, score.beatmap.mode)}>{formatBeatmapString(score.beatmap)}</a><strong>{modsString}</strong> <span style={{ textDecoration: 'underline' }} title={scoreMoment.format()}>{scoreMoment.fromNow()}</span>
+                <a href={userLink(score.user.id, score.beatmap.mode)}>{score.user.username}</a> achieved <strong>{score.pp.toFixed(2)}pp</strong> on <a href={beatmapLink(score.beatmap.id, score.beatmap.mode)}>{formatBeatmapString(score.beatmap)}</a><strong>{modsString}</strong> <span style={{ color: 'gray', textDecoration: 'underline' }} title={scoreMoment.format()}>{scoreMoment.fromNow()}</span>
               </div>
             );
           })}
