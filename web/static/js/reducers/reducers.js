@@ -4,6 +4,7 @@ import group from './group';
 import groups from './groups';
 import latestScores from './latestScores';
 import players from './players';
+import recentScores from './recentScores';
 import statsChart from './statsChart';
 
 export default {
@@ -13,6 +14,7 @@ export default {
   groups,
   latestScores,
   players,
+  recentScores,
   statsChart,
 };
 

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export function getModsArray(curMods) {
   const modMap = [
     ['NF', 1],
@@ -31,5 +33,17 @@ export function getModsArray(curMods) {
   }
 
   return mods;
+}
+
+export function momentFromOsuDate(date) {
+  return moment(`${date}+08`);
+}
+
+export function beatmapLink(id, m) {
+  return `https://osu.ppy.sh/b/${id}?m=${m}`;
+}
+
+export function userLink(id, m) {
+  return `https://osu.ppy.sh/u/${id}?m=${m}`;
 }
 

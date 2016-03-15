@@ -30,6 +30,10 @@ export const FETCH_LATEST_SCORES_REQUEST = 'FETCH_LATEST_SCORES_REQUEST';
 export const FETCH_LATEST_SCORES_SUCCESS = 'FETCH_LATEST_SCORES_SUCCESS';
 export const FETCH_LATEST_SCORES_FAILURE = 'FETCH_LATEST_SCORES_FAILURE';
 
+export const FETCH_RECENT_SCORES_REQUEST = 'FETCH_RECENT_SCORES_REQUEST';
+export const FETCH_RECENT_SCORES_SUCCESS = 'FETCH_RECENT_SCORES_SUCCESS';
+export const FETCH_RECENT_SCORES_FAILURE = 'FETCH_RECENT_SCORES_FAILURE';
+
 export const FETCH_GROUPS_REQUEST = 'FETCH_GROUPS_REQUEST';
 export const FETCH_GROUPS_SUCCESS = 'FETCH_GROUPS_SUCCESS';
 export const FETCH_GROUPS_FAILURE = 'FETCH_GROUPS_FAILURE';
@@ -314,6 +318,51 @@ export function fetchLatestScores(groupId, before, since) {
       return dispatch(fetchLatestScoresSuccess(response));
     }, error => {
       return dispatch(fetchLatestScoresFailure(error));
+    });
+  };
+}
+
+function fetchRecentScoresRequest(groupId) {
+  return {
+    payload: {
+      groupId,
+    },
+    type: FETCH_RECENT_SCORES_REQUEST,
+  };
+}
+
+function fetchRecentScoresSuccess(scores) {
+  return {
+    payload: {
+      scores,
+    },
+    type: FETCH_RECENT_SCORES_SUCCESS,
+  };
+}
+
+function fetchRecentScoresFailure(error) {
+  return {
+    payload: {
+      error,
+    },
+    type: FETCH_RECENT_SCORES_FAILURE,
+  };
+}
+
+export function fetchRecentScores(groupId, before, since) {
+  return dispatch => {
+    dispatch(fetchRecentScoresRequest(groupId));
+
+    return fetch(`${root}/api/scores?g=${groupId}`)
+    .then(response => {
+      if (response.status >= 400) {
+        throw new Error();
+      }
+      return response.json();
+    }).then(response => {
+      return dispatch(fetchRecentScoresSuccess(response));
+    }, error => {
+      return dispatch(fetchRecentScoresFailure(error));
     });
   };
 }
