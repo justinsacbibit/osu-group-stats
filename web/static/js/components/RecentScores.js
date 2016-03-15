@@ -2,14 +2,14 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import {
   beatmapLink,
+  getModsArray,
   momentFromOsuDate,
-  userLink
+  userLink,
 } from '../utils';
 
 import {
   fetchRecentScores,
 } from '../actions';
-import { getModsArray } from '../utils';
 
 
 function formatBeatmapString(beatmap) {
@@ -39,9 +39,10 @@ class RecentScores extends React.Component {
         <div className='ui list'>
           {this.props.scores.map((score, index) => {
             const scoreMoment = momentFromOsuDate(score.date);
+            const modsString = score.enabled_mods > 0 ? ` +${getModsArray(score.enabled_mods).join(',')}` : ``;
             return (
               <div className='item' key={index}>
-                <a href={userLink(score.user.id, score.beatmap.mode)}>{score.user.username}</a> achieved <strong>{score.pp.toFixed(2)}pp</strong> on <a href={beatmapLink(score.beatmap.id, score.beatmap.mode)}>{formatBeatmapString(score.beatmap)}</a> <span style={{ textDecoration: 'underline' }} title={scoreMoment.format()}>{scoreMoment.fromNow()}</span>
+                <a href={userLink(score.user.id, score.beatmap.mode)}>{score.user.username}</a> achieved <strong>{score.pp.toFixed(2)}pp</strong> on <a href={beatmapLink(score.beatmap.id, score.beatmap.mode)}>{formatBeatmapString(score.beatmap)}</a><strong>{modsString}</strong> <span style={{ textDecoration: 'underline' }} title={scoreMoment.format()}>{scoreMoment.fromNow()}</span>
               </div>
             );
           })}

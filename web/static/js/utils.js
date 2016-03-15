@@ -32,6 +32,7 @@ export function getModsArray(curMods) {
     mods.push(mod);
   }
 
+  mods.reverse();
   return mods;
 }
 
