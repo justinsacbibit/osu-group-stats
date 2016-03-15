@@ -89,7 +89,7 @@ class TabbedStats extends React.Component {
         : null}
         <StatsChart
           groupId={groupId}
-          visible={selectedTabIndex === 2} />
+          visible={selectedTabIndex === 3} />
         {selectedTabIndex === 4 ?
           <FarmedBeatmaps
             groupId={groupId} />
