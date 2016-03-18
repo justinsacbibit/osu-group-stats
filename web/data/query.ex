@@ -67,7 +67,7 @@ defmodule UwOsu.Data.Query do
       FROM user_snapshot s
       JOIN generation g
       ON s.generation_id = g.id
-      WHERE s.inserted_at::time >= '5:00'
+      WHERE s.inserted_at::time >= '4:00'
       GROUP BY s.inserted_at::date, s.user_id, g.mode
       "),
         on: s.inserted_at == i.min
