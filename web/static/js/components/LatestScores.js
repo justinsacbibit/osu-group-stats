@@ -4,7 +4,10 @@ import { connect } from 'react-redux';
 import {
   fetchLatestScores,
 } from '../actions';
-import { getModsArray } from '../utils';
+import {
+  getModsArray,
+  momentFromOsuDate,
+} from '../utils';
 
 
 const before = '2016-03-01T00:00:00Z';
@@ -40,10 +43,10 @@ class LatestScores extends React.Component {
                 {user.username}
                 <div className='list'>
                   {user.scores.map((score, scoreIndex) => {
-                    const scoreDate = new Date(score.date);
+                    const scoreMoment = momentFromOsuDate(score.date);
                     return (
                       <div className='item' key={scoreIndex}>
-                        [<strong>{score.pp}pp</strong>] <strong>{getModsArray(score.enabled_mods).join('')}</strong> {score.beatmap.artist} - {score.beatmap.title} [{score.beatmap.version}] \\ {score.beatmap.creator} - {scoreDate.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' })}
+                        [<strong>{score.pp}pp</strong>] <strong>{getModsArray(score.enabled_mods).join('')}</strong> {score.beatmap.artist} - {score.beatmap.title} [{score.beatmap.version}] \\ {score.beatmap.creator} - {scoreMoment.format('LL')}
                       </div>
                     );
                   })}

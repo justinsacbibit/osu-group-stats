@@ -36,6 +36,12 @@ export function getModsArray(curMods) {
   return mods;
 }
 
+/**
+ * Returns a moment for a date returned from the osu! API.
+ * Treats the date as UTC+8. Should not be used once the OGS API returns
+ * proper timezone data.
+ * @param {string} date
+ */
 export function momentFromOsuDate(date) {
   return moment(`${date}+08`);
 }

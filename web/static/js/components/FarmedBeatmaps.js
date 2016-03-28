@@ -7,7 +7,10 @@ import {
   selectFarmedBeatmap,
 } from '../actions';
 import Loader, { LOADER_SIZES } from '../components/Loader';
-import { getModsArray } from '../utils';
+import {
+  getModsArray,
+  momentFromOsuDate,
+} from '../utils';
 
 
 class FarmedBeatmaps extends React.Component {
@@ -126,15 +129,9 @@ class FarmedBeatmaps extends React.Component {
                    </thead>
                    <tbody>
                      {selectedBeatmap.scores.map((score, index) => {
-                       const scoreDate = new Date(score.date);
-
                        const mods = getModsArray(score.enabled_mods);
 
-                       const date = scoreDate.toLocaleString('en-US', {
-                         year: 'numeric',
-                         month: 'numeric',
-                         day: 'numeric',
-                       });
+                       const date = momentFromOsuDate(score.date).format('LL');
 
                        return (
                          <tr
