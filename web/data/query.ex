@@ -117,7 +117,7 @@ defmodule UwOsu.Data.Query do
         FROM (
           SELECT x.mode, beatmap_id, x.id, group_id,
             count(*)
-            OVER (PARTITION BY beatmap_id) AS score_count
+            OVER (PARTITION BY group_id, beatmap_id) AS score_count
           FROM (
             SELECT sc.*,
               b.mode,
@@ -150,7 +150,7 @@ defmodule UwOsu.Data.Query do
       join: ugr in UserGroup,
         on: ugr.group_id == ^group_id and ugr.user_id == u.id,
       join: gr in Group,
-        on: ugr.group_id == gr.id and gr.mode == b.mode,
+        on: ugr.group_id == gr.id and gr.mode == b.mode and gr.id == sc_.group_id,
       order_by: [desc: sc_.score_ranking],
       preload: [scores: {sc, user: u}],
       select: b
