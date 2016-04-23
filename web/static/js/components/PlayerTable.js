@@ -16,7 +16,7 @@ import { SORT_ORDERS } from '../constants';
 
 const sortableColumns = [
   'PP',
-  'PP Rank',
+  'Global Rank',
   'Country Rank',
   'Playcount',
   'Accuracy',
