@@ -69,13 +69,26 @@ class PlayerTable extends React.Component {
 
   _sortPlayers(deltas, p1, p2) {
     let column;
+    let index;
     if (deltas) {
-      column = columnMap[sortableColumns.indexOf(this.props.recentChanges.stat)];
+      index = sortableColumns.indexOf(this.props.recentChanges.stat);
     } else {
-      column = columnMap[this.props.sortOrder.index];
+      index = this.props.sortOrder.index;
     }
+    column = columnMap[index];
     let d1 = column[0](p1);
     let d2 = column[0](p2);
+
+    const isPPRank = index === 1;
+    if (isPPRank) {
+      if (d1 === 0) {
+        d1 = Number.MAX_SAFE_INTEGER;
+      }
+      if (d2 === 0) {
+        d2 = Number.MAX_SAFE_INTEGER;
+      }
+    }
+
     if (deltas && this.props.sortOrder.index > 0) {
       const daysDelta = [null, 1, 7, 30][this.props.sortOrder.index];
       if (this.props.players[daysDelta][p1.user_id]) {
