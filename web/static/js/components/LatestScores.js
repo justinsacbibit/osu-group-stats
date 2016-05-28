@@ -10,8 +10,8 @@ import {
 } from '../utils';
 
 
-const before = '2016-05-01T00:00:00Z';
-const since = '2016-04-01T00:00:00Z';
+const before = '2016-06-01T00:00:00Z';
+const since = '2016-05-01T00:00:00Z';
 
 class LatestScores extends React.Component {
   static propTypes = {
@@ -34,7 +34,7 @@ class LatestScores extends React.Component {
     return (
       <div>
         <h2 className='ui header'>
-          April 2016 Scores
+          May 2016 Scores
         </h2>
         <div className='ui list'>
           {this.props.scores.map((user, index) => {
