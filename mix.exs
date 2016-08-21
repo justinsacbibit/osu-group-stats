@@ -20,7 +20,7 @@ defmodule UwOsu.Mixfile do
     [mod: {UwOsu, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger, :gettext,
                     :phoenix_ecto, :postgrex, :quantum, :httpoison, :timex,
-                    :exirc, :ecto]]
+                    :exirc, :ecto, :cachex]]
   end
 
   # Specifies which paths to compile per environment.
@@ -42,6 +42,7 @@ defmodule UwOsu.Mixfile do
      {:cowboy, "~> 1.0"},
      {:quantum, "~> 1.6.1"},
      {:httpoison, "~> 0.8.0"},
+     {:cachex, "~> 1.2"},
      {:poison, "~> 1.5"},
      {:mock, "~> 0.1.1", only: :test},
      {:mix_test_watch, "~> 0.2", only: :dev},

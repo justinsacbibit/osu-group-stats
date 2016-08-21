@@ -17,12 +17,21 @@ defmodule UwOsu do
       worker(IrcLoginHandler, [client, []]),
       # Here you could define other workers and supervisors as children
       # worker(UwOsu.Worker, [arg1, arg2, arg3]),
+      worker(Cachex, [UwOsu.Caches.DailySnapshotsCache.cache_name(), []]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: UwOsu.Supervisor]
-    Supervisor.start_link(children, opts)
+    supervisor = Supervisor.start_link(children, opts)
+
+    Task.start(&bootstrap/0)
+
+    supervisor
+  end
+
+  def bootstrap() do
+    UwOsu.Caches.DailySnapshotsCache.hydrate()
   end
 
   # Tell Phoenix to update the endpoint configuration

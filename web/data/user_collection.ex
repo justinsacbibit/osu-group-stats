@@ -8,6 +8,7 @@ defmodule UwOsu.Data.UserCollection do
   alias UwOsu.Models.User
   alias UwOsu.Models.UserSnapshot
   alias UwOsu.Repo
+  alias UwOsu.Caches.DailySnapshotsCache
 
   def collect(
     client \\ %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
@@ -16,6 +17,8 @@ defmodule UwOsu.Data.UserCollection do
     Enum.each(modes, fn(mode) ->
       collect_mode mode, client
     end)
+    DailySnapshotsCache.clear()
+    DailySnapshotsCache.hydrate()
   end
 
   def collect_mode(
@@ -37,7 +40,7 @@ defmodule UwOsu.Data.UserCollection do
           select: u.id
         user_ids = Repo.all query
 
-        Repo.transaction([timeout: 120000, pool_timeout: 120000], fn ->
+        Repo.transaction([timeout: 180000, pool_timeout: 180000], fn ->
           changeset = Generation.changeset(%Generation{}, %{
             mode: mode,
           })

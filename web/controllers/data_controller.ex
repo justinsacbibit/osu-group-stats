@@ -3,6 +3,7 @@ defmodule UwOsu.DataController do
   alias UwOsu.Models.Generation
   alias UwOsu.Data.Query
   alias UwOsu.Repo
+  alias UwOsu.Caches.DailySnapshotsCache
 
   def weekly_snapshots(conn, _params) do
     snapshots = Repo.all(Query.get_weekly_snapshots)
@@ -33,8 +34,11 @@ defmodule UwOsu.DataController do
   end
 
   def daily_snapshots(conn, %{"g" => group_id}) do
-    users = Repo.all(Query.get_users_with_snapshots(group_id))
-    render conn, "daily_snapshots.json", users: users
+    data = DailySnapshotsCache.get_gzipped(group_id)
+    conn
+    |> put_resp_header("content-type", "application/json")
+    |> put_resp_header("content-encoding", "gzip")
+    |> resp(200, data)
   end
 
   def latest_scores(conn, %{"g" => group_id, "before" => before, "since" => since}) do

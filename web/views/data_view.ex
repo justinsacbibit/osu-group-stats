@@ -37,21 +37,27 @@ defmodule UwOsu.DataView do
   def render("daily_snapshot.json", %{user: user}) do
     user
     |> Map.from_struct
-    |> Map.drop([
-      :__meta__,
-      :__struct__,
-      :events,
-      :generations,
-      :scores,
-      :user_groups,
-      :groups,
+    |> Map.take([
+      :id,
+      :snapshots,
+      :username,
     ])
     |> Map.update(:snapshots, [], fn(snapshots) ->
       snapshots
       |> Enum.map(fn(snapshot) ->
         snapshot
         |> Map.from_struct
-        |> Map.drop([:__struct__, :__meta__, :generation, :user])
+        |> Map.take([
+          :inserted_at,
+          :total_score,
+          :ranked_score,
+          :pp_raw,
+          :pp_rank,
+          :pp_country_rank,
+          :playcount,
+          :level,
+          :accuracy,
+        ])
       end)
     end)
   end
