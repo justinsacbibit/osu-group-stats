@@ -16,11 +16,11 @@ defmodule UwOsu.ScoreNotifier.Notify do
   """
   def notify() do
     user_ids_and_modes = get_user_ids_and_modes()
-    IO.inspect "Going to get scores for user ids and modes:"
-    IO.inspect user_ids_and_modes
+    Logger.info "Going to get scores for user ids and modes:"
+    Logger.info inspect user_ids_and_modes
     ids_and_scores = get_new_scores_for_users(user_ids_and_modes)
-    IO.inspect "Got ids and scores"
-    IO.inspect ids_and_scores
+    Logger.info "Got ids and scores"
+    Logger.info inspect ids_and_scores
     send_notifications(ids_and_scores)
   end
 
@@ -46,7 +46,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
 
   # returns a MapSet containing {{user_id, mode}, score, personal best ranking} tuples
   defp get_new_scores_for_user({user_id, mode} = id) do
-    IO.inspect "Getting scores for #{inspect id}"
+    Logger.debug "Getting scores for #{inspect id}"
     # Get user scores
     client = %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
     %HTTPoison.Response{
@@ -95,8 +95,8 @@ defmodule UwOsu.ScoreNotifier.Notify do
       # find Discord channels subscribed to this ID
       subscriptions = subscriptions_for_id(id)
 
-      IO.inspect "Subscriptions for id #{inspect id}"
-      IO.inspect subscriptions
+      Logger.info "Subscriptions for id #{inspect id}"
+      Logger.info inspect subscriptions
 
       {user, old_user_dict, new_user_dict} = get_user(user_id, mode)
       beatmap = get_beatmap(score["beatmap_id"])
@@ -302,6 +302,6 @@ defmodule UwOsu.ScoreNotifier.Notify do
     data = %{"guild_id" => guild_id, "channel_id" => channel_id, "message" => message, "cookie" => cookie}
     json = Poison.encode!(data)
     result = HTTPoison.post bot_url <> "/ogs-score", json, [{"Content-Type", "application/json"}], timeout: 20000, recv_timeout: 20000
-    IO.inspect result
+    Logger.info inspect result
   end
 end
