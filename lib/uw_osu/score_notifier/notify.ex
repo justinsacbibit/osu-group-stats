@@ -49,14 +49,17 @@ defmodule UwOsu.ScoreNotifier.Notify do
     Logger.debug "Getting scores for #{inspect id}"
     # Get user scores
     client = %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
+    get_user_best_fn = fn() ->
+      Osu.get_user_best!(client, user_id, m: mode, limit: 50)
+    end
     %HTTPoison.Response{
       body: scores,
     } = try do
-      Osu.get_user_best!(client, user_id, m: mode, limit: 15)
+      get_user_best_fn.()
     rescue
       e ->
         :timer.sleep :timer.seconds(5)
-        Osu.get_user_best!(client, user_id, m: mode, limit: 15)
+        get_user_best_fn.()
     end
 
     {new_scores_mapset, best_map, _idx} = Enum.reduce(scores, {MapSet.new(), %{}, 0}, fn(score_dict, {new_scores_mapset, best_map, idx}) ->
