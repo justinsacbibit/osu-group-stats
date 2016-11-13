@@ -127,7 +127,7 @@ defmodule UwOsu.Data.UserCollection do
     # Get user scores
     %HTTPoison.Response{
       body: scores,
-    } = Osu.get_user_best!(client, id, m: generation.mode)
+    } = Osu.get_user_best!(client, id, m: generation.mode, limit: 100)
 
     Enum.each(scores, fn(score_dict) ->
       {:ok, date} = Ecto.DateTime.cast(score_dict["date"])

@@ -24,7 +24,7 @@ defmodule UwOsu.Data.BeatmapCollection do
     |> Enum.chunk(100, 100, [])
     |> Enum.each(fn(beatmap_ids) ->
       Enum.each beatmap_ids, fn(beatmap_id) ->
-        fetch_and_process_beatmap client, beatmap_id, 5
+        fetch_and_process_beatmap(client, beatmap_id)
       end
       unless Mix.env == :test do
         :timer.sleep 30000 # sleep for 30 seconds
@@ -32,11 +32,14 @@ defmodule UwOsu.Data.BeatmapCollection do
     end)
   end
 
-  defp fetch_and_process_beatmap(_client, beatmap_id, attempts_remaining) when attempts_remaining == 0 do
+  def fetch_and_process_beatmap(client, beatmap_id, attempts_remaining \\ 5)
+
+  def fetch_and_process_beatmap(_client, beatmap_id, attempts_remaining) when attempts_remaining == 0 do
     Logger.error "Failed to fetch beatmap with id #{beatmap_id}"
+    {:error, "Unknown"}
   end
 
-  defp fetch_and_process_beatmap(client, beatmap_id, attempts_remaining) do
+  def fetch_and_process_beatmap(client, beatmap_id, attempts_remaining) do
     Logger.debug "Fetching beatmap with id #{beatmap_id}"
     %HTTPoison.Response{body: body} = Osu.get_beatmaps!(client, b: beatmap_id)
     case body do
@@ -45,10 +48,11 @@ defmodule UwOsu.Data.BeatmapCollection do
           "id" => beatmap["beatmap_id"]
         }
         beatmap = Dict.delete beatmap, "beatmap_id"
-        Repo.insert!(Beatmap.changeset(%Beatmap{}, beatmap))
+        changeset = Beatmap.changeset(%Beatmap{}, beatmap)
+        {:ok, Repo.insert!(changeset)}
       _ ->
         :timer.sleep 10000 # sleep for 10 seconds
-        fetch_and_process_beatmap client, beatmap_id, attempts_remaining - 1
+        fetch_and_process_beatmap(client, beatmap_id, attempts_remaining - 1)
     end
   end
 end

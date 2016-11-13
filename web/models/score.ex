@@ -20,11 +20,12 @@ defmodule UwOsu.Models.Score do
     field :date, Ecto.DateTime
     field :rank, :string
     field :pp, :float
+    field :mode, :integer
 
     timestamps
   end
 
-  @required_fields ~w(user_id beatmap_id score maxcombo count50 count100 count300 countmiss countkatu countgeki perfect enabled_mods date rank pp)
+  @required_fields ~w(user_id beatmap_id score maxcombo count50 count100 count300 countmiss countkatu countgeki perfect enabled_mods date rank pp mode)
   @optional_fields ~w()
 
   def changeset(event, params \\ %{}) do

@@ -44,7 +44,6 @@ defmodule UwOsu.Osu do
   def get_user_best!(client, user, params \\ []) do
     params = params
     |> Keyword.put(:u, user)
-    |> Keyword.put(:limit, 100)
 
     _get!("/get_user_best", client, params)
   end
@@ -66,7 +65,12 @@ defmodule UwOsu.Osu do
   defp _get!(path, client, params) do
     params = Keyword.put(params, :k, client.api_key)
     one_minute = 60000
-    get!(path, [], params: params, timeout: one_minute, recv_timeout: one_minute)
+    resp = get!(path, [], params: params, timeout: one_minute, recv_timeout: one_minute)
+    if resp.status_code == 401 do
+      raise "Invalid API key"
+    else
+      resp
+    end
   end
 end
 

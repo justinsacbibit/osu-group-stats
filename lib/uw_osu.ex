@@ -18,6 +18,8 @@ defmodule UwOsu do
       # Here you could define other workers and supervisors as children
       # worker(UwOsu.Worker, [arg1, arg2, arg3]),
       worker(Cachex, [UwOsu.Caches.DailySnapshotsCache.cache_name(), []]),
+      worker(UwOsu.ScoreNotifier.DataStore, []),
+      worker(UwOsu.ScoreNotifier.Worker, []),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
