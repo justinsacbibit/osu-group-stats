@@ -55,9 +55,7 @@ defmodule UwOsu.Data.UserCollection do
         Logger.info "Successfully collected mode #{mode} on try ##{attempt_number}"
       rescue
         e ->
-          # TODO: Pass error through logger
-          IO.inspect e
-          Logger.error "Failed to collect mode #{mode} on try ##{attempt_number}"
+          Logger.error "Failed to collect mode #{mode} on try ##{attempt_number}: #{inspect e}"
           :timer.sleep 10000
           collect_mode mode, client, attempts_remaining - 1
       end
