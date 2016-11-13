@@ -51,7 +51,12 @@ defmodule UwOsu.ScoreNotifier.Notify do
     client = %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
     %HTTPoison.Response{
       body: scores,
-    } = Osu.get_user_best!(client, user_id, m: mode, limit: 15)
+    } = try do
+      Osu.get_user_best!(client, user_id, m: mode, limit: 15)
+    rescue
+      e ->
+        Osu.get_user_best!(client, user_id, m: mode, limit: 15)
+    end
 
     {new_scores_mapset, best_map, _idx} = Enum.reduce(scores, {MapSet.new(), %{}, 0}, fn(score_dict, {new_scores_mapset, best_map, idx}) ->
       # %{
