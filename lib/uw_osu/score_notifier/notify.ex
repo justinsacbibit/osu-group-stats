@@ -55,6 +55,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
       Osu.get_user_best!(client, user_id, m: mode, limit: 15)
     rescue
       e ->
+        :timer.sleep :timer.seconds(5)
         Osu.get_user_best!(client, user_id, m: mode, limit: 15)
     end
 
