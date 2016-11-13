@@ -13,7 +13,7 @@ defmodule UwOsu.Models.Generation do
   @required_fields ~w(mode)
   @optional_fields ~w(id inserted_at updated_at)
 
-  def changeset(event, params \\ :empty) do
+  def changeset(event, params \\ %{}) do
     event
     |> cast(params, @required_fields, @optional_fields)
   end

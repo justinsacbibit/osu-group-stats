@@ -17,7 +17,7 @@ defmodule UwOsu.Models.Event do
   @required_fields ~w(user_id display_html beatmap_id beatmapset_id date epicfactor)
   @optional_fields ~w()
 
-  def changeset(event, params \\ :empty) do
+  def changeset(event, params \\ %{}) do
     event
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:user_id, name: :event_user_id_beatmap_id_date_index)

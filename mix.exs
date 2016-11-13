@@ -4,7 +4,7 @@ defmodule UwOsu.Mixfile do
   def project do
     [app: :uw_osu,
      version: "0.0.1",
-     elixir: "~> 1.2",
+     elixir: "~> 1.3",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix, :gettext] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -18,7 +18,7 @@ defmodule UwOsu.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [mod: {UwOsu, []},
-     applications: [:phoenix, :phoenix_html, :cowboy, :logger, :gettext,
+     applications: [:phoenix, :phoenix_html, :phoenix_pubsub, :cowboy, :logger, :gettext,
                     :phoenix_ecto, :postgrex, :quantum, :httpoison, :timex,
                     :exirc, :ecto, :cachex]]
   end
@@ -31,7 +31,8 @@ defmodule UwOsu.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.1.1"},
+    [{:phoenix, "~> 1.2.0"},
+     {:phoenix_pubsub, "~> 1.0"},
      {:phoenix_ecto, "~> 3.0.0-beta.2"},
      {:ecto, "~> 2.0.0-beta.1"},
      {:postgrex, ">= 0.11.1"},
@@ -59,6 +60,7 @@ defmodule UwOsu.Mixfile do
   defp aliases do
     ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
      "ecto.reset": ["ecto.drop", "ecto.setup"],
-     "phoenix.digest": "my_app.digest"]
+     "phoenix.digest": "my_app.digest",
+     "test": ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 end

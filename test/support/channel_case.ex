@@ -33,6 +33,10 @@ defmodule UwOsu.ChannelCase do
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(UwOsu.Repo)
 
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(UwOsu.Repo, {:shared, self()})
+    end
+
     :ok
   end
 end

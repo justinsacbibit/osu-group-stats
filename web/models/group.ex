@@ -17,7 +17,7 @@ defmodule UwOsu.Models.Group do
   @required_fields ~w(mode created_by title)
   @optional_fields ~w(id inserted_at updated_at)
 
-  def changeset(event, params \\ :empty) do
+  def changeset(event, params \\ %{}) do
     event
     |> cast(params, @required_fields, @optional_fields)
     |> validate_number(:mode, greater_than_or_equal_to: 0, less_than_or_equal_to: 3)

@@ -158,7 +158,7 @@ defmodule UwOsu.Data.Group do
     query = from g in Group,
       where: g.id == ^group_id and ^token.user_id == g.created_by
 
-    case Repo.first(query) do
+    case Repo.one(query) do
       nil ->
         {:error, %Error{reason: "That group does not exist", status_code: 404}}
       group ->

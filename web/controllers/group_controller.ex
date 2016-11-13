@@ -15,7 +15,7 @@ defmodule UwOsu.GroupController do
     query = from g in Group,
       where: g.id == ^id,
       preload: [:users]
-    group = Repo.first!(query)
+    group = Repo.one!(query)
     render(conn, "group.json", group: group)
   end
 

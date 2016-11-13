@@ -34,6 +34,10 @@ defmodule UwOsu.ConnCase do
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(UwOsu.Repo)
 
-    {:ok, conn: Phoenix.ConnTest.conn()}
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(UwOsu.Repo, {:shared, self()})
+    end
+
+    {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

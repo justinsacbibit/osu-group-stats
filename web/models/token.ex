@@ -14,7 +14,7 @@ defmodule UwOsu.Models.Token do
   @optional_fields ~w()
   @token_length 8
 
-  def changeset(token, params \\ :empty) do
+  def changeset(token, params \\ %{}) do
     token
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:user_id)

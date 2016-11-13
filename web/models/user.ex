@@ -21,7 +21,7 @@ defmodule UwOsu.Models.User do
   @required_fields ~w(id)
   @optional_fields ~w(username inserted_at updated_at)
 
-  def changeset(event, params \\ :empty) do
+  def changeset(event, params \\ %{}) do
     event
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:id, name: :id_user_index)

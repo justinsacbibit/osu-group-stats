@@ -12,7 +12,7 @@ defmodule UwOsu.Models.UserGroup do
   @required_fields ~w(user_id group_id)
   @optional_fields ~w(id)
 
-  def changeset(event, params \\ :empty) do
+  def changeset(event, params \\ %{}) do
     event
     |> cast(params, @required_fields, @optional_fields)
   end

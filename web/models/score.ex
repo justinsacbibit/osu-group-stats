@@ -27,7 +27,7 @@ defmodule UwOsu.Models.Score do
   @required_fields ~w(user_id beatmap_id score maxcombo count50 count100 count300 countmiss countkatu countgeki perfect enabled_mods date rank pp)
   @optional_fields ~w()
 
-  def changeset(event, params \\ :empty) do
+  def changeset(event, params \\ %{}) do
     event
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:user_id, name: :score_user_id_date_index)
