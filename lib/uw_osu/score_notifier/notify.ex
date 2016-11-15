@@ -44,16 +44,19 @@ defmodule UwOsu.ScoreNotifier.Notify do
     end)
   end
 
-  # returns a MapSet containing {{user_id, mode}, score, personal best ranking} tuples
+  # returns a MapSet containing {{user_id, mode}, score, personal best ranking, user, old_user_dict, new_user_dict} tuples
   defp get_new_scores_for_user({user_id, mode} = id) do
     Logger.debug "Getting scores for #{inspect id}"
     # Get user scores
     client = %Osu.Client{api_key: Application.get_env(:uw_osu, :osu_api_key)}
     get_user_best_fn = fn() ->
-      Osu.get_user_best!(client, user_id, m: mode, limit: 50)
+      {get_user(user_id, mode), Osu.get_user_best!(client, user_id, m: mode, limit: 50)}
     end
-    %HTTPoison.Response{
-      body: scores,
+    {
+      {user, old_user_dict, new_user_dict},
+      %HTTPoison.Response{
+        body: scores,
+      }
     } = try do
       get_user_best_fn.()
     rescue
@@ -92,7 +95,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
       # add on {user_id, mode} tuples
       unseen_scores_mapset
       |> Enum.map(fn(unseen_score) ->
-        {id, unseen_score, best_map[unseen_score]}
+        {id, unseen_score, best_map[unseen_score], user, old_user_dict, new_user_dict}
       end)
       |> MapSet.new
     end
@@ -100,14 +103,13 @@ defmodule UwOsu.ScoreNotifier.Notify do
 
   # sends notifications for the given scores
   defp send_notifications(ids_and_scores) do
-    Enum.each(ids_and_scores, fn({{user_id, mode} = id, score, personal_best_rank}) ->
+    Enum.each(ids_and_scores, fn({{user_id, mode} = id, score, personal_best_rank, user, old_user_dict, new_user_dict}) ->
       # find Discord channels subscribed to this ID
       subscriptions = subscriptions_for_id(id)
 
       Logger.info "Subscriptions for id #{inspect id}"
       Logger.info inspect subscriptions
 
-      {user, old_user_dict, new_user_dict} = get_user(user_id, mode)
       beatmap = get_beatmap(score["beatmap_id"])
       message = build_message(user, old_user_dict, new_user_dict, mode, beatmap, score, personal_best_rank)
 
