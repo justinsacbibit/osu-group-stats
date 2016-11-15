@@ -88,7 +88,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
 
     old_scores_mapset = DataStore.get_and_update_scores(id, new_scores_mapset)
 
-    if is_nil(old_scores_mapset) do
+    if is_nil(user) or is_nil(old_scores_mapset) do
       MapSet.new()
     else
       unseen_scores_mapset = MapSet.difference(new_scores_mapset, old_scores_mapset)
@@ -144,7 +144,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
             {user, old_user_dict, user_dict}
         end
       _ ->
-        raise "Failed to get user with id #{user_id} - get_user returned empty array"
+        {nil, nil, nil}
     end
   end
 
