@@ -19,8 +19,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
     Logger.debug "Going to get scores for user ids and modes:"
     Logger.debug inspect user_ids_and_modes
     ids_and_scores = get_new_scores_for_users(user_ids_and_modes)
-    Logger.info "Got ids and scores"
-    Logger.info inspect ids_and_scores
+    Logger.info "Got new scores: #{inspect ids_and_scores}"
     send_notifications(ids_and_scores)
   end
 
