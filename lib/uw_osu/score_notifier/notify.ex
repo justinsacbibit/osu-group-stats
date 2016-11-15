@@ -16,8 +16,8 @@ defmodule UwOsu.ScoreNotifier.Notify do
   """
   def notify() do
     user_ids_and_modes = get_user_ids_and_modes()
-    Logger.info "Going to get scores for user ids and modes:"
-    Logger.info inspect user_ids_and_modes
+    Logger.debug "Going to get scores for user ids and modes:"
+    Logger.debug inspect user_ids_and_modes
     ids_and_scores = get_new_scores_for_users(user_ids_and_modes)
     Logger.info "Got ids and scores"
     Logger.info inspect ids_and_scores
