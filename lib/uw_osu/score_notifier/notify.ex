@@ -256,8 +256,8 @@ defmodule UwOsu.ScoreNotifier.Notify do
   end
 
   defp format_bpm(bpm) do
-    # TODO
-    "#{bpm} BPM"
+    rounded_bpm = Float.round(bpm, 0)
+    "#{rounded_bpm} BPM"
   end
 
   defp format_mods(mods) when mods != 0 do
