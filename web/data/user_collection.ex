@@ -40,7 +40,7 @@ defmodule UwOsu.Data.UserCollection do
           select: u.id
         user_ids = Repo.all query
 
-        Repo.transaction([timeout: 180000, pool_timeout: 180000], fn ->
+        Repo.transaction(fn ->
           changeset = Generation.changeset(%Generation{}, %{
             mode: mode,
           })
@@ -51,7 +51,7 @@ defmodule UwOsu.Data.UserCollection do
           Enum.each user_ids, fn(user_id) ->
             process_user(user_id, generation, client)
           end
-        end)
+        end, [timeout: 180000, pool_timeout: 180000])
         Logger.info "Successfully collected mode #{mode} on try ##{attempt_number}"
       rescue
         e ->
