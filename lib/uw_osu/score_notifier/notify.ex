@@ -172,7 +172,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
   def build_message(user, old_user_dict, new_user_dict, mode, beatmap, score, personal_best_rank) do
     acc = calculate_acc(score)
     {pp, _} = Float.parse(score["pp"])
-    "_New score by **#{user.username}**! • **#{format_pp(pp)}** • ##{personal_best_rank} personal best_"
+    "__New score by **#{user.username}**! • **#{format_pp(pp)}** • ##{personal_best_rank} personal best__"
     <> "\n⬥ #{format_mode(mode)} • #{format_global_rank(old_user_dict, new_user_dict)} • #{format_country_rank(old_user_dict, new_user_dict)} • #{format_user_pp(old_user_dict, new_user_dict)}"
     <> "\n⬥ x#{score["maxcombo"]}/#{beatmap.max_combo} • #{score["rank"]} • #{format_score(score["score"])} • #{format_acc(acc, old_user_dict, new_user_dict)} • #{format_mods(score["enabled_mods"])}"
     <> "\n#{beatmap.artist} - #{beatmap.title} [#{beatmap.version}]"
