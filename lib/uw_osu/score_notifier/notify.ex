@@ -60,7 +60,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
     } = try do
       get_user_best_fn.()
     rescue
-      e ->
+      _e ->
         :timer.sleep :timer.seconds(5)
         get_user_best_fn.()
     end
@@ -103,7 +103,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
 
   # sends notifications for the given scores
   defp send_notifications(ids_and_scores) do
-    Enum.each(ids_and_scores, fn({{user_id, mode} = id, score, personal_best_rank, user, old_user_dict, new_user_dict}) ->
+    Enum.each(ids_and_scores, fn({{_user_id, mode} = id, score, personal_best_rank, user, old_user_dict, new_user_dict}) ->
       # find Discord channels subscribed to this ID
       subscriptions = subscriptions_for_id(id)
 
@@ -174,19 +174,20 @@ defmodule UwOsu.ScoreNotifier.Notify do
     acc = calculate_acc(score)
     {pp, _} = Float.parse(score["pp"])
     {enabled_mods, _} = Integer.parse(score["enabled_mods"])
-    "__New score by **#{user.username}**! • **#{format_pp(pp)}** • ##{personal_best_rank} personal best__"
-    <> "\n⬥ #{format_mode(mode)} • #{format_global_rank(old_user_dict, new_user_dict)} • #{format_country_rank(old_user_dict, new_user_dict)} • #{format_user_pp(old_user_dict, new_user_dict)}"
-    <> "\n⬥ x#{score["maxcombo"]}/#{beatmap.max_combo} • #{score["rank"]} • #{format_score(score["score"])} • #{format_acc(acc, old_user_dict, new_user_dict)} • #{format_mods(enabled_mods)}"
-    <> "\n#{beatmap.artist} - #{beatmap.title} [#{beatmap.version}]"
-    <> "\n⬥ #{format_length(beatmap.total_length)} • #{format_bpm(beatmap.bpm)} • **#{format_stars(beatmap.difficultyrating)}** • <https://osu.ppy.sh/b/#{beatmap.id}>"
+    "**#{user.username}** • #{format_mode(mode)} • ##{personal_best_rank} personal best"
+    <> "\n#{format_song(beatmap)} #{format_mods(enabled_mods)}"
+    <> "\n⬥ **#{format_pp(pp)}** • **#{score["rank"]} #{format_acc(acc)}** • x#{score["maxcombo"]}/#{beatmap.max_combo}"
+    <> "\n⬥ #{format_global_rank(old_user_dict, new_user_dict)} • #{format_country_rank(old_user_dict, new_user_dict)}"
+    <> "\n⬥ #{format_user_pp(old_user_dict, new_user_dict)} • #{format_user_acc(old_user_dict, new_user_dict)}"
+    <> "\n<https://osu.ppy.sh/b/#{beatmap.id}>"
   end
 
-  defp formatted_length(length) do
-    "#{div(length, 60)}:#{formatted_seconds(rem(length, 60))}"
-  end
+  # defp formatted_length(length) do
+  #   "#{div(length, 60)}:#{formatted_seconds(rem(length, 60))}"
+  # end
 
-  defp formatted_seconds(s) when s < 10, do: "0#{s}"
-  defp formatted_seconds(s), do: "#{s}"
+  # defp formatted_seconds(s) when s < 10, do: "0#{s}"
+  # defp formatted_seconds(s), do: "#{s}"
 
   defp calculate_acc(score) do
     {count50, _} = Integer.parse(score["count50"])
@@ -198,6 +199,10 @@ defmodule UwOsu.ScoreNotifier.Notify do
     total_points_of_hits / (total_number_of_hits * 300)
   end
 
+  defp format_song(beatmap) do
+    "__#{beatmap.artist} - #{beatmap.title} [#{beatmap.version}]__"
+  end
+
   defp format_global_rank(old_user_dict, new_user_dict) do
     change = if old_user_dict["pp_rank"] != new_user_dict["pp_rank"] do
       {old_pp_rank, _} = Integer.parse(old_user_dict["pp_rank"])
@@ -207,7 +212,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
       else
         ""
       end
-      " (#{sign}#{old_pp_rank - new_pp_rank})"
+      " **(#{sign}#{old_pp_rank - new_pp_rank})**"
     else
       ""
     end
@@ -223,11 +228,11 @@ defmodule UwOsu.ScoreNotifier.Notify do
       else
         ""
       end
-      " (#{sign}#{old_pp_country_rank - new_pp_country_rank})"
+      " **(#{sign}#{old_pp_country_rank - new_pp_country_rank})**"
     else
       ""
     end
-    "#{new_user_dict["country"]}##{new_user_dict["pp_country_rank"]}#{change}"
+    ":flag_#{String.downcase(new_user_dict["country"])}:##{new_user_dict["pp_country_rank"]}#{change}"
   end
 
   defp format_user_pp(old_user_dict, new_user_dict) do
@@ -239,43 +244,46 @@ defmodule UwOsu.ScoreNotifier.Notify do
       else
         ""
       end
-      " (#{sign}#{format_float(new_pp_raw - old_pp_raw)})"
+      " **(#{sign}#{format_float(new_pp_raw - old_pp_raw)})**"
     else
       ""
     end
     "#{new_user_dict["pp_raw"]}pp#{change}"
   end
 
-  defp format_stars(stars) do
-    "★ #{format_float(stars)}"
-  end
+  # defp format_stars(stars) do
+  #   "★ #{format_float(stars)}"
+  # end
 
-  defp format_length(beatmap_length) do
-    # TODO
-    "#{formatted_length(beatmap_length)}"
-  end
+  # defp format_length(beatmap_length) do
+  #   "#{formatted_length(beatmap_length)}"
+  # end
 
-  defp format_bpm(bpm) do
-    rounded_bpm = Float.round(bpm, 0)
-    "#{rounded_bpm} BPM"
-  end
+  # defp format_bpm(bpm) do
+  #   rounded_bpm = Float.round(bpm, 0)
+  #   "#{rounded_bpm} BPM"
+  # end
 
   defp format_mods(mods) when mods != 0 do
     formatted_mods =
       OsuUtils.mods_to_strings(mods)
       |> Enum.join("")
 
-    formatted_mods
+    "**+#{formatted_mods}**"
   end
   defp format_mods(_mods) do
-    "nomod"
+    ""
   end
 
   defp format_float(float) do
     Float.round(float, 2)
   end
 
-  defp format_acc(acc, old_user_dict, new_user_dict) do
+  defp format_acc(acc) do
+    "#{format_float(acc * 100)}%"
+  end
+
+  defp format_user_acc(old_user_dict, new_user_dict) do
     change = if old_user_dict["accuracy"] != new_user_dict["accuracy"] do
       {old_accuracy, _} = Float.parse(old_user_dict["accuracy"])
       {new_accuracy, _} = Float.parse(new_user_dict["accuracy"])
@@ -284,16 +292,12 @@ defmodule UwOsu.ScoreNotifier.Notify do
       else
         ""
       end
-      " (#{sign}#{format_float(new_accuracy - old_accuracy)}%)"
+      " **(#{sign}#{format_float(new_accuracy - old_accuracy)}%)**"
     else
       ""
     end
-    "#{format_float(acc * 100)}%#{change}"
-  end
-
-  defp format_score(score) do
-    # TODO
-    "#{score}"
+    {new_accuracy, _} = Float.parse(new_user_dict["accuracy"])
+    "#{format_float(new_accuracy)}%#{change}"
   end
 
   defp format_pp(pp) do
@@ -301,7 +305,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
   end
 
   defp format_mode(0) do
-    "osu!"
+    "osu!std"
   end
   defp format_mode(1) do
     "Taiko"
