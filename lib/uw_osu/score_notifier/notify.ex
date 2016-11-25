@@ -327,13 +327,6 @@ defmodule UwOsu.ScoreNotifier.Notify do
 
   def send_discord_message(guild_id, channel_id, message) do
     Logger.info "Sending to guild_id=#{guild_id} channel_id=#{channel_id}: \n#{message}"
-    bot_url = Application.get_env(:uw_osu, :truckbot_url)
-    cookie = Application.get_env(:uw_osu, :truckbot_cookie)
-    data = %{"guild_id" => guild_id, "channel_id" => channel_id, "message" => message, "cookie" => cookie}
-    json = Poison.encode!(data)
-    result = HTTPoison.post bot_url <> "/ogs-score", json, [{"Content-Type", "application/json"}], timeout: 20000, recv_timeout: 20000
-    Logger.info inspect result
-
     bot_url = Application.get_env(:uw_osu, :ogs_discord_url)
     cookie = Application.get_env(:uw_osu, :ogs_discord_cookie)
     data = %{"channel_id" => channel_id, "message" => message, "cookie" => cookie}

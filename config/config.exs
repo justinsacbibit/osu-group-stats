@@ -23,8 +23,6 @@ config :logger, :console,
 
 config :uw_osu,
   osu_api_key: System.get_env("OSU_API_KEY"),
-  truckbot_url: System.get_env("TRUCKBOT_URL"),
-  truckbot_cookie: System.get_env("TRUCKBOT_COOKIE"),
   ogs_discord_url: System.get_env("OGS_DISCORD_URL"),
   ogs_discord_cookie: System.get_env("OGS_DISCORD_COOKIE")
 
