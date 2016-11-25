@@ -333,5 +333,12 @@ defmodule UwOsu.ScoreNotifier.Notify do
     json = Poison.encode!(data)
     result = HTTPoison.post bot_url <> "/ogs-score", json, [{"Content-Type", "application/json"}], timeout: 20000, recv_timeout: 20000
     Logger.info inspect result
+
+    bot_url = Application.get_env(:uw_osu, :ogs_discord_url)
+    cookie = Application.get_env(:uw_osu, :ogs_discord_cookie)
+    data = %{"channel_id" => channel_id, "message" => message, "cookie" => cookie}
+    json = Poison.encode!(data)
+    result = HTTPoison.post bot_url, json, [{"Content-Type", "application/json"}], timeout: 20000, recv_timeout: 20000
+    Logger.info inspect result
   end
 end

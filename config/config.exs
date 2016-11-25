@@ -21,9 +21,12 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-config :uw_osu, osu_api_key: System.get_env("OSU_API_KEY")
-config :uw_osu, truckbot_url: System.get_env("TRUCKBOT_URL")
-config :uw_osu, truckbot_cookie: System.get_env("TRUCKBOT_COOKIE")
+config :uw_osu,
+  osu_api_key: System.get_env("OSU_API_KEY"),
+  truckbot_url: System.get_env("TRUCKBOT_URL"),
+  truckbot_cookie: System.get_env("TRUCKBOT_COOKIE"),
+  ogs_discord_url: System.get_env("OGS_DISCORD_URL"),
+  ogs_discord_cookie: System.get_env("OGS_DISCORD_COOKIE")
 
 # The maximum allowed group size for a non-admin creator
 config :uw_osu, max_group_size: System.get_env("MAX_GROUP_SIZE") || 25
