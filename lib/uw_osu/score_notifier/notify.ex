@@ -176,7 +176,7 @@ defmodule UwOsu.ScoreNotifier.Notify do
     {enabled_mods, _} = Integer.parse(score["enabled_mods"])
     "**#{user.username}** • #{format_mode(mode)} • ##{personal_best_rank} personal best"
     <> "\n#{format_song(beatmap)} #{format_mods(enabled_mods)}"
-    <> "\n⬥ **#{format_pp(pp)}** • **#{score["rank"]} #{format_acc(acc)}** • x#{score["maxcombo"]}/#{beatmap.max_combo}"
+    <> "\n⬥ **#{format_pp(pp)}** • **#{score["rank"]} #{format_acc(acc)}** #{format_combo(score, beatmap)}"
     <> "\n⬥ #{format_global_rank(old_user_dict, new_user_dict)} • #{format_country_rank(old_user_dict, new_user_dict)}"
     <> "\n⬥ #{format_user_pp(old_user_dict, new_user_dict)} • #{format_user_acc(old_user_dict, new_user_dict)}"
     <> "\n<https://osu.ppy.sh/b/#{beatmap.id}>"
@@ -188,6 +188,14 @@ defmodule UwOsu.ScoreNotifier.Notify do
 
   # defp formatted_seconds(s) when s < 10, do: "0#{s}"
   # defp formatted_seconds(s), do: "#{s}"
+
+  defp format_combo(score, beatmap) do
+    if is_nil(score["maxcombo"]) do
+      ""
+    else
+      "• x#{score["maxcombo"]}/#{beatmap.max_combo}"
+    end
+  end
 
   defp calculate_acc(score) do
     {count50, _} = Integer.parse(score["count50"])
