@@ -19,7 +19,7 @@ defmodule UwOsu.GroupViewTest do
       user_id: 1,
     }))
 
-    conn = get conn, "/api/groups"
+    conn = get build_conn, "/api/groups"
     resp = json_response(conn, 200)
 
     [_g1, _g2, _g3, _g4] = resp

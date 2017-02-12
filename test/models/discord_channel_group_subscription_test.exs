@@ -1,7 +1,7 @@
 defmodule UwOsu.DiscordChannelGroupSubscriptionTest do
   use UwOsu.ModelCase
 
-  alias UwOsu.DiscordChannelGroupSubscription
+  alias UwOsu.Models.DiscordChannelGroupSubscription
 
   @valid_attrs %{channel_id: "some content", guild_id: "some content"}
   @invalid_attrs %{}

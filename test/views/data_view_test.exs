@@ -271,7 +271,7 @@ defmodule UwOsu.DataViewTest do
       user_id: 2,
     }))
 
-    conn = get conn, "/api/players", g: group_id
+    conn = get build_conn, "/api/players", g: group_id
     resp = json_response(conn, 200)
 
     [u1, u2] = resp
@@ -352,7 +352,7 @@ defmodule UwOsu.DataViewTest do
       user_id: 2,
     }))
 
-    conn = get conn, "/api/daily-snapshots", g: group_id
+    conn = get build_conn, "/api/daily-snapshots", g: group_id
     resp = json_response(conn, 200)
 
     [u1, u2] = resp
