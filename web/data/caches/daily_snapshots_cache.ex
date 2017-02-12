@@ -21,7 +21,7 @@ defmodule UwOsu.Caches.DailySnapshotsCache do
 
   def get_gzipped(group_id) do
     {status, raw} = Cachex.get(@cache_name, cache_key(group_id), fallback: fn(_key) ->
-      users = Repo.all(Query.get_users_with_snapshots(group_id), timeout: :timer.seconds(40))
+      users = Repo.all(Query.get_users_with_snapshots(group_id), timeout: :timer.seconds(1000))
       DataView.render("daily_snapshots.json", %{users: users})
       |> Poison.encode!
       |> :zlib.gzip
