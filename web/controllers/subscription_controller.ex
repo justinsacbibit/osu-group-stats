@@ -18,6 +18,7 @@ defmodule UwOsu.SubscriptionController do
 
   def create(conn, %{"guild_id" => _guild_id, "channel_id" => _channel_id, "group_id" => _group_id} = params) do
     changeset = DiscordChannelGroupSubscription.changeset(%DiscordChannelGroupSubscription{}, params)
+    IO.inspect changeset
     Repo.insert! changeset
     conn
     |> json(%{})
