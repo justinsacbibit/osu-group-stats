@@ -29,6 +29,9 @@ defmodule UwOsu.Router do
     post "/groups", GroupController, :create
 
     get "/scores", ScoreController, :index
+
+    post "/subscriptions", SubscriptionController, :create
+    delete "/subscriptions", SubscriptionController, :delete
   end
 
   scope "/", UwOsu do
