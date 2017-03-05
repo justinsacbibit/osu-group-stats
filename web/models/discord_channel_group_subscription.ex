@@ -15,7 +15,7 @@ defmodule UwOsu.Models.DiscordChannelGroupSubscription do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:guild_id, :channel_id])
-    |> validate_required([:guild_id, :channel_id])
+    |> cast(params, [:guild_id, :channel_id, :group_id])
+    |> validate_required([:guild_id, :channel_id, :group_id])
   end
 end
